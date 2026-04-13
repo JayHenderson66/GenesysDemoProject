@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ABC Retail – Agent Script · Genesys Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- Genesys Cloud SDKs -->
+<script src="https://sdk-cdn.mypurecloud.com/client-apps/latest/purecloud-client-app-sdk.js"></script>
+<script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIGURATION
+═══════════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'gc_widget_config_abcretail';
+
+const ORG_DEFAULTS = {
+  clientId:    '79b9998d-45f6-46c7-97e7-5019106922ee',
+  environment: 'mypurecloud.com'
+};
+
+function loadConfig() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return Object.assign({}, ORG_DEFAULTS, JSON.parse(saved));
+  } catch(e) {}
+  return Object.assign({}, ORG_DEFAULTS);
+}
+function saveConfig(cfg) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); } catch(e) {}
+}
+const GC_CONFIG = loadConfig();
+
+/* ═══════════════════════════════════════════════════════════
+   DATA TABLE IDs
+═══════════════════════════════════════════════════════════ */
+const TABLE_IDS = {
+  demo_config:         'a9927325-bd86-498b-bab5-1bc24527815f',
+  customers_by_phone:  '3a396340-c08c-4718-9459-b1b25057b579',
+  customers:           '6b315f36-949b-4300-8a0f-288e4f9c481d',
+  transactions:        '9fe351e8-f5d1-49c7-9448-014d8a7a3ed4',
+  fulfillment:         '0f40a44b-0133-414f-8d7b-5462b9405514',
+  cases:               '69738800-00de-492f-a557-dd927dfc9049',
+  journey_events:      'e322d8ac-d478-4edc-9283-06fe6e6b8d18',
+  work_item_templates: 'ff05f706-9431-445a-a220-54ac3fc76d2e'
+};
+
+const DEMO_CONFIG_KEY = 'abc-retail-v1';
+</script>
+
+<style>
+:root {
+  --navy:      #1A3A6B;
+  --navy-mid:  #1E4A8A;
+  --blue:      #4A90D9;
+  --blue-dk:   #2E74C0;
+  --blue-lt:   #E8F2FC;
+  --cream:     #F4F6F9;
+  --white:     #ffffff;
+  --gray-100:  #eef0f3;
+  --gray-200:  #d8dce3;
+  --gray-500:  #6b7a90;
+  --gray-700:  #3d4a5c;
+  --green:     #1e8c5a;
+  --green-lt:  #e3f5ed;
+  --amber:     #d97706;
+  --amber-lt:  #fef3cd;
+  --red:       #c0392b;
+  --red-lt:    #fde8e6;
+  --purple:    #6B4FA8;
+  --purple-lt: #EDE8F7;
+  --radius:    10px;
+  --shadow:    0 3px 12px rgba(26,58,107,0.10);
+  --shadow-lg: 0 8px 28px rgba(26,58,107,0.16);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--cream);
+  font-family: 'Barlow', sans-serif;
+  color: var(--gray-700);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ─── TOPBAR ─────────────────────────────────────────────── */
+.topbar {
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.topbar-brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo {
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--white);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+}
+.brand-logo span { color: #7BB8F0; }
+.brand-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.2); }
+.brand-subtitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.topbar-status { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: rgba(255,255,255,0.6); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #aaa; }
+
+/* ─── SEARCH HERO ────────────────────────────────────────── */
+.search-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.search-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #7BB8F0;
+  white-space: nowrap;
+}
+.search-box-wrap { position: relative; flex: 1; min-width: 220px; max-width: 420px; }
+.search-box {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.08);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border 0.2s, background 0.2s;
+}
+.search-box::placeholder { color: rgba(255,255,255,0.4); }
+.search-box:focus { border-color: var(--blue); background: rgba(255,255,255,0.12); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4); font-size: 1rem; pointer-events: none; }
+.search-results-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; width: 100%;
+  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  z-index: 200; max-height: 280px; overflow-y: auto; display: none; border: 1px solid var(--gray-200);
+}
+.search-results-dropdown.open { display: block; }
+.search-result-item {
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--gray-100);
+  transition: background 0.15s; display: flex; align-items: center; gap: 10px;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--gray-100); }
+.sri-company { font-weight: 600; color: var(--navy); font-size: 0.9rem; }
+.sri-detail { font-size: 0.8rem; color: var(--gray-500); }
+.sri-badge { margin-left: auto; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--blue-lt); color: var(--blue); white-space: nowrap; }
+.search-no-results { padding: 14px; color: var(--gray-500); font-size: 0.88rem; text-align: center; }
+
+/* ─── MAIN LAYOUT ────────────────────────────────────────── */
+.main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: calc(100vh - 52px - 62px); }
+
+/* ─── LEFT PANEL ─────────────────────────────────────────── */
+.left-panel { background: var(--white); border-right: 1px solid var(--gray-200); padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+.panel-section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); margin-bottom: 8px; }
+.info-row { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.info-label { font-size: 0.72rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+.info-value { font-size: 0.92rem; font-weight: 500; color: var(--navy); }
+.info-value.empty { color: var(--gray-200); font-style: italic; font-size: 0.82rem; }
+.divider { height: 1px; background: var(--gray-100); margin: 4px 0; }
+
+/* ─── SENTIMENT / JOURNEY BADGES ────────────────────────── */
+.sentiment-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+.sentiment-positive { background: var(--green-lt); color: var(--green); }
+.sentiment-negative { background: var(--red-lt); color: var(--red); }
+.sentiment-neutral  { background: var(--gray-100); color: var(--gray-500); }
+.sentiment-at-risk  { background: var(--amber-lt); color: var(--amber); }
+
+.journey-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: var(--blue-lt); color: var(--blue); }
+
+/* ─── STATUS BADGE ───────────────────────────────────────── */
+.status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap; }
+.badge-delivered  { background: var(--green-lt); color: var(--green); }
+.badge-shipped    { background: var(--blue-lt);  color: var(--blue); }
+.badge-transit    { background: var(--blue-lt);  color: var(--blue); }
+.badge-partial    { background: var(--amber-lt); color: var(--amber); }
+.badge-delayed    { background: var(--red-lt);   color: var(--red); }
+.badge-hold       { background: var(--red-lt);   color: var(--red); }
+.badge-open       { background: var(--gray-100); color: var(--gray-500); }
+.badge-processing { background: var(--amber-lt); color: var(--amber); }
+.badge-pending    { background: var(--gray-100); color: var(--gray-500); }
+.badge-preparing  { background: var(--amber-lt); color: var(--amber); }
+.badge-exception  { background: var(--red-lt);   color: var(--red); }
+.badge-closed     { background: var(--green-lt); color: var(--green); }
+.badge-stage-1    { background: var(--amber-lt); color: var(--amber); }
+.badge-stage-2    { background: var(--blue-lt);  color: var(--blue); }
+.badge-stage-3    { background: var(--purple-lt);color: var(--purple); }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ─── TABS ───────────────────────────────────────────────── */
+.tabs-bar { background: var(--white); border-bottom: 2px solid var(--gray-100); display: flex; gap: 0; padding: 0 20px; overflow-x: auto; }
+.tab-btn {
+  padding: 14px 18px; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--gray-500); cursor: pointer; white-space: nowrap; transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover { color: var(--navy); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ─── RIGHT PANEL ────────────────────────────────────────── */
+.right-panel { background: var(--cream); overflow-y: auto; }
+.tab-pane { display: none; padding: 20px; }
+.tab-pane.active { display: block; }
+
+/* ─── CARDS ──────────────────────────────────────────────── */
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 16px; }
+.card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.card-title-accent { width: 3px; height: 18px; background: var(--blue); border-radius: 2px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 20px; }
+
+/* ─── DATA FIELDS ────────────────────────────────────────── */
+.field-group { display: flex; flex-direction: column; gap: 3px; }
+.field-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); }
+.field-value { font-size: 0.92rem; font-weight: 500; color: var(--navy); padding: 6px 10px; background: var(--gray-100); border-radius: 6px; border: 1px solid var(--gray-200); min-height: 34px; word-break: break-word; }
+.field-value.empty { color: var(--gray-200); font-style: italic; }
+.field-value a { color: var(--blue); text-decoration: none; }
+.field-value a:hover { text-decoration: underline; }
+
+/* ─── EXCEPTION / INFO BANNERS ───────────────────────────── */
+.exception-banner { display: flex; align-items: center; gap: 10px; background: var(--red-lt); border: 1px solid #f5b7b1; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.88rem; color: var(--red); font-weight: 600; }
+.info-banner { display: flex; align-items: center; gap: 10px; background: var(--blue-lt); border: 1px solid #b3d4f5; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.88rem; color: var(--blue); font-weight: 600; }
+.warning-banner { display: flex; align-items: center; gap: 10px; background: var(--amber-lt); border: 1px solid #fcd281; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.88rem; color: var(--amber); font-weight: 600; }
+
+/* ─── PROGRESS BAR ───────────────────────────────────────── */
+.prog-bar-wrap { background: var(--gray-200); border-radius: 999px; height: 6px; margin-top: 4px; }
+.prog-bar { height: 6px; border-radius: 999px; background: var(--blue); transition: width 0.4s; }
+
+/* ─── CASE PIPELINE ──────────────────────────────────────── */
+.case-pipeline { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 14px 0; }
+.pipeline-stage {
+  padding: 10px 12px; border-radius: 8px; border: 2px solid var(--gray-200);
+  background: var(--gray-100); text-align: center; position: relative;
+  transition: border-color 0.2s, background 0.2s;
+}
+.pipeline-stage.active { background: var(--blue-lt); border-color: var(--blue); }
+.pipeline-stage.complete { background: var(--green-lt); border-color: var(--green); }
+.pipeline-stage.pending { background: var(--gray-100); border-color: var(--gray-200); opacity: 0.6; }
+.pipeline-stage-num { font-size: 0.7rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.pipeline-stage.active .pipeline-stage-num { color: var(--blue); }
+.pipeline-stage.complete .pipeline-stage-num { color: var(--green); }
+.pipeline-stage-owner { font-size: 0.82rem; font-weight: 600; color: var(--navy); }
+.pipeline-stage-status { font-size: 0.72rem; color: var(--gray-500); margin-top: 2px; }
+.pipeline-stage.active .pipeline-stage-status { color: var(--blue); }
+.pipeline-stage.complete .pipeline-stage-status { color: var(--green); }
+
+/* ─── SLA BAR ────────────────────────────────────────────── */
+.sla-wrap { margin: 10px 0; }
+.sla-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px; }
+.sla-bar-bg { background: var(--gray-200); border-radius: 999px; height: 8px; }
+.sla-bar-fill { height: 8px; border-radius: 999px; background: var(--green); transition: width 0.4s; }
+.sla-bar-fill.warn { background: var(--amber); }
+.sla-bar-fill.over { background: var(--red); }
+
+/* ─── TIMELINE ───────────────────────────────────────────── */
+.timeline { border-left: 2px solid var(--gray-200); padding-left: 16px; }
+.tl-event { position: relative; margin-bottom: 16px; padding-bottom: 4px; }
+.tl-event::before { content: ''; position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); border: 2px solid var(--white); box-shadow: 0 0 0 2px var(--blue); }
+.tl-date { font-size: 0.72rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+.tl-channel-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--blue-lt); color: var(--blue); margin: 3px 0; }
+.tl-channel-badge.voice    { background: var(--navy); color: white; }
+.tl-channel-badge.sms      { background: var(--green-lt); color: var(--green); }
+.tl-channel-badge.email    { background: var(--amber-lt); color: var(--amber); }
+.tl-channel-badge.digital  { background: var(--blue-lt); color: var(--blue); }
+.tl-channel-badge.workitem { background: var(--purple-lt); color: var(--purple); }
+.tl-channel-badge.outbound { background: var(--gray-100); color: var(--gray-700); }
+.tl-summary { font-size: 0.88rem; color: var(--gray-700); line-height: 1.4; }
+.tl-outcome { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; margin-left: 6px; }
+.tl-outcome.resolved  { background: var(--green-lt); color: var(--green); }
+.tl-outcome.escalated { background: var(--red-lt); color: var(--red); }
+.tl-outcome.pending   { background: var(--amber-lt); color: var(--amber); }
+.tl-outcome.abandoned { background: var(--gray-100); color: var(--gray-500); }
+
+/* ─── CHECKLIST ──────────────────────────────────────────── */
+.check-list { display: flex; flex-direction: column; gap: 10px; }
+.check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--gray-100); border-radius: 8px; border-left: 3px solid var(--gray-200); transition: background 0.15s, border-color 0.15s; cursor: pointer; }
+.check-item.checked { background: var(--green-lt); border-left-color: var(--green); }
+.check-item input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--green); margin-top: 1px; flex-shrink: 0; cursor: pointer; }
+.check-text { font-size: 0.88rem; line-height: 1.4; }
+.check-item.checked .check-text { color: var(--green); }
+
+/* ─── CALL SCRIPT ────────────────────────────────────────── */
+.script-block { background: var(--navy); border-left: 4px solid var(--blue); border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 16px; margin-bottom: 12px; }
+.script-block-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #7BB8F0; margin-bottom: 5px; }
+.script-block-text { font-size: 0.92rem; line-height: 1.55; color: rgba(255,255,255,0.88); font-style: italic; }
+
+/* ─── ESCALATION ─────────────────────────────────────────── */
+.escalation-panel { display: none; background: var(--red-lt); border: 1px solid #f5b7b1; border-radius: var(--radius); padding: 14px 16px; margin-top: 10px; }
+.escalation-panel.open { display: block; }
+.esc-option { padding: 8px 12px; cursor: pointer; border-radius: 6px; font-size: 0.88rem; font-weight: 600; color: var(--red); transition: background 0.15s; }
+.esc-option:hover { background: rgba(192,57,43,0.1); }
+
+/* ─── BUTTONS ────────────────────────────────────────────── */
+.btn { padding: 9px 18px; border: none; border-radius: var(--radius); font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+.btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-blue   { background: var(--blue);  color: var(--white); }
+.btn-navy   { background: var(--navy);  color: var(--white); }
+.btn-danger { background: var(--red);   color: var(--white); }
+.btn-ghost  { background: var(--gray-100); color: var(--navy); border: 1px solid var(--gray-200); }
+.btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+/* ─── TOAST ──────────────────────────────────────────────── */
+.toast-wrap { position: fixed; top: 62px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--navy); color: var(--white); border-left: 4px solid var(--blue); padding: 10px 16px; border-radius: 8px; box-shadow: var(--shadow-lg); font-size: 0.88rem; font-weight: 600; opacity: 0; transform: translateX(20px); transition: opacity 0.25s, transform 0.25s; max-width: 280px; }
+.toast.show { opacity: 1; transform: translateX(0); }
+
+/* ─── EMPTY STATE ────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--gray-500); }
+.empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); }
+.empty-sub { font-size: 0.85rem; margin-top: 4px; }
+
+/* ─── LOADING STATE ──────────────────────────────────────── */
+.loading-state { text-align: center; padding: 40px 20px; color: var(--gray-500); }
+.loading-spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--gray-200); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── BLIND TRANSFER MODAL ───────────────────────────────── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,58,107,0.55); backdrop-filter: blur(3px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box { background: var(--white); border-radius: 14px; box-shadow: 0 20px 60px rgba(26,58,107,0.3); width: 420px; max-width: 95vw; transform: translateY(12px) scale(0.97); transition: transform 0.2s; overflow: hidden; }
+.modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+.modal-header { background: var(--navy); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+.modal-header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--white); display: flex; align-items: center; gap: 8px; }
+.modal-header-title span { color: #7BB8F0; font-size: 1.1rem; }
+.modal-close { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.2rem; cursor: pointer; line-height: 1; transition: color 0.15s; }
+.modal-close:hover { color: var(--white); }
+.modal-body { padding: 20px; }
+.modal-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); margin-bottom: 6px; }
+.modal-tabs { display: flex; gap: 0; border: 1px solid var(--gray-200); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+.modal-tab { flex: 1; padding: 8px; background: var(--gray-100); border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); cursor: pointer; transition: background 0.15s, color 0.15s; }
+.modal-tab.active { background: var(--navy); color: var(--white); }
+.modal-input { width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200); border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 0.95rem; color: var(--navy); outline: none; transition: border-color 0.2s; margin-bottom: 14px; }
+.modal-input:focus { border-color: var(--blue); }
+.modal-hint { font-size: 0.78rem; color: var(--gray-500); margin-top: -10px; margin-bottom: 14px; line-height: 1.4; }
+.modal-queue-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; max-height: 180px; overflow-y: auto; }
+.queue-item { padding: 9px 12px; background: var(--gray-100); border-radius: 8px; border: 1px solid var(--gray-200); cursor: pointer; font-size: 0.88rem; font-weight: 600; color: var(--navy); transition: background 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 8px; }
+.queue-item:hover { background: var(--blue-lt); border-color: var(--blue); }
+.queue-item.selected { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.queue-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.transfer-confirm-btn { width: 100%; padding: 12px; background: var(--blue); color: var(--white); border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.15s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.transfer-confirm-btn:hover { background: var(--blue-dk); transform: translateY(-1px); }
+.transfer-confirm-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; }
+.transfer-status { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; display: none; align-items: center; gap: 8px; }
+.transfer-status.connecting { display: flex; background: var(--amber-lt); color: var(--amber); }
+.transfer-status.success    { display: flex; background: var(--green-lt); color: var(--green); }
+.transfer-status.error      { display: flex; background: var(--red-lt);   color: var(--red); }
+.spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+
+/* ─── SETUP WIZARD ───────────────────────────────────────── */
+.setup-overlay { position: fixed; inset: 0; background: rgba(10,20,50,0.92); backdrop-filter: blur(6px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.setup-box { background: var(--white); border-radius: 16px; box-shadow: 0 24px 80px rgba(26,58,107,0.5); width: 500px; max-width: 95vw; overflow: hidden; animation: setupSlideIn 0.3s ease; }
+@keyframes setupSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.setup-header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%); padding: 24px 28px 20px; }
+.setup-logo { font-family: 'Barlow', sans-serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--white); margin-bottom: 4px; }
+.setup-logo span { color: #7BB8F0; }
+.setup-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--white); margin-bottom: 4px; }
+.setup-subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.55); }
+.setup-body { padding: 24px 28px 8px; }
+.setup-step { margin-bottom: 20px; }
+.setup-step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.setup-step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--blue); color: var(--white); font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.setup-step-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--navy); }
+.setup-step-hint { font-size: 0.8rem; color: var(--gray-500); line-height: 1.5; margin-bottom: 10px; }
+.setup-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 0.92rem; color: var(--navy); outline: none; transition: border-color 0.2s; margin-bottom: 4px; }
+.setup-input:focus { border-color: var(--blue); }
+.setup-input.valid { border-color: var(--green); }
+.setup-input.error { border-color: var(--red); }
+.setup-select { width: 100%; padding: 10px 36px 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 0.92rem; color: var(--navy); outline: none; appearance: none; background: var(--white); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a90' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; transition: border-color 0.2s; }
+.setup-select:focus { border-color: var(--blue); }
+.setup-input-note { font-size: 0.74rem; color: var(--gray-500); margin-top: 5px; }
+.setup-input-note.ok  { color: var(--green); font-weight: 600; }
+.setup-input-note.err { color: var(--red);   font-weight: 600; }
+.setup-divider { height: 1px; background: var(--gray-100); margin: 4px 0 20px; }
+.setup-actions { display: flex; gap: 10px; align-items: center; padding: 0 28px 24px; }
+.setup-save-btn { flex: 1; padding: 13px; background: var(--blue); color: var(--white); border: none; border-radius: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.15s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.setup-save-btn:hover:not(:disabled) { background: var(--blue-dk); transform: translateY(-1px); }
+.setup-save-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; }
+.setup-reset-btn { padding: 13px 16px; background: none; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+.setup-reset-btn:hover { border-color: var(--red); color: var(--red); }
+.setup-gear-btn { position: fixed; bottom: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); border: none; color: rgba(255,255,255,0.5); font-size: 1rem; cursor: pointer; z-index: 500; transition: background 0.15s, color 0.15s; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+.setup-gear-btn:hover { background: var(--blue); color: var(--white); }
+
+@media (max-width: 860px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .left-panel { border-right: none; border-bottom: 1px solid var(--gray-200); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .case-pipeline { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-logo">ABC <span>Retail</span></div>
+    <div class="brand-divider"></div>
+    <div class="brand-subtitle">Agent Script · Genesys Cloud</div>
+  </div>
+  <div class="topbar-status" id="topbarStatus">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusLabel">Connecting…</span>
+  </div>
+</div>
+
+<!-- SEARCH HERO -->
+<div class="search-hero">
+  <div class="search-label">Customer Lookup</div>
+  <div class="search-box-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-box" id="searchInput" type="text"
+           placeholder="Search by name, company, account#, phone…" autocomplete="off"/>
+    <div class="search-results-dropdown" id="searchDropdown"></div>
+  </div>
+  <button class="btn btn-blue btn-sm" id="clearBtn" style="display:none;" onclick="clearSelection()">✕ Clear</button>
+  <div id="dataLoadStatus" style="font-size:0.78rem;color:rgba(255,255,255,0.5);"></div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel" id="leftPanel">
+    <div class="empty-state" id="leftEmpty">
+      <div class="empty-icon">👤</div>
+      <div class="empty-title">No Customer Selected</div>
+      <div class="empty-sub">Search above or wait for screen pop</div>
+    </div>
+
+    <div id="leftContent" style="display:none;">
+      <div class="panel-section-title">Customer</div>
+      <div class="info-row"><div class="info-label">Name</div><div class="info-value" id="lp-name">—</div></div>
+      <div class="info-row"><div class="info-label">Company</div><div class="info-value" id="lp-company">—</div></div>
+      <div class="info-row"><div class="info-label">Account #</div><div class="info-value" id="lp-acct">—</div></div>
+      <div class="info-row"><div class="info-label">Phone</div><div class="info-value" id="lp-phone">—</div></div>
+      <div class="info-row"><div class="info-label">Email</div><div class="info-value" id="lp-email" style="font-size:0.82rem;">—</div></div>
+      <div class="info-row"><div class="info-label">Account Type</div><div class="info-value" id="lp-acct-type">—</div></div>
+      <div class="info-row">
+        <div class="info-label">Journey Stage</div>
+        <div id="lp-journey">—</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Sentiment</div>
+        <div id="lp-sentiment">—</div>
+      </div>
+      <div class="info-row"><div class="info-label">NPS Score</div><div class="info-value" id="lp-nps">—</div></div>
+      <div class="info-row"><div class="info-label">Lifetime Value</div><div class="info-value" id="lp-ltv">—</div></div>
+
+      <div class="divider"></div>
+      <div class="panel-section-title">Open Orders</div>
+      <div id="lp-orders-list"></div>
+
+      <div class="divider"></div>
+      <div class="panel-section-title">Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px;">
+        <button class="btn btn-navy btn-sm" onclick="switchTab('orders')">📦 View Orders</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTab('shipments')">🚚 Track Shipments</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTab('cases')">📋 View Cases</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTab('journey')">🕐 Journey Timeline</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTab('workflow')">✅ Call Workflow</button>
+        <button class="btn btn-danger btn-sm" onclick="escalate()">⚠ Escalate</button>
+        <button class="btn btn-sm" onclick="openTransferModal()"
+                style="background:linear-gradient(135deg,#1E4A8A,#1A3A6B);color:var(--white);border:1px solid rgba(74,144,217,0.4);">
+          ↔ Blind Transfer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="tabs-bar">
+      <button class="tab-btn active" data-tab="orders"    onclick="switchTab('orders')">Orders</button>
+      <button class="tab-btn"        data-tab="shipments" onclick="switchTab('shipments')">Shipments</button>
+      <button class="tab-btn"        data-tab="cases"     onclick="switchTab('cases')">Cases</button>
+      <button class="tab-btn"        data-tab="journey"   onclick="switchTab('journey')">Journey</button>
+      <button class="tab-btn"        data-tab="workflow"  onclick="switchTab('workflow')">Call Workflow</button>
+      <button class="tab-btn"        data-tab="script"    onclick="switchTab('script')">Call Script</button>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tab-pane active" id="tab-orders">
+      <div class="empty-state" id="orders-empty">
+        <div class="empty-icon">📦</div>
+        <div class="empty-title">No Customer Selected</div>
+        <div class="empty-sub">Select a customer to view their orders</div>
+      </div>
+      <div id="orders-content" style="display:none;"></div>
+    </div>
+
+    <!-- SHIPMENTS TAB -->
+    <div class="tab-pane" id="tab-shipments">
+      <div class="empty-state" id="shipments-empty">
+        <div class="empty-icon">🚚</div>
+        <div class="empty-title">No Customer Selected</div>
+        <div class="empty-sub">Select a customer to view shipments</div>
+      </div>
+      <div id="shipments-content" style="display:none;"></div>
+    </div>
+
+    <!-- CASES TAB -->
+    <div class="tab-pane" id="tab-cases">
+      <div class="empty-state" id="cases-empty">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No Customer Selected</div>
+        <div class="empty-sub">Select a customer to view their cases</div>
+      </div>
+      <div id="cases-content" style="display:none;"></div>
+    </div>
+
+    <!-- JOURNEY TAB -->
+    <div class="tab-pane" id="tab-journey">
+      <div class="empty-state" id="journey-empty">
+        <div class="empty-icon">🕐</div>
+        <div class="empty-title">No Customer Selected</div>
+        <div class="empty-sub">Select a customer to view their journey</div>
+      </div>
+      <div id="journey-content" style="display:none;"></div>
+    </div>
+
+    <!-- CALL WORKFLOW TAB -->
+    <div class="tab-pane" id="tab-workflow">
+      <div class="card">
+        <div class="card-title"><div class="card-title-accent"></div>Pre-Call Checklist</div>
+        <div class="check-list" id="workflowChecklist">
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"/><div class="check-text">Confirm customer identity (name, account number)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"/><div class="check-text">Review open orders and any active exceptions</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"/><div class="check-text">Check for open cases — note case ID and current stage</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"/><div class="check-text">Review journey timeline — note last interaction and sentiment</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"/><div class="check-text">Identify primary reason for call</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"/><div class="check-text">Check NPS score — if low or at-risk, flag for retention</div></div>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="resetChecklist()">↺ Reset Checklist</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-accent"></div>Order Status Reference</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+          <tr style="background:var(--navy);">
+            <th style="padding:8px 12px;text-align:left;color:rgba(255,255,255,0.8);font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;border-radius:6px 0 0 6px;">Status</th>
+            <th style="padding:8px 12px;text-align:left;color:rgba(255,255,255,0.8);font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;">Meaning</th>
+            <th style="padding:8px 12px;text-align:left;color:rgba(255,255,255,0.8);font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;border-radius:0 6px 6px 0;">Agent Action</th>
+          </tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);"><span class="status-badge badge-processing"><span class="badge-dot"></span>Processing</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Order received, not yet shipped</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Confirm expected ship date</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);"><span class="status-badge badge-transit"><span class="badge-dot"></span>In Transit</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Shipped, en route</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Provide tracking number and ETA</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);"><span class="status-badge badge-delayed"><span class="badge-dot"></span>Delayed</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Carrier delay exception</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Explain reason, offer compensation, escalate if needed</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);"><span class="status-badge badge-hold"><span class="badge-dot"></span>On Hold</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Blocked — credit or approval</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Transfer to AR if credit hold, do not release without approval</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);"><span class="status-badge badge-exception"><span class="badge-dot"></span>Exception</span></td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Defective/damaged product</td><td style="padding:8px 12px;border-bottom:1px solid var(--gray-100);">Open refund case, arrange return label</td></tr>
+          <tr><td style="padding:8px 12px;"><span class="status-badge badge-delivered"><span class="badge-dot"></span>Delivered</span></td><td style="padding:8px 12px;">Completed successfully</td><td style="padding:8px 12px;">Confirm receipt, offer follow-up survey</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-accent"></div>Escalation Options</div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('escalationPanel').classList.toggle('open')">⚠ Open Escalation Panel</button>
+        <div class="escalation-panel" id="escalationPanel">
+          <div style="font-size:0.82rem;font-weight:700;color:var(--red);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Select Escalation Type</div>
+          <div class="esc-option" onclick="selectEscalation(this)">🔴 Supervisor Escalation — Agent requests supervisor involvement</div>
+          <div class="esc-option" onclick="selectEscalation(this)">📋 Open Exception Case — Create 3-stage case for logistics exception</div>
+          <div class="esc-option" onclick="selectEscalation(this)">💳 Credit Hold Review — Transfer to AR for credit approval</div>
+          <div class="esc-option" onclick="selectEscalation(this)">↩ Refund / Return Case — Open refund case for defective product</div>
+          <div class="esc-option" onclick="selectEscalation(this)">📊 Retention Flag — Mark customer as at-risk for retention outreach</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALL SCRIPT TAB -->
+    <div class="tab-pane" id="tab-script">
+      <div class="card">
+        <div class="card-title"><div class="card-title-accent"></div>Opening Script</div>
+        <div class="script-block">
+          <div class="script-block-label">Opening</div>
+          <div class="script-block-text">"Thank you for calling ABC Retail customer support. My name is [Agent Name]. I have your account pulled up — am I speaking with [Customer Name]?"</div>
+        </div>
+        <div class="script-block">
+          <div class="script-block-label">Verification</div>
+          <div class="script-block-text">"Just to verify your account, can you confirm your account number or the email address on file?"</div>
+        </div>
+        <div class="script-block">
+          <div class="script-block-label">Purpose</div>
+          <div class="script-block-text">"How can I help you today?"</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-accent"></div>Order Status Scripts</div>
+        <div class="script-block">
+          <div class="script-block-label">Order In Transit</div>
+          <div class="script-block-text">"I can see your order [PO#] is currently in transit with [Carrier]. The last tracking event shows [last event] as of [date]. Your estimated delivery date is [ETA]. Would you like me to send the tracking link to your email?"</div>
+        </div>
+        <div class="script-block">
+          <div class="script-block-label">Order Delayed</div>
+          <div class="script-block-text">"I can see there's been a delay on order [PO#]. [Delay reason]. We sincerely apologize for this inconvenience. The updated estimated delivery is [new ETA]. I'm going to escalate this to our logistics team to get you a more precise update within 24 hours."</div>
+        </div>
+        <div class="script-block">
+          <div class="script-block-label">Order On Hold</div>
+          <div class="script-block-text">"I see order [PO#] is currently on hold. [Hold reason]. I'm transferring you to our accounts team who can resolve this right away. Your hold reference is [Case ID]."</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-accent"></div>Closing Script</div>
+        <div class="script-block">
+          <div class="script-block-label">Standard Close</div>
+          <div class="script-block-text">"Is there anything else I can help you with today? … Thank you for choosing ABC Retail. We appreciate your business. Have a great day!"</div>
+        </div>
+        <div class="script-block">
+          <div class="script-block-label">Post-Issue Close</div>
+          <div class="script-block-text">"I understand this has been frustrating, and I want to assure you we're committed to resolving this. You'll receive a case number by SMS shortly. Our team will follow up within [SLA timeframe]. Thank you for your patience."</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SETUP WIZARD -->
+<div class="setup-overlay" id="setupOverlay" style="display:none;">
+  <div class="setup-box">
+    <div class="setup-header">
+      <div class="setup-logo">ABC <span>Retail</span></div>
+      <div class="setup-title">Genesys Cloud Setup</div>
+      <div class="setup-subtitle">Configure your org connection to enable live data lookups</div>
+    </div>
+    <div class="setup-body">
+      <div class="setup-step">
+        <div class="setup-step-header">
+          <div class="setup-step-num">1</div>
+          <div class="setup-step-label">OAuth Client ID</div>
+        </div>
+        <div class="setup-step-hint">
+          In Genesys Cloud: <strong>Admin → OAuth → Add Client</strong><br>
+          Grant Type: <strong>Token Implicit Grant (Browser)</strong><br>
+          Add the URL below to <strong>Authorized redirect URIs</strong>.
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="flex:1;padding:8px 12px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:7px;font-family:monospace;font-size:0.78rem;color:var(--navy);word-break:break-all;line-height:1.4;" id="redirectUriDisplay"></div>
+          <button onclick="copyRedirectUri()" id="copyUriBtn"
+                  style="flex-shrink:0;padding:8px 12px;background:var(--navy);color:var(--white);border:none;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;white-space:nowrap;transition:background 0.15s;">
+            Copy
+          </button>
+        </div>
+        <input class="setup-input" id="setupClientId" type="text"
+               placeholder="e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+               oninput="validateSetup()" autocomplete="off" spellcheck="false"/>
+        <div class="setup-input-note" id="setupClientIdNote"></div>
+      </div>
+      <div class="setup-divider"></div>
+      <div class="setup-step" style="margin-bottom:0;">
+        <div class="setup-step-header">
+          <div class="setup-step-num">2</div>
+          <div class="setup-step-label">Genesys Cloud Region</div>
+        </div>
+        <select class="setup-select" id="setupEnvironment" onchange="validateSetup()">
+          <option value="mypurecloud.com">🇺🇸 US East — Virginia (mypurecloud.com)</option>
+          <option value="usw2.pure.cloud">🇺🇸 US West — Oregon (usw2.pure.cloud)</option>
+          <option value="cac1.pure.cloud">🇨🇦 Canada (cac1.pure.cloud)</option>
+          <option value="mypurecloud.ie">🇮🇪 EU West — Ireland (mypurecloud.ie)</option>
+          <option value="mypurecloud.de">🇩🇪 EU Central — Frankfurt (mypurecloud.de)</option>
+          <option value="aps1.pure.cloud">🇰🇷 Asia Pacific — Seoul (aps1.pure.cloud)</option>
+          <option value="apne2.pure.cloud">🇦🇺 Asia Pacific — Sydney (apne2.pure.cloud)</option>
+        </select>
+      </div>
+    </div>
+    <div class="setup-actions">
+      <button class="setup-save-btn" id="setupSaveBtn" disabled onclick="saveSetupAndInit()">✓ Save &amp; Connect</button>
+      <button class="setup-reset-btn" id="setupCancelBtn" onclick="cancelSetup()" style="display:none;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<button class="setup-gear-btn" id="setupGearBtn" onclick="openSetup(true)" title="Genesys Cloud Settings">⚙</button>
+
+<!-- BLIND TRANSFER MODAL -->
+<div class="modal-overlay" id="transferModal" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-title"><span>↔</span> Blind Transfer</div>
+      <button class="modal-close" onclick="closeTransferModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabBtnPhone" onclick="setTransferMode('phone')">Phone / Ext</button>
+        <button class="modal-tab"        id="tabBtnQueue" onclick="setTransferMode('queue')">Queue</button>
+        <button class="modal-tab"        id="tabBtnUser"  onclick="setTransferMode('user')">Agent</button>
+      </div>
+      <div id="transferPhoneMode">
+        <div class="modal-label">Transfer Destination</div>
+        <input class="modal-input" id="transferPhoneInput" type="tel"
+               placeholder="+1 (800) 555-0100 or ext. 4200" oninput="validateTransferInput()"/>
+        <div class="modal-hint">Enter a full E.164 number (+1XXXXXXXXXX), SIP address, or internal extension.</div>
+      </div>
+      <div id="transferQueueMode" style="display:none;">
+        <div class="modal-label">Select Queue</div>
+        <div class="modal-queue-list" id="queueList"></div>
+      </div>
+      <div id="transferUserMode" style="display:none;">
+        <div class="modal-label">Search Agent</div>
+        <input class="modal-input" id="transferUserInput" type="text" placeholder="Agent name or email…" oninput="filterAgents()"/>
+        <div class="modal-queue-list" id="agentList"></div>
+      </div>
+      <button class="transfer-confirm-btn" id="transferConfirmBtn" disabled onclick="executeBlindTransfer()">↔ Transfer Now</button>
+      <div class="transfer-status" id="transferStatus">
+        <div class="spinner"></div>
+        <span id="transferStatusText">Connecting…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA CACHE — populated from GC Data Tables after auth
+═══════════════════════════════════════════════════════════ */
+let allCustomers      = [];
+let allTransactions   = [];
+let allFulfillment    = [];
+let allCases          = [];
+let allJourneyEvents  = [];
+let demoConfig        = null;
+let dataLoaded        = false;
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let selectedCustomer     = null;
+let selectedTransactions = [];
+let selectedFulfillment  = [];
+let selectedCases        = [];
+let selectedJourney      = [];
+
+/* ═══════════════════════════════════════════════════════════
+   DATA TABLE API HELPERS
+═══════════════════════════════════════════════════════════ */
+async function fetchTableRows(tableId) {
+  const env = gcEnvironment || 'mypurecloud.com';
+  const token = gcAccessToken || (apiClient && apiClient.authData && apiClient.authData.accessToken);
+  if (!token) { console.warn('No token available for table fetch'); return []; }
+
+  try {
+    let all = [];
+    let pageNum = 1;
+    let totalPages = 1;
+    do {
+      const res = await fetch(
+        `https://api.${env}/api/v2/datatables/${tableId}/rows?showbrief=false&pageSize=500&pageNumber=${pageNum}`,
+        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
+      if (!res.ok) { console.warn(`Table ${tableId} returned ${res.status}`); break; }
+      const data = await res.json();
+      all = all.concat(data.entities || []);
+      totalPages = data.pageCount || 1;
+      pageNum++;
+    } while (pageNum <= totalPages);
+    return all;
+  } catch(e) {
+    console.warn(`Failed to fetch table ${tableId}:`, e);
+    return [];
+  }
+}
+
+async function fetchTableRow(tableId, key) {
+  const env = gcEnvironment || 'mypurecloud.com';
+  const token = gcAccessToken || (apiClient && apiClient.authData && apiClient.authData.accessToken);
+  if (!token) return null;
+  try {
+    const res = await fetch(
+      `https://api.${env}/api/v2/datatables/${tableId}/rows/${encodeURIComponent(key)}?showbrief=false`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) {
+    return null;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOAD ALL DATA
+═══════════════════════════════════════════════════════════ */
+async function loadAllData() {
+  const statusEl = document.getElementById('dataLoadStatus');
+  statusEl.textContent = 'Loading data…';
+
+  try {
+    const [customers, transactions, fulfillment, cases, journeyEvents] = await Promise.all([
+      fetchTableRows(TABLE_IDS.customers),
+      fetchTableRows(TABLE_IDS.transactions),
+      fetchTableRows(TABLE_IDS.fulfillment),
+      fetchTableRows(TABLE_IDS.cases),
+      fetchTableRows(TABLE_IDS.journey_events)
+    ]);
+
+    allCustomers     = customers;
+    allTransactions  = transactions;
+    allFulfillment   = fulfillment;
+    allCases         = cases;
+    allJourneyEvents = journeyEvents;
+    dataLoaded       = true;
+
+    statusEl.textContent = `${customers.length} customers loaded`;
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+
+    toast(`Data loaded — ${customers.length} customers`);
+
+    // Re-attempt screen pop now that data is available
+    if (!selectedCustomer) doScreenPop();
+
+  } catch(e) {
+    console.error('Failed to load data tables:', e);
+    statusEl.textContent = 'Data load failed — check console';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH
+═══════════════════════════════════════════════════════════ */
+const searchInput    = document.getElementById('searchInput');
+const searchDropdown = document.getElementById('searchDropdown');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { searchDropdown.classList.remove('open'); return; }
+  if (!dataLoaded) {
+    searchDropdown.innerHTML = '<div class="search-no-results">Loading data… please wait</div>';
+    searchDropdown.classList.add('open');
+    return;
+  }
+
+  const hits = allCustomers.filter(c =>
+    (c.first_name + ' ' + c.last_name).toLowerCase().includes(q) ||
+    (c.company_name || '').toLowerCase().includes(q) ||
+    (c.account_number || '').toLowerCase().includes(q) ||
+    String(c.phone_normalized || '').includes(q) ||
+    (c.key || '').toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (!hits.length) {
+    searchDropdown.innerHTML = '<div class="search-no-results">No customers found</div>';
+  } else {
+    searchDropdown.innerHTML = hits.map(c => `
+      <div class="search-result-item" onclick="selectCustomer('${c.key}')">
+        <div>
+          <div class="sri-company">${c.company_name || c.first_name + ' ' + c.last_name}</div>
+          <div class="sri-detail">${c.first_name} ${c.last_name} · ${formatPhone(c.phone_normalized)}</div>
+        </div>
+        <div class="sri-badge">${c.account_number || c.key}</div>
+      </div>`).join('');
+  }
+  searchDropdown.classList.add('open');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-box-wrap')) searchDropdown.classList.remove('open');
+});
+
+/* ═══════════════════════════════════════════════════════════
+   SELECT CUSTOMER
+═══════════════════════════════════════════════════════════ */
+function selectCustomer(key) {
+  selectedCustomer = allCustomers.find(c => c.key === key);
+  if (!selectedCustomer) return;
+
+  searchDropdown.classList.remove('open');
+  searchInput.value = (selectedCustomer.company_name || '') + ' — ' + selectedCustomer.first_name + ' ' + selectedCustomer.last_name;
+  document.getElementById('clearBtn').style.display = '';
+
+  // Filter related data
+  selectedTransactions = allTransactions.filter(t => t.customer_id === key);
+  selectedFulfillment  = allFulfillment.filter(f => selectedTransactions.some(t => t.key === f.transaction_id));
+  selectedCases        = allCases.filter(c => c.customer_id === key);
+  selectedJourney      = allJourneyEvents
+    .filter(e => e.customer_id === key)
+    .sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
+
+  renderLeftPanel();
+  renderOrders();
+  renderShipments();
+  renderCases();
+  renderJourney();
+
+  toast(`Loaded: ${selectedCustomer.company_name || selectedCustomer.first_name + ' ' + selectedCustomer.last_name}`);
+}
+
+function clearSelection() {
+  selectedCustomer = null;
+  selectedTransactions = []; selectedFulfillment = []; selectedCases = []; selectedJourney = [];
+  searchInput.value = '';
+  document.getElementById('clearBtn').style.display = 'none';
+  document.getElementById('leftEmpty').style.display = '';
+  document.getElementById('leftContent').style.display = 'none';
+  ['orders','shipments','cases','journey'].forEach(t => {
+    document.getElementById(t + '-empty').style.display = '';
+    document.getElementById(t + '-content').style.display = 'none';
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEFT PANEL
+═══════════════════════════════════════════════════════════ */
+function renderLeftPanel() {
+  const c = selectedCustomer;
+  document.getElementById('leftEmpty').style.display = 'none';
+  document.getElementById('leftContent').style.display = '';
+
+  document.getElementById('lp-name').textContent    = c.first_name + ' ' + c.last_name;
+  document.getElementById('lp-company').textContent = c.company_name || '—';
+  document.getElementById('lp-acct').textContent    = c.account_number || '—';
+  document.getElementById('lp-phone').textContent   = formatPhone(c.phone_normalized);
+  document.getElementById('lp-email').textContent   = c.email || '—';
+  document.getElementById('lp-acct-type').textContent = c.account_type || '—';
+  document.getElementById('lp-nps').textContent     = c.nps_score ? c.nps_score + ' / 10' : '—';
+  document.getElementById('lp-ltv').textContent     = c.lifetime_value || '—';
+
+  // Journey stage badge
+  const journeyEl = document.getElementById('lp-journey');
+  journeyEl.innerHTML = c.journey_stage
+    ? `<span class="journey-badge">${c.journey_stage}</span>`
+    : '<span class="info-value">—</span>';
+
+  // Sentiment badge
+  const sentEl = document.getElementById('lp-sentiment');
+  const sentClass = {
+    positive: 'sentiment-positive',
+    negative: 'sentiment-negative',
+    neutral:  'sentiment-neutral',
+    'at-risk':'sentiment-at-risk'
+  }[c.sentiment_score] || 'sentiment-neutral';
+  sentEl.innerHTML = c.sentiment_score
+    ? `<span class="sentiment-badge ${sentClass}">${c.sentiment_score}</span>`
+    : '<span class="info-value">—</span>';
+
+  // Open orders list
+  const list = document.getElementById('lp-orders-list');
+  const activeOrders = selectedTransactions.filter(t => t.status !== 'delivered');
+  if (!activeOrders.length) {
+    list.innerHTML = '<div style="font-size:0.8rem;color:var(--gray-500);">No active orders</div>';
+  } else {
+    list.innerHTML = activeOrders.map(t => `
+      <div style="margin-bottom:8px;padding:8px 10px;background:var(--gray-100);border-radius:8px;cursor:pointer;" onclick="switchTab('orders')">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:600;font-size:0.85rem;color:var(--navy);">${t.reference_number || t.key}</div>
+          ${statusBadge(t.status_display || t.status)}
+        </div>
+        <div style="font-size:0.75rem;color:var(--gray-500);margin-top:2px;">${t.destination || ''} · ETA ${t.estimated_completion || '—'}</div>
+      </div>`).join('');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ORDERS TAB
+═══════════════════════════════════════════════════════════ */
+function renderOrders() {
+  document.getElementById('orders-empty').style.display = 'none';
+  const container = document.getElementById('orders-content');
+  container.style.display = '';
+
+  if (!selectedTransactions.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No orders found</div></div>';
+    return;
+  }
+
+  container.innerHTML = selectedTransactions.map(t => {
+    const total = parseInt(t.total_items) || 0;
+    const completed = parseInt(t.completed_items) || 0;
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const hasException = t.on_hold_reason || t.delay_reason;
+    const exBanner = t.on_hold_reason
+      ? `<div class="exception-banner">⚠ On Hold: ${t.on_hold_reason}</div>`
+      : t.delay_reason
+        ? `<div class="warning-banner">⏱ Delay: ${t.delay_reason}</div>`
+        : '';
+
+    return `
+    <div class="card">
+      ${exBanner}
+      <div class="card-title">
+        <div class="card-title-accent"></div>
+        ${t.reference_number || t.key}
+        <span style="margin-left:auto;">${statusBadge(t.status_display || t.status)}</span>
+      </div>
+      <div class="grid-3" style="margin-bottom:14px;">
+        <div class="field-group"><div class="field-label">Transaction ID</div><div class="field-value">${t.key}</div></div>
+        <div class="field-group"><div class="field-label">Date</div><div class="field-value">${t.transaction_date || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Amount</div><div class="field-value">${t.amount || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Description</div><div class="field-value" style="grid-column:span 2;">${t.description || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Destination</div><div class="field-value">${t.destination || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Est. Completion</div><div class="field-value">${t.estimated_completion || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Assigned To</div><div class="field-value">${t.assigned_to || '—'}</div></div>
+      </div>
+      <div style="margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+        <div class="field-label">Fulfillment Progress</div>
+        <div style="font-size:0.78rem;color:var(--gray-500);">${completed} of ${total} items completed</div>
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
+      ${t.notes ? `<div style="margin-top:10px;font-size:0.82rem;color:var(--gray-500);"><span class="field-label">Notes: </span>${t.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHIPMENTS TAB
+═══════════════════════════════════════════════════════════ */
+function renderShipments() {
+  document.getElementById('shipments-empty').style.display = 'none';
+  const container = document.getElementById('shipments-content');
+  container.style.display = '';
+
+  if (!selectedFulfillment.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🚚</div><div class="empty-title">No shipments found</div></div>';
+    return;
+  }
+
+  container.innerHTML = selectedFulfillment.map(f => {
+    const txn = selectedTransactions.find(t => t.key === f.transaction_id) || {};
+    const exBanner = f.exception
+      ? `<div class="exception-banner">⚠ Exception: ${f.exception}</div>` : '';
+
+    return `
+    <div class="card">
+      ${exBanner}
+      <div class="card-title">
+        <div class="card-title-accent"></div>
+        ${txn.reference_number || f.transaction_id} — Fulfillment ${f.key}
+        <span style="margin-left:auto;">${shipmentBadge(f.status)}</span>
+      </div>
+      <div class="grid-3" style="margin-bottom:14px;">
+        <div class="field-group"><div class="field-label">Carrier</div><div class="field-value">${f.carrier_or_provider || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Tracking #</div><div class="field-value">${f.tracking_reference
+          ? (f.tracking_url ? `<a href="${f.tracking_url}" target="_blank">${f.tracking_reference}</a>` : f.tracking_reference)
+          : '—'}</div></div>
+        <div class="field-group"><div class="field-label">Ship Date</div><div class="field-value">${f.start_date || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Est. Delivery</div><div class="field-value">${f.estimated_date || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Actual Delivery</div><div class="field-value">${f.actual_date || '—'}</div></div>
+        <div class="field-group"><div class="field-label">POD Signed By</div><div class="field-value">${f.signed_by || '—'}</div></div>
+      </div>
+      <div class="field-group" style="margin-bottom:10px;">
+        <div class="field-label">Last Tracking Event (${f.last_event_date || '—'})</div>
+        <div class="field-value">${f.last_event || '—'}</div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Destination</div>
+        <div class="field-value">${f.destination || '—'}</div>
+      </div>
+      ${f.tracking_url ? `<div style="margin-top:10px;"><a href="${f.tracking_url}" target="_blank" style="color:var(--blue);font-weight:600;font-size:0.85rem;">Track Online ↗</a></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CASES TAB
+═══════════════════════════════════════════════════════════ */
+function renderCases() {
+  document.getElementById('cases-empty').style.display = 'none';
+  const container = document.getElementById('cases-content');
+  container.style.display = '';
+
+  if (!selectedCases.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No cases found</div><div class="empty-sub">No open or historical cases for this customer</div></div>';
+    return;
+  }
+
+  container.innerHTML = selectedCases.map(c => {
+    const isOpen = c.status !== 'closed';
+    const stage1Class = c.stage_1_status === 'complete' ? 'complete' : c.current_stage === '1' ? 'active' : 'pending';
+    const stage2Class = c.stage_2_status === 'complete' ? 'complete' : c.current_stage === '2' ? 'active' : 'pending';
+    const stage3Class = c.stage_3_status === 'complete' ? 'complete' : c.current_stage === '3' ? 'active' : 'pending';
+
+    // SLA calculation
+    const openedDate = new Date(c.opened_date);
+    const dueDate    = new Date(c.due_date);
+    const now        = new Date();
+    const totalMs    = dueDate - openedDate;
+    const elapsedMs  = Math.min(now - openedDate, totalMs);
+    const slaPct     = totalMs > 0 ? Math.round((elapsedMs / totalMs) * 100) : 0;
+    const slaClass   = slaPct >= 100 ? 'over' : slaPct >= 75 ? 'warn' : '';
+    const slaLabel   = slaPct >= 100 ? 'SLA Breached' : `${slaPct}% of ${c.sla_hours}h SLA used`;
+
+    return `
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-accent"></div>
+        ${c.key}
+        <span style="margin-left:auto;">${caseBadge(c.status)}</span>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div class="field-label" style="margin-bottom:4px;">Case Summary</div>
+        <div style="font-size:0.92rem;font-weight:500;color:var(--navy);">${c.case_title}</div>
+      </div>
+      <div class="grid-3" style="margin-bottom:14px;">
+        <div class="field-group"><div class="field-label">Type</div><div class="field-value">${c.case_type}</div></div>
+        <div class="field-group"><div class="field-label">Priority</div><div class="field-value">${priorityBadge(c.priority)}</div></div>
+        <div class="field-group"><div class="field-label">Linked Order</div><div class="field-value">${c.linked_transaction_id || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Opened</div><div class="field-value">${c.opened_date || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Due Date</div><div class="field-value">${c.due_date || '—'}</div></div>
+        <div class="field-group"><div class="field-label">Current Stage</div><div class="field-value">Stage ${c.current_stage || '—'}</div></div>
+      </div>
+
+      ${isOpen ? `
+      <div class="sla-wrap">
+        <div class="sla-label"><span>SLA Progress</span><span>${slaLabel}</span></div>
+        <div class="sla-bar-bg"><div class="sla-bar-fill ${slaClass}" style="width:${Math.min(slaPct,100)}%"></div></div>
+      </div>` : ''}
+
+      <div style="margin:14px 0 8px;font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-500);">Stage Pipeline</div>
+      <div class="case-pipeline">
+        <div class="pipeline-stage ${stage1Class}">
+          <div class="pipeline-stage-num">Stage 1</div>
+          <div class="pipeline-stage-owner">${c.stage_1_owner || '—'}</div>
+          <div class="pipeline-stage-status">${c.stage_1_status || 'pending'}</div>
+        </div>
+        <div class="pipeline-stage ${stage2Class}">
+          <div class="pipeline-stage-num">Stage 2</div>
+          <div class="pipeline-stage-owner">${c.stage_2_owner || '—'}</div>
+          <div class="pipeline-stage-status">${c.stage_2_status || 'pending'}</div>
+        </div>
+        <div class="pipeline-stage ${stage3Class}">
+          <div class="pipeline-stage-num">Stage 3</div>
+          <div class="pipeline-stage-owner">${c.stage_3_owner || '—'}</div>
+          <div class="pipeline-stage-status">${c.stage_3_status || 'pending'}</div>
+        </div>
+      </div>
+      ${c.resolution ? `<div style="margin-top:12px;padding:10px 14px;background:var(--green-lt);border-radius:8px;font-size:0.85rem;color:var(--green);"><strong>Resolution:</strong> ${c.resolution}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   JOURNEY TAB
+═══════════════════════════════════════════════════════════ */
+function renderJourney() {
+  document.getElementById('journey-empty').style.display = 'none';
+  const container = document.getElementById('journey-content');
+  container.style.display = '';
+
+  if (!selectedJourney.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-title">No journey events found</div></div>';
+    return;
+  }
+
+  const html = `
+  <div class="card">
+    <div class="card-title"><div class="card-title-accent"></div>Interaction History (${selectedJourney.length} events)</div>
+    <div class="timeline">
+      ${selectedJourney.map(e => `
+        <div class="tl-event">
+          <div class="tl-date">${formatEventDate(e.event_date)} · ${e.direction || ''}</div>
+          <div>
+            <span class="tl-channel-badge ${e.channel || ''}">${e.channel || 'unknown'} — ${e.event_type || ''}</span>
+            ${e.outcome ? `<span class="tl-outcome ${e.outcome}">${e.outcome}</span>` : ''}
+          </div>
+          <div class="tl-summary">${e.summary || '—'}</div>
+          ${e.agent_name ? `<div style="font-size:0.75rem;color:var(--gray-500);margin-top:3px;">Agent: ${e.agent_name}${e.queue_name ? ' · ' + e.queue_name : ''}${e.duration_seconds ? ' · ' + Math.round(parseInt(e.duration_seconds)/60) + 'm' : ''}</div>` : ''}
+          ${e.linked_case_id ? `<div style="font-size:0.75rem;color:var(--blue);margin-top:2px;">Case: ${e.linked_case_id}</div>` : ''}
+        </div>`).join('')}
+    </div>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════ */
+function formatPhone(n) {
+  const s = String(n || '').replace(/\D/g, '');
+  if (s.length === 10) return `(${s.slice(0,3)}) ${s.slice(3,6)}-${s.slice(6)}`;
+  return s || '—';
+}
+
+function formatEventDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch(e) { return d; }
+}
+
+function statusBadge(status) {
+  if (!status) return '';
+  const s = status.toLowerCase();
+  let cls = 'badge-open';
+  if (s.includes('delivered'))  cls = 'badge-delivered';
+  else if (s.includes('transit'))    cls = 'badge-transit';
+  else if (s.includes('delay'))      cls = 'badge-delayed';
+  else if (s.includes('hold'))       cls = 'badge-hold';
+  else if (s.includes('process'))    cls = 'badge-processing';
+  else if (s.includes('exception'))  cls = 'badge-exception';
+  else if (s.includes('preparing'))  cls = 'badge-preparing';
+  return `<span class="status-badge ${cls}"><span class="badge-dot"></span>${status}</span>`;
+}
+
+function shipmentBadge(status) {
+  if (!status) return '';
+  const s = status.toLowerCase();
+  let cls = 'badge-pending';
+  if (s === 'delivered')      cls = 'badge-delivered';
+  else if (s === 'in transit') cls = 'badge-transit';
+  else if (s === 'delayed')    cls = 'badge-delayed';
+  else if (s === 'on hold')    cls = 'badge-hold';
+  else if (s === 'preparing')  cls = 'badge-preparing';
+  return `<span class="status-badge ${cls}"><span class="badge-dot"></span>${status}</span>`;
+}
+
+function caseBadge(status) {
+  if (!status) return '';
+  const map = {
+    'open':    'badge-open',
+    'stage-1': 'badge-stage-1',
+    'stage-2': 'badge-stage-2',
+    'stage-3': 'badge-stage-3',
+    'closed':  'badge-closed'
+  };
+  return `<span class="status-badge ${map[status] || 'badge-open'}"><span class="badge-dot"></span>${status}</span>`;
+}
+
+function priorityBadge(priority) {
+  const map = { critical: 'badge-exception', high: 'badge-delayed', medium: 'badge-processing', low: 'badge-open' };
+  return `<span class="status-badge ${map[priority] || 'badge-open'}">${priority || '—'}</span>`;
+}
+
+function toast(msg) {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg + ' ✓';
+  wrap.appendChild(el);
+  requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('show')); });
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHECKLIST + ESCALATION
+═══════════════════════════════════════════════════════════ */
+function toggleCheck(el) {
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
+}
+function resetChecklist() {
+  document.querySelectorAll('#workflowChecklist .check-item').forEach(el => {
+    el.querySelector('input').checked = false;
+    el.classList.remove('checked');
+  });
+  toast('Checklist reset');
+}
+function escalate() {
+  switchTab('workflow');
+  document.getElementById('escalationPanel').classList.toggle('open');
+}
+function selectEscalation(el) {
+  document.getElementById('escalationPanel').classList.remove('open');
+  toast('Escalation logged: ' + el.textContent.trim());
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN POP
+═══════════════════════════════════════════════════════════ */
+const qp = new URLSearchParams(window.location.search);
+const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+let restoredParams = new URLSearchParams();
+try {
+  const stateVal = qp.get('state') || hashParams.get('state');
+  if (stateVal) restoredParams = new URLSearchParams(decodeURIComponent(stateVal));
+} catch(e) {}
+
+function getParam(name) {
+  return qp.get(name) || restoredParams.get(name) || hashParams.get(name) || null;
+}
+
+function doScreenPop() {
+  if (!dataLoaded) return; // wait until data is loaded
+
+  // Priority 1: customer_id passed by AVA/Architect
+  const autoCustomerId = getParam('customer_id') || getParam('customerId') || getParam('AccountNumber') || getParam('account_number');
+  if (autoCustomerId) {
+    const match = allCustomers.find(c =>
+      c.key.toLowerCase() === autoCustomerId.toLowerCase() ||
+      (c.account_number || '').toLowerCase() === autoCustomerId.toLowerCase()
+    );
+    if (match) { selectCustomer(match.key); toast('Screen pop: ' + (match.company_name || match.first_name)); return; }
+  }
+
+  // Priority 2: ANI lookup
+  const autoPhone = getParam('ANI') || getParam('phone') || getParam('DNIS');
+  if (autoPhone) {
+    const normalized = autoPhone.replace(/\D/g, '').slice(-10);
+    const match = allCustomers.find(c => String(c.phone_normalized || '') === normalized);
+    if (match) { selectCustomer(match.key); toast('Screen pop (ANI): ' + (match.company_name || match.first_name)); }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Listen for postMessage from Genesys parent window
+  window.addEventListener('message', (event) => {
+    if (event.data && (event.data.customerId || event.data.AccountNumber)) {
+      const id = event.data.customerId || event.data.AccountNumber;
+      const match = allCustomers.find(c =>
+        c.key.toLowerCase() === id.toLowerCase() ||
+        (c.account_number || '').toLowerCase() === id.toLowerCase()
+      );
+      if (match) { selectCustomer(match.key); toast('Screen pop: ' + match.first_name); }
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   STATUS INDICATOR
+═══════════════════════════════════════════════════════════ */
+function setStatus(state) {
+  const dot   = document.getElementById('statusDot');
+  const label = document.getElementById('statusLabel');
+  if (!dot || !label) return;
+  const map = {
+    authenticating: { color: '#f39c12', shadow: 'rgba(243,156,18,0.6)', text: 'Authenticating…' },
+    connected:      { color: '#2ecc71', shadow: 'rgba(46,204,113,0.7)', text: 'Agent Connected' },
+    error:          { color: '#e74c3c', shadow: 'rgba(231,76,60,0.6)',  text: 'Auth Error — check Client ID' },
+  };
+  const s = map[state] || map.authenticating;
+  dot.style.background = s.color;
+  dot.style.boxShadow  = `0 0 6px ${s.shadow}`;
+  label.textContent    = state === 'connected' && gcConversationId ? 'Connected · Call Active' : s.text;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SETUP WIZARD
+═══════════════════════════════════════════════════════════ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function openSetup(isEdit) {
+  const cfg = loadConfig();
+  document.getElementById('setupClientId').value    = cfg.clientId || '';
+  document.getElementById('setupEnvironment').value = cfg.environment || 'mypurecloud.com';
+  const redirectUri = window.location.href.split('?')[0].split('#')[0];
+  document.getElementById('redirectUriDisplay').textContent = redirectUri;
+  document.getElementById('setupCancelBtn').style.display = isEdit ? '' : 'none';
+  document.getElementById('setupOverlay').style.display = 'flex';
+  validateSetup();
+  setTimeout(() => document.getElementById('setupClientId').focus(), 80);
+}
+function copyRedirectUri() {
+  const uri = document.getElementById('redirectUriDisplay').textContent;
+  const btn = document.getElementById('copyUriBtn');
+  navigator.clipboard.writeText(uri).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = uri; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+  });
+  btn.textContent = 'Copied ✓'; btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = 'var(--navy)'; }, 2000);
+}
+function cancelSetup() { document.getElementById('setupOverlay').style.display = 'none'; }
+function validateSetup() {
+  const idVal = document.getElementById('setupClientId').value.trim();
+  const note  = document.getElementById('setupClientIdNote');
+  const btn   = document.getElementById('setupSaveBtn');
+  const inp   = document.getElementById('setupClientId');
+  if (!idVal) { note.textContent = ''; note.className = 'setup-input-note'; inp.className = 'setup-input'; btn.disabled = true; return; }
+  if (UUID_RE.test(idVal)) {
+    note.textContent = '✓ Looks like a valid OAuth Client ID';
+    note.className = 'setup-input-note ok'; inp.className = 'setup-input valid'; btn.disabled = false;
+  } else {
+    note.textContent = '⚠ OAuth Client IDs are usually a UUID';
+    note.className = 'setup-input-note err'; inp.className = 'setup-input error'; btn.disabled = true;
+  }
+}
+function saveSetupAndInit() {
+  GC_CONFIG.clientId    = document.getElementById('setupClientId').value.trim();
+  GC_CONFIG.environment = document.getElementById('setupEnvironment').value;
+  saveConfig(GC_CONFIG);
+  document.getElementById('setupOverlay').style.display = 'none';
+  setStatus('authenticating');
+  initSDK();
+}
+(function checkSetupOnLoad() {
+  const cfg = loadConfig();
+  if (!cfg.clientId || !UUID_RE.test(cfg.clientId)) {
+    document.addEventListener('DOMContentLoaded', () => openSetup(false));
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   GENESYS CLOUD SDK
+═══════════════════════════════════════════════════════════ */
+let ClientApp        = null;
+let platformClient   = null;
+let apiClient        = null;
+let conversationsApi = null;
+let routingApi       = null;
+let usersApi         = null;
+let gcAccessToken    = null;
+let gcConversationId = null;
+let gcParticipantId  = null;
+let gcEnvironment    = null;
+let gcLiveQueues     = [];
+let gcLiveAgents     = [];
+let clientApp;
+
+const urlParams = new URLSearchParams(window.location.search);
+gcConversationId = urlParams.get('conversationId') || urlParams.get('pcConversationId') || null;
+
+function isInsideGenesysWidget() {
+  try { return window.self !== window.top; } catch(e) { return true; }
+}
+
+function initSDK() {
+  const pcEnvironment = urlParams.get('pcEnvironment') || GC_CONFIG.environment;
+  gcEnvironment = pcEnvironment;
+
+  if (isInsideGenesysWidget()) {
+    console.log('Running inside Genesys widget');
+    setStatus('connected');
+    try {
+      if (window.require) {
+        platformClient = window.require('platformClient');
+        apiClient      = platformClient.ApiClient.instance;
+        conversationsApi = new platformClient.ConversationsApi();
+        routingApi       = new platformClient.RoutingApi();
+        usersApi         = new platformClient.UsersApi();
+        gcAccessToken    = apiClient.authData && apiClient.authData.accessToken;
+      }
+    } catch(e) { console.warn('platformClient not available:', e); }
+    loadAllData();
+    return;
+  }
+
+  // Standalone OAuth flow
+  try {
+    if (window.require) {
+      platformClient = window.require('platformClient');
+      apiClient      = platformClient.ApiClient.instance;
+    }
+  } catch(e) {}
+
+  if (!apiClient) { setStatus('error'); return; }
+
+  apiClient.setEnvironment(pcEnvironment);
+  apiClient.loginImplicitGrant(
+    GC_CONFIG.clientId,
+    window.location.href.split('?')[0].split('#')[0],
+    { state: window.location.search }
+  )
+  .then(data => {
+    gcAccessToken = data.accessToken;
+    if (data.state) {
+      const restored = new URLSearchParams(data.state);
+      gcConversationId = gcConversationId || restored.get('conversationId') || restored.get('pcConversationId');
+    }
+    conversationsApi = new platformClient.ConversationsApi();
+    routingApi       = new platformClient.RoutingApi();
+    usersApi         = new platformClient.UsersApi();
+    setStatus('connected');
+    loadAllData(); // fetch data tables after auth
+    return Promise.all([fetchLiveQueues(), fetchLiveAgents()]);
+  })
+  .catch(err => {
+    console.error('Auth error:', err);
+    setStatus('error');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (GC_CONFIG.clientId && UUID_RE.test(GC_CONFIG.clientId)) {
+    setStatus('authenticating');
+    initSDK();
+  }
+});
+
+/* ─── Fetch live queues ──────────────────────────────────── */
+async function fetchLiveQueues() {
+  try {
+    let all = [], pageNum = 1, totalPages = 1;
+    do {
+      const resp = await routingApi.getRoutingQueues({ pageSize: 100, pageNumber: pageNum });
+      all = all.concat(resp.entities || []);
+      totalPages = resp.pageCount || 1; pageNum++;
+    } while (pageNum <= totalPages && pageNum <= 5);
+    gcLiveQueues = all.map(q => ({ id: q.id, name: q.name, memberCount: q.memberCount || 0 })).sort((a,b) => a.name.localeCompare(b.name));
+  } catch(e) { gcLiveQueues = DEMO_QUEUES; }
+}
+
+/* ─── Fetch live agents ──────────────────────────────────── */
+async function fetchLiveAgents() {
+  try {
+    const resp = await usersApi.getUsers({ pageSize: 100, state: 'active', expand: ['presence'] });
+    gcLiveAgents = (resp.entities || []).map(u => ({
+      id: u.id, name: u.name, email: u.email || '', status: mapPresence(u.presence)
+    })).sort((a,b) => a.name.localeCompare(b.name));
+  } catch(e) { gcLiveAgents = DEMO_AGENTS; }
+}
+
+function mapPresence(presence) {
+  if (!presence || !presence.presenceDefinition) return 'Unknown';
+  const sys = presence.presenceDefinition.systemPresence;
+  if (sys === 'Available') return 'Available';
+  if (sys === 'Busy' || sys === 'On Queue') return sys;
+  if (sys === 'Away' || sys === 'Break') return 'Away';
+  return sys || 'Unknown';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BLIND TRANSFER MODAL
+═══════════════════════════════════════════════════════════ */
+const DEMO_QUEUES = [
+  { id: 'q-001', name: 'Order Management',      memberCount: 4 },
+  { id: 'q-002', name: 'Logistics & Shipping',  memberCount: 6 },
+  { id: 'q-003', name: 'Accounts Receivable',   memberCount: 3 },
+  { id: 'q-004', name: 'Customer Service',       memberCount: 5 },
+  { id: 'q-005', name: 'Quality & Returns',      memberCount: 2 },
+  { id: 'q-006', name: 'Retention',              memberCount: 3 },
+];
+const DEMO_AGENTS = [
+  { id: 'u-101', name: 'Maria Chen',    email: 'maria.chen@abcretail.com',    status: 'On Queue' },
+  { id: 'u-102', name: 'James Park',   email: 'james.park@abcretail.com',    status: 'Available' },
+  { id: 'u-103', name: 'David Reyes',  email: 'david.reyes@abcretail.com',   status: 'Available' },
+  { id: 'u-104', name: 'Sarah Kim',    email: 'sarah.kim@abcretail.com',     status: 'Busy' },
+];
+
+let transferMode    = 'phone';
+let selectedQueueId = null;
+let selectedAgentId = null;
+
+function openTransferModal() {
+  document.getElementById('transferModal').classList.add('open');
+  resetTransferModal();
+  renderQueues(gcLiveQueues.length ? gcLiveQueues : DEMO_QUEUES);
+  renderAgents('', gcLiveAgents.length ? gcLiveAgents : DEMO_AGENTS);
+  setTimeout(() => document.getElementById('transferPhoneInput').focus(), 50);
+}
+function closeTransferModal() { document.getElementById('transferModal').classList.remove('open'); }
+function handleModalOverlayClick(e) { if (e.target === document.getElementById('transferModal')) closeTransferModal(); }
+function resetTransferModal() {
+  document.getElementById('transferPhoneInput').value = '';
+  document.getElementById('transferUserInput').value  = '';
+  document.getElementById('transferConfirmBtn').disabled = true;
+  document.getElementById('transferStatus').className = 'transfer-status';
+  selectedQueueId = null; selectedAgentId = null;
+  setTransferMode('phone');
+}
+function setTransferMode(mode) {
+  transferMode = mode;
+  document.getElementById('transferPhoneMode').style.display = mode === 'phone' ? '' : 'none';
+  document.getElementById('transferQueueMode').style.display = mode === 'queue' ? '' : 'none';
+  document.getElementById('transferUserMode').style.display  = mode === 'user'  ? '' : 'none';
+  ['Phone','Queue','User'].forEach(m =>
+    document.getElementById('tabBtn' + m).classList.toggle('active', mode === m.toLowerCase())
+  );
+  document.getElementById('transferConfirmBtn').disabled = true;
+  selectedQueueId = null; selectedAgentId = null;
+}
+function validateTransferInput() {
+  const val = document.getElementById('transferPhoneInput').value.trim();
+  document.getElementById('transferConfirmBtn').disabled = val.length < 3;
+}
+function renderQueues(data) {
+  const list = data || (gcLiveQueues.length ? gcLiveQueues : DEMO_QUEUES);
+  document.getElementById('queueList').innerHTML = list.length
+    ? list.map(q => `<div class="queue-item" id="qi-${q.id}" onclick="selectQueue('${q.id}')"><div class="queue-dot"></div><span style="flex:1;">${q.name}</span><span style="font-size:0.75rem;opacity:0.6;">${q.memberCount} members</span></div>`).join('')
+    : '<div style="padding:12px;color:var(--gray-500);font-size:0.85rem;">Loading queues…</div>';
+}
+function selectQueue(id) {
+  selectedQueueId = id;
+  document.querySelectorAll('#queueList .queue-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById('qi-' + id);
+  if (el) el.classList.add('selected');
+  document.getElementById('transferConfirmBtn').disabled = false;
+}
+function renderAgents(filter, data) {
+  const list = (data || (gcLiveAgents.length ? gcLiveAgents : DEMO_AGENTS))
+    .filter(a => !filter || a.name.toLowerCase().includes(filter.toLowerCase()) || a.email.toLowerCase().includes(filter.toLowerCase()));
+  const statusColor = s => s === 'Available' ? 'var(--green)' : s === 'On Queue' || s === 'Busy' ? 'var(--blue)' : 'var(--amber)';
+  document.getElementById('agentList').innerHTML = list.length
+    ? list.map(a => `<div class="queue-item" id="ai-${a.id}" onclick="selectAgent('${a.id}')"><div class="queue-dot" style="background:${statusColor(a.status)}"></div><div style="flex:1;"><div style="font-size:0.88rem;">${a.name}</div><div style="font-size:0.72rem;opacity:0.65;">${a.email}</div></div><span style="font-size:0.72rem;opacity:0.65;">${a.status}</span></div>`).join('')
+    : '<div style="padding:12px;color:var(--gray-500);font-size:0.85rem;">No agents found</div>';
+}
+function filterAgents() { renderAgents(document.getElementById('transferUserInput').value); selectedAgentId = null; document.getElementById('transferConfirmBtn').disabled = true; }
+function selectAgent(id) {
+  selectedAgentId = id;
+  document.querySelectorAll('#agentList .queue-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById('ai-' + id);
+  if (el) el.classList.add('selected');
+  document.getElementById('transferConfirmBtn').disabled = false;
+}
+
+async function executeBlindTransfer() {
+  const btn = document.getElementById('transferConfirmBtn');
+  const statusEl = document.getElementById('transferStatus');
+  const statusText = document.getElementById('transferStatusText');
+  btn.disabled = true;
+  statusEl.className = 'transfer-status connecting';
+  statusText.textContent = 'Initiating blind transfer…';
+
+  let body = { voicemail: false };
+  let description = '';
+  if (transferMode === 'phone') {
+    body.address = document.getElementById('transferPhoneInput').value.trim();
+    description  = body.address;
+  } else if (transferMode === 'queue') {
+    const q = [...gcLiveQueues, ...DEMO_QUEUES].find(q => q.id === selectedQueueId);
+    body.queueId = selectedQueueId; description = q ? q.name : selectedQueueId;
+  } else {
+    const a = [...gcLiveAgents, ...DEMO_AGENTS].find(a => a.id === selectedAgentId);
+    body.userId = selectedAgentId; description = a ? a.name : selectedAgentId;
+  }
+
+  if (!gcConversationId || !gcParticipantId) {
+    await new Promise(r => setTimeout(r, 900));
+    statusEl.className  = 'transfer-status success';
+    statusText.textContent = `✓ [Demo] Transfer to ${description} — wire up conversationId for live calls`;
+    toast(`[Demo] Transfer → ${description}`);
+    setTimeout(() => closeTransferModal(), 2500);
+    return;
+  }
+
+  try {
+    await conversationsApi.postConversationParticipantReplace(gcConversationId, gcParticipantId, body);
+    statusEl.className     = 'transfer-status success';
+    statusText.textContent = `✓ Call transferred to ${description}`;
+    toast(`Blind transfer → ${description}`);
+    if (clientApp) clientApp.lifecycle.exitApp();
+    setTimeout(() => closeTransferModal(), 2000);
+  } catch(err) {
+    const msg = err.body?.message || err.message || 'Unknown error';
+    statusEl.className     = 'transfer-status error';
+    statusText.textContent = `Transfer failed: ${msg}`;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
