@@ -1299,18 +1299,41 @@ function selectEscalation(el) {
 ═══════════════════════════════════════════════════════════ */
 const qp = new URLSearchParams(window.location.search);
 const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
-let restoredParams = new URLSearchParams();
-try {
-  const stateVal = qp.get('state') || hashParams.get('state');
-  if (stateVal) restoredParams = new URLSearchParams(decodeURIComponent(stateVal));
-} catch(e) {}
 
+// Save screen pop params to sessionStorage BEFORE OAuth redirect strips them
+const SCREENPOP_KEY = 'gc_screenpop_params';
+['customer_id','customerId','AccountNumber','account_number','ANI','phone','DNIS','conversationId','pcConversationId'].forEach(p => {
+  const val = qp.get(p);
+  if (val) {
+    try { sessionStorage.setItem(SCREENPOP_KEY + '_' + p, val); } catch(e) {}
+  }
+});
+
+// Restore params from sessionStorage (survives OAuth redirect)
 function getParam(name) {
-  return qp.get(name) || restoredParams.get(name) || hashParams.get(name) || null;
+  const fromQp   = qp.get(name);
+  const fromHash = hashParams.get(name);
+  let fromSession = null;
+  try { fromSession = sessionStorage.getItem(SCREENPOP_KEY + '_' + name); } catch(e) {}
+
+  // Also try state param restoration
+  let fromState = null;
+  try {
+    const stateVal = qp.get('state') || hashParams.get('state');
+    if (stateVal) fromState = new URLSearchParams(decodeURIComponent(stateVal)).get(name);
+  } catch(e) {}
+
+  return fromQp || fromState || fromSession || fromHash || null;
+}
+
+function clearScreenPopSession() {
+  ['customer_id','customerId','AccountNumber','account_number','ANI','phone','DNIS','conversationId','pcConversationId'].forEach(p => {
+    try { sessionStorage.removeItem(SCREENPOP_KEY + '_' + p); } catch(e) {}
+  });
 }
 
 function doScreenPop() {
-  if (!dataLoaded) return; // wait until data is loaded
+  if (!dataLoaded) return;
 
   // Priority 1: customer_id passed by AVA/Architect
   const autoCustomerId = getParam('customer_id') || getParam('customerId') || getParam('AccountNumber') || getParam('account_number');
@@ -1319,7 +1342,12 @@ function doScreenPop() {
       c.key.toLowerCase() === autoCustomerId.toLowerCase() ||
       (c.account_number || '').toLowerCase() === autoCustomerId.toLowerCase()
     );
-    if (match) { selectCustomer(match.key); toast('Screen pop: ' + (match.company_name || match.first_name)); return; }
+    if (match) {
+      selectCustomer(match.key);
+      toast('Screen pop: ' + (match.company_name || match.first_name));
+      clearScreenPopSession();
+      return;
+    }
   }
 
   // Priority 2: ANI lookup
@@ -1327,7 +1355,11 @@ function doScreenPop() {
   if (autoPhone) {
     const normalized = autoPhone.replace(/\D/g, '').slice(-10);
     const match = allCustomers.find(c => String(c.phone_normalized || '') === normalized);
-    if (match) { selectCustomer(match.key); toast('Screen pop (ANI): ' + (match.company_name || match.first_name)); }
+    if (match) {
+      selectCustomer(match.key);
+      toast('Screen pop (ANI): ' + (match.company_name || match.first_name));
+      clearScreenPopSession();
+    }
   }
 }
 
