@@ -837,7 +837,7 @@ function renderOrdersDirect(transactions) {
   const activeOrders = transactions.filter(t => (t.status||'') !== 'delivered');
   const list = document.getElementById('lp-orders-list');
   list.innerHTML = activeOrders.length
-    ? activeOrders.map(t => '<div style="margin-bottom:8px;padding:8px 10px;background:var(--gray-100);border-radius:8px;cursor:pointer;" onclick="switchTab('orders')"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:600;font-size:0.85rem;color:var(--navy);">' + (t.reference_number||t.key) + '</div>' + statusBadge(t.status_display||t.status) + '</div><div style="font-size:0.75rem;color:var(--gray-500);margin-top:2px;">' + (t.destination||'') + ' - ETA ' + (t.estimated_completion||'-') + '</div></div>').join('')
+    ? activeOrders.map(t => '<div style="margin-bottom:8px;padding:8px 10px;background:var(--gray-100);border-radius:8px;cursor:pointer;" onclick="switchTab(\'orders\')"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:600;font-size:0.85rem;color:var(--navy);">' + (t.reference_number||t.key) + '</div>' + statusBadge(t.status_display||t.status) + '</div><div style="font-size:0.75rem;color:var(--gray-500);margin-top:2px;">' + (t.destination||'') + ' - ETA ' + (t.estimated_completion||'-') + '</div></div>').join('')
     : '<div style="font-size:0.8rem;color:var(--gray-500);">No active orders</div>';
   if (!transactions.length) {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128230;</div><div class="empty-title">No orders found</div></div>';
@@ -893,7 +893,7 @@ function renderCasesDirect(cases) {
       (c.case_title ? '<div style="margin-bottom:12px;font-size:0.92rem;font-weight:500;color:var(--navy);">' + c.case_title + '</div>' : '') +
       '<div class="grid-3" style="margin-bottom:14px;"><div class="field-group"><div class="field-label">Type</div><div class="field-value">' + (c.case_type||'-') + '</div></div><div class="field-group"><div class="field-label">Priority</div><div class="field-value">' + priorityBadge(c.priority) + '</div></div><div class="field-group"><div class="field-label">Stage</div><div class="field-value">Stage ' + (c.current_stage||'-') + '</div></div><div class="field-group"><div class="field-label">Opened</div><div class="field-value">' + (c.opened_date||'-') + '</div></div><div class="field-group"><div class="field-label">Due Date</div><div class="field-value">' + (c.due_date||'-') + '</div></div><div class="field-group"><div class="field-label">Linked Order</div><div class="field-value">' + (c.linked_transaction_id||'-') + '</div></div></div>' +
       (isOpen && slaLabel ? '<div style="margin:10px 0;"><div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--gray-500);margin-bottom:4px;"><span>SLA Progress</span><span>' + slaLabel + '</span></div><div class="sla-bar-bg"><div class="sla-bar-fill ' + slaClass + '" style="width:' + Math.min(slaPct,100) + '%"></div></div></div>' : '') +
-      '<div style="margin:14px 0 8px;font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-500);">Stage Pipeline</div><div class="case-pipeline"><div class="pipeline-stage ' + s1 + '"><div class="pipeline-stage-num">Stage 1</div><div class="pipeline-stage-owner">' + (c.stage_1_owner||'-') + '</div><div class="pipeline-stage-status">' + (c.stage_1_status||'pending') + '</div></div><div class="pipeline-stage ' + s2 + '"><div class="pipeline-stage-num">Stage 2</div><div class="pipeline-stage-owner">' + (c.stage_2_owner||'-') + '</div><div class="pipeline-stage-status">' + (c.stage_2_status||'pending') + '</div></div><div class="pipeline-stage ' + s3 + '"><div class="pipeline-stage-num">Stage 3</div><div class="pipeline-stage-owner">' + (c.stage_3_owner||'-') + '</div><div class="pipeline-stage-status">' + (c.stage_3_status||'pending') + '</div></div></div>' +
+      '<div style="margin:14px 0 8px;font-family:\'Barlow Condensed\',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-500);">Stage Pipeline</div><div class="case-pipeline"><div class="pipeline-stage ' + s1 + '"><div class="pipeline-stage-num">Stage 1</div><div class="pipeline-stage-owner">' + (c.stage_1_owner||'-') + '</div><div class="pipeline-stage-status">' + (c.stage_1_status||'pending') + '</div></div><div class="pipeline-stage ' + s2 + '"><div class="pipeline-stage-num">Stage 2</div><div class="pipeline-stage-owner">' + (c.stage_2_owner||'-') + '</div><div class="pipeline-stage-status">' + (c.stage_2_status||'pending') + '</div></div><div class="pipeline-stage ' + s3 + '"><div class="pipeline-stage-num">Stage 3</div><div class="pipeline-stage-owner">' + (c.stage_3_owner||'-') + '</div><div class="pipeline-stage-status">' + (c.stage_3_status||'pending') + '</div></div></div>' +
       (c.resolution ? '<div style="margin-top:12px;padding:10px 14px;background:var(--green-lt);border-radius:8px;font-size:0.85rem;color:var(--green);"><strong>Resolution:</strong> ' + c.resolution + '</div>' : '') +
       '</div>';
   }).join('');
@@ -1056,7 +1056,8 @@ function saveSetupAndInit() {
 /* ===== INIT ===== */
 document.addEventListener('DOMContentLoaded', () => {
   detectMode();
-  if (isWidgetMode) {
+  const hasUrlParams = getParam('customer_id') || getParam('customerId') || getParam('AccountNumber') || getParam('account_number');
+  if (isWidgetMode || hasUrlParams) {
     setStatus('widget');
     loadFromUrlParams();
     window.addEventListener('message', event => {
@@ -1160,7 +1161,7 @@ function setTransferMode(mode) {
 }
 function validateTransferInput() { document.getElementById('transferConfirmBtn').disabled=document.getElementById('transferPhoneInput').value.trim().length<3; }
 function renderQueues(data) {
-  document.getElementById('queueList').innerHTML=(data||DEMO_QUEUES).map(q=>'<div class="queue-item" id="qi-'+q.id+'" onclick="selectQueue(''+q.id+'')"><div class="queue-dot"></div><span style="flex:1;">'+q.name+'</span><span style="font-size:0.75rem;opacity:0.6;">'+q.memberCount+' members</span></div>').join('');
+  document.getElementById('queueList').innerHTML=(data||DEMO_QUEUES).map(q=>'<div class="queue-item" id="qi-'+q.id+'" onclick="selectQueue(\''+q.id+'\')"><div class="queue-dot"></div><span style="flex:1;">'+q.name+'</span><span style="font-size:0.75rem;opacity:0.6;">'+q.memberCount+' members</span></div>').join('');
 }
 function selectQueue(id) {
   selectedQueueId=id;
@@ -1171,7 +1172,7 @@ function selectQueue(id) {
 function renderAgents(filter,data) {
   const list=(data||DEMO_AGENTS).filter(a=>!filter||a.name.toLowerCase().includes(filter.toLowerCase())||a.email.toLowerCase().includes(filter.toLowerCase()));
   const color=s=>s==='Available'?'var(--green)':(s==='On Queue'||s==='Busy')?'var(--blue)':'var(--amber)';
-  document.getElementById('agentList').innerHTML=list.length?list.map(a=>'<div class="queue-item" id="ai-'+a.id+'" onclick="selectAgent(''+a.id+'')"><div class="queue-dot" style="background:'+color(a.status)+'"></div><div style="flex:1;"><div style="font-size:0.88rem;">'+a.name+'</div><div style="font-size:0.72rem;opacity:0.65;">'+a.email+'</div></div><span style="font-size:0.72rem;opacity:0.65;">'+a.status+'</span></div>').join(''):'<div style="padding:12px;color:var(--gray-500);font-size:0.85rem;">No agents found</div>';
+  document.getElementById('agentList').innerHTML=list.length?list.map(a=>'<div class="queue-item" id="ai-'+a.id+'" onclick="selectAgent(\''+a.id+'\')"><div class="queue-dot" style="background:'+color(a.status)+'"></div><div style="flex:1;"><div style="font-size:0.88rem;">'+a.name+'</div><div style="font-size:0.72rem;opacity:0.65;">'+a.email+'</div></div><span style="font-size:0.72rem;opacity:0.65;">'+a.status+'</span></div>').join(''):'<div style="padding:12px;color:var(--gray-500);font-size:0.85rem;">No agents found</div>';
 }
 function filterAgents() { renderAgents(document.getElementById('transferUserInput').value); selectedAgentId=null; document.getElementById('transferConfirmBtn').disabled=true; }
 function selectAgent(id) {
