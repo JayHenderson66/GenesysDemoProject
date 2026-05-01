@@ -1225,7 +1225,7 @@ footer {
     <div class="container">
       <div class="shop-categories">
 
-        <div class="shop-cat-card" onclick="navigate('support')">
+        <div class="shop-cat-card" data-category="Home &amp; Living">
           <div class="shop-cat-visual">
             <div class="cat-bg cat-home"></div>
             <div class="cat-overlay"></div>
@@ -1243,7 +1243,7 @@ footer {
           </div>
         </div>
 
-        <div class="shop-cat-card" onclick="navigate('support')">
+        <div class="shop-cat-card" data-category="Office &amp; Workspace">
           <div class="shop-cat-visual">
             <div class="cat-bg cat-office"></div>
             <div class="cat-overlay"></div>
@@ -1261,7 +1261,7 @@ footer {
           </div>
         </div>
 
-        <div class="shop-cat-card" onclick="navigate('support')">
+        <div class="shop-cat-card" data-category="Sports &amp; Fitness">
           <div class="shop-cat-visual">
             <div class="cat-bg cat-sports"></div>
             <div class="cat-overlay"></div>
@@ -1279,7 +1279,7 @@ footer {
           </div>
         </div>
 
-        <div class="shop-cat-card" onclick="navigate('support')">
+        <div class="shop-cat-card" data-category="Electronics &amp; Tech">
           <div class="shop-cat-visual">
             <div class="cat-bg cat-tech"></div>
             <div class="cat-overlay"></div>
@@ -1297,7 +1297,7 @@ footer {
           </div>
         </div>
 
-        <div class="shop-cat-card" onclick="navigate('support')" style="grid-column:1/-1;">
+        <div class="shop-cat-card" data-category="Luxury &amp; Gifts" style="grid-column:1/-1;">
           <div style="display:flex;gap:0;overflow:hidden;border-radius:var(--radius-lg);">
             <div class="shop-cat-visual" style="width:45%;flex-shrink:0;height:220px;border-radius:0;">
               <div class="cat-bg cat-luxury"></div>
@@ -1852,6 +1852,16 @@ function toggleFaq(btn) {
 function setFilter(btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const selected = btn.textContent.trim();
+  document.querySelectorAll('.shop-cat-card').forEach(card => {
+    const cat = card.dataset.category || '';
+    const show = selected === 'All' || cat === selected;
+    card.style.display = show ? '' : 'none';
+    // Luxury spans full width only when visible alongside others
+    if (cat === 'Luxury & Gifts') {
+      card.style.gridColumn = show && selected === 'All' ? '1 / -1' : '';
+    }
+  });
 }
 
 // ── Order lookup ──
