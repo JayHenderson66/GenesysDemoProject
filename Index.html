@@ -1,1 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ABC Retail — Premium Lifestyle Shopping</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:     #1A2B4A;
+  --navy-mid: #243561;
+  --gold:     #C8973A;
+  --gold-lt:  #F2E0BC;
+  --cream:    #F9F6F0;
+  --white:    #ffffff;
+  --gray-100: #f0ede8;
+  --gray-200: #ddd9d2;
+  --gray-400: #a09890;
+  --gray-600: #6b6460;
+  --gray-800: #2e2a26;
+  --green:    #2a7a55;
+  --green-lt: #e4f4ed;
+  --amber:    #b45309;
+  --amber-lt: #fef3c7;
+  --red:      #9b1c1c;
+  --red-lt:   #fde8e8;
+  --radius:   8px;
+  --radius-lg:16px;
+  --shadow:   0 2px 12px rgba(26,43,74,0.10);
+  --shadow-lg:0 8px 32px rgba(26,43,74,0.16);
+  --transition: 0.2s ease;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--gray-800);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+h1,h2,h3,h4 { font-family: 'Playfair Display', serif; font-weight: 700; line-height: 1.2; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+img { max-width: 100%; display: block; }
+.page { display: none; flex: 1; }
+.page.active { display: block; }
 
+/* ── Utility ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.btn-primary { background: var(--gold); color: var(--white); }
+.btn-primary:hover { background: #b5831f; }
+.btn-outline {
+  background: transparent;
+  color: var(--navy);
+  border: 1.5px solid var(--navy);
+}
+.btn-outline:hover { background: var(--navy); color: var(--white); }
+.btn-outline-white {
+  background: transparent;
+  color: var(--white);
+  border: 1.5px solid rgba(255,255,255,0.6);
+}
+.btn-outline-white:hover { background: rgba(255,255,255,0.15); border-color: var(--white); }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.badge-green { background: var(--green-lt); color: var(--green); }
+.badge-amber { background: var(--amber-lt); color: var(--amber); }
+.badge-red   { background: var(--red-lt);   color: var(--red); }
+.badge-navy  { background: rgba(26,43,74,0.1); color: var(--navy); }
+.badge-gold  { background: var(--gold-lt); color: #7a5518; }
+
+/* ── Navigation ── */
+.topnav-bar {
+  background: var(--cream);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 8px 0;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+}
+.topnav-bar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topnav-links { display: flex; gap: 24px; }
+.topnav-links a:hover { color: var(--gold); }
+
+.navbar {
+  background: var(--navy);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 16px rgba(26,43,74,0.25);
+}
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.nav-logo span { color: var(--gold); }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+}
+.nav-links li a, .nav-links li button {
+  display: block;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.78);
+  border-radius: 4px;
+  transition: var(--transition);
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+.nav-links li a:hover,
+.nav-links li button:hover,
+.nav-links li a.active,
+.nav-links li button.active {
+  color: var(--white);
+  background: rgba(255,255,255,0.1);
+}
+.nav-links li a.active,
+.nav-links li button.active {
+  color: var(--gold);
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.nav-icon-btn {
+  color: rgba(255,255,255,0.78);
+  padding: 8px;
+  border-radius: 4px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.nav-icon-btn:hover { color: var(--white); background: rgba(255,255,255,0.1); }
+.cart-count {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 16px; height: 16px;
+  background: var(--gold);
+  color: var(--white);
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-account-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 24px;
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: var(--transition);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+.nav-account-btn:hover { background: rgba(255,255,255,0.18); }
+.nav-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+/* ── Footer ── */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.65);
+  padding: 56px 0 32px;
+  margin-top: auto;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 32px;
+}
+.footer-brand .footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.footer-brand .footer-logo span { color: var(--gold); }
+.footer-brand p { font-size: 0.88rem; line-height: 1.7; max-width: 260px; }
+.footer-col h4 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-col ul li a, .footer-col ul li button {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.6);
+  transition: var(--transition);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.footer-col ul li a:hover,
+.footer-col ul li button:hover { color: var(--gold); }
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+.footer-legal { display: flex; gap: 20px; }
+.footer-legal a { transition: var(--transition); }
+.footer-legal a:hover { color: var(--gold); }
+
+/* ══════════════════════════════
+   HOME PAGE
+══════════════════════════════ */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #2a3f6b 60%, #1e3a5f 100%);
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 80% 50%, rgba(200,151,58,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 300px at 20% 80%, rgba(200,151,58,0.06) 0%, transparent 70%);
+}
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px);
+}
+.hero .container {
+  position: relative;
+  z-index: 2;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+.hero-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  color: var(--white);
+  max-width: 600px;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.hero p {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.72);
+  max-width: 480px;
+  margin-bottom: 36px;
+  line-height: 1.75;
+}
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 52px;
+  padding-top: 36px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.hero-stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.hero-stat-label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 4px;
+}
+
+.section { padding: 64px 0; }
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.section-header h2 { font-size: 2rem; color: var(--navy); margin-bottom: 12px; }
+.section-header p { color: var(--gray-600); max-width: 500px; margin: 0 auto; }
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.category-grid .cat-wide { grid-column: span 2; }
+
+.cat-card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  height: 260px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.cat-card.tall { height: 340px; }
+.cat-bg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.4s ease;
+}
+.cat-card:hover .cat-bg { transform: scale(1.04); }
+.cat-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(26,43,74,0.1) 0%, rgba(26,43,74,0.72) 100%);
+}
+.cat-content {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 28px 28px 24px;
+}
+.cat-tag {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--white);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+.cat-content h3 { font-size: 1.35rem; color: var(--white); margin-bottom: 4px; }
+.cat-content p { font-size: 0.85rem; color: rgba(255,255,255,0.72); }
+.cat-arrow {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--white);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: var(--transition);
+}
+.cat-card:hover .cat-arrow { opacity: 1; transform: translateX(0); }
+
+/* Category gradients */
+.cat-home   { background: linear-gradient(135deg, #8B6914 0%, #C8973A 40%, #E8C585 100%); }
+.cat-office { background: linear-gradient(135deg, #1A3A5C 0%, #2E5E8A 60%, #4A8AC4 100%); }
+.cat-sports { background: linear-gradient(135deg, #1A4A2E 0%, #2E7A4E 60%, #52A87A 100%); }
+.cat-tech   { background: linear-gradient(135deg, #1A1A3A 0%, #2E2E6A 60%, #5050A0 100%); }
+.cat-luxury { background: linear-gradient(135deg, #3A1A3A 0%, #6A2E6A 50%, #A050A0 100%); }
+
+/* Promo Banner */
+.promo-banner {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: var(--radius-lg);
+  padding: 52px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.promo-banner::before {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: rgba(200,151,58,0.1);
+}
+.promo-banner::after {
+  content: '';
+  position: absolute;
+  right: 80px; bottom: -80px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(200,151,58,0.07);
+}
+.promo-text { position: relative; z-index: 1; }
+.promo-text .badge-gold { margin-bottom: 12px; display: inline-block; }
+.promo-text h2 { font-size: 1.9rem; color: var(--white); max-width: 380px; }
+.promo-text p { color: rgba(255,255,255,0.68); margin-top: 10px; max-width: 340px; }
+.promo-ctas { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+
+/* Trust Bar */
+.trust-bar {
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 28px 0;
+}
+.trust-bar .container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.trust-icon {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--gold-lt);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.trust-label { font-weight: 600; font-size: 0.9rem; color: var(--navy); }
+.trust-sub { font-size: 0.8rem; color: var(--gray-600); }
+
+/* ══════════════════════════════
+   SHOP PAGE
+══════════════════════════════ */
+.shop-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 52px 0;
+  color: var(--white);
+}
+.shop-hero h1 { font-size: 2.2rem; margin-bottom: 8px; }
+.shop-hero p { color: rgba(255,255,255,0.65); font-size: 0.95rem; }
+
+.shop-filter-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 16px 0;
+  position: sticky;
+  top: 68px;
+  z-index: 100;
+}
+.shop-filter-bar .container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filter-label { font-size: 0.8rem; font-weight: 600; color: var(--gray-600); margin-right: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+.filter-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--gray-800);
+  background: var(--gray-100);
+  border: 1.5px solid transparent;
+  transition: var(--transition);
+  cursor: pointer;
+  font-family: inherit;
+}
+.filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+.filter-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+.shop-grid {
+  padding: 48px 0 72px;
+}
+.shop-categories {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.shop-cat-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.shop-cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.shop-cat-visual {
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+.shop-cat-visual .cat-bg { position: absolute; inset: 0; }
+.shop-cat-visual .cat-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(26,43,74,0.5) 100%); }
+.shop-cat-info { padding: 24px 28px; }
+.shop-cat-info h3 { font-size: 1.2rem; color: var(--navy); margin-bottom: 6px; }
+.shop-cat-info p { font-size: 0.88rem; color: var(--gray-600); margin-bottom: 16px; }
+.shop-cat-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.shop-cat-count { font-size: 0.82rem; color: var(--gray-400); }
+.shop-cat-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.featured-banner {
+  background: linear-gradient(135deg, #8B6914 0%, #C8973A 100%);
+  border-radius: var(--radius-lg);
+  padding: 40px 44px;
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.featured-banner h3 { font-size: 1.5rem; color: var(--white); margin-bottom: 6px; }
+.featured-banner p { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+.btn-white { background: var(--white); color: var(--navy); font-weight: 600; padding: 11px 24px; border-radius: 4px; font-size: 0.88rem; transition: var(--transition); }
+.btn-white:hover { background: var(--cream); }
+
+/* ══════════════════════════════
+   SUPPORT PAGE
+══════════════════════════════ */
+.support-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 52px 0;
+  color: var(--white);
+  text-align: center;
+}
+.support-hero h1 { font-size: 2.2rem; margin-bottom: 8px; }
+.support-hero p { color: rgba(255,255,255,0.65); font-size: 0.95rem; max-width: 440px; margin: 0 auto; }
+
+.support-channels {
+  padding: 56px 0 0;
+}
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.channel-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.channel-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.channel-icon {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.channel-icon.navy  { background: rgba(26,43,74,0.08); color: var(--navy); }
+.channel-icon.gold  { background: var(--gold-lt); color: var(--gold); }
+.channel-icon.green { background: var(--green-lt); color: var(--green); }
+.channel-card h3 { font-size: 1.05rem; color: var(--navy); margin-bottom: 8px; }
+.channel-card p { font-size: 0.87rem; color: var(--gray-600); margin-bottom: 20px; }
+.channel-avail {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-lt);
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+/* Messenger placeholder */
+.messenger-section { padding: 48px 0 0; }
+.messenger-placeholder {
+  background: var(--white);
+  border: 2px dashed var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+}
+.messenger-placeholder-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--gold-lt);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  color: var(--gold);
+}
+.messenger-placeholder h3 { font-size: 1.05rem; color: var(--navy); margin-bottom: 6px; }
+.messenger-placeholder p { font-size: 0.87rem; color: var(--gray-600); }
+
+<!-- Genesys Messenger snippet goes here -->
+
+/* Order lookup */
+.order-lookup-section { padding: 48px 0 0; }
+.order-lookup-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  box-shadow: var(--shadow);
+  max-width: 600px;
+  margin: 0 auto;
+}
+.order-lookup-card h3 { font-size: 1.15rem; color: var(--navy); margin-bottom: 6px; }
+.order-lookup-card p { font-size: 0.88rem; color: var(--gray-600); margin-bottom: 24px; }
+.lookup-row { display: flex; gap: 12px; }
+.lookup-input {
+  flex: 1;
+  padding: 11px 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.92rem;
+  color: var(--gray-800);
+  transition: var(--transition);
+  outline: none;
+}
+.lookup-input:focus { border-color: var(--navy); }
+.lookup-result {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  display: none;
+}
+.lookup-result.visible { display: block; }
+.lookup-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.lookup-result-id { font-weight: 600; color: var(--navy); font-size: 0.95rem; }
+.lookup-result-rows { display: flex; flex-direction: column; gap: 6px; }
+.lookup-result-row { display: flex; gap: 12px; font-size: 0.87rem; }
+.lookup-result-row .lbl { color: var(--gray-600); width: 120px; flex-shrink: 0; }
+.lookup-result-row .val { color: var(--gray-800); font-weight: 500; }
+
+/* FAQ */
+.faq-section { padding: 48px 0 64px; }
+.faq-section h2 { font-size: 1.6rem; color: var(--navy); margin-bottom: 24px; }
+.faq-list { display: flex; flex-direction: column; gap: 2px; }
+.faq-item {
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.faq-question {
+  width: 100%;
+  text-align: left;
+  padding: 18px 24px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  transition: var(--transition);
+}
+.faq-question:hover { background: var(--cream); }
+.faq-question.open { background: var(--cream); }
+.faq-chevron { flex-shrink: 0; transition: transform 0.25s ease; color: var(--gray-400); }
+.faq-question.open .faq-chevron { transform: rotate(180deg); }
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.faq-answer-inner {
+  padding: 0 24px 20px;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  line-height: 1.75;
+}
+
+/* ══════════════════════════════
+   ACCOUNT PAGE
+══════════════════════════════ */
+.account-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 44px 0;
+}
+.account-hero .container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.account-avatar-lg {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,0.25);
+}
+.account-hero-info h1 { font-size: 1.7rem; color: var(--white); margin-bottom: 4px; }
+.account-hero-info .account-sub { font-size: 0.88rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+.account-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.account-badges .badge-gold {
+  background: rgba(200,151,58,0.2);
+  color: var(--gold);
+  border: 1px solid rgba(200,151,58,0.35);
+}
+
+.account-layout {
+  padding: 36px 0 72px;
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.account-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px 0;
+  position: sticky;
+  top: 100px;
+}
+.account-sidebar-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  padding: 8px 20px;
+  margin-top: 8px;
+}
+.account-sidebar-label:first-child { margin-top: 0; }
+.acct-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+.acct-tab:hover { background: var(--cream); color: var(--navy); }
+.acct-tab.active { background: var(--cream); color: var(--navy); font-weight: 600; border-left-color: var(--gold); }
+.acct-tab svg { flex-shrink: 0; color: var(--gray-400); }
+.acct-tab.active svg { color: var(--gold); }
+
+.account-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.acct-panel { display: none; }
+.acct-panel.active { display: flex; flex-direction: column; gap: 20px; }
+
+.acct-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.acct-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.acct-card-header h3 { font-size: 1rem; color: var(--navy); }
+.acct-card-body { padding: 0; }
+
+/* Order card */
+.order-item {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.order-item:last-child { border-bottom: none; }
+.order-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.order-id { font-weight: 700; font-size: 0.85rem; color: var(--navy); font-family: monospace; }
+.order-date { font-size: 0.82rem; color: var(--gray-400); margin-top: 2px; }
+.order-product { font-weight: 600; color: var(--gray-800); margin-bottom: 4px; }
+.order-meta { font-size: 0.85rem; color: var(--gray-600); }
+.order-timeline {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.timeline-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.timeline-step::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: -50%;
+  right: 50%;
+  height: 2px;
+  background: var(--gray-200);
+}
+.timeline-step:first-child::before { display: none; }
+.timeline-step.done::before { background: var(--green); }
+.timeline-dot {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  border: 2px solid var(--white);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.timeline-step.done .timeline-dot { background: var(--green); }
+.timeline-step.current .timeline-dot { background: var(--gold); }
+.timeline-label {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  margin-top: 6px;
+  font-weight: 500;
+  text-align: center;
+}
+.timeline-step.done .timeline-label { color: var(--green); }
+.timeline-step.current .timeline-label { color: var(--gold); font-weight: 600; }
+
+/* Case card */
+.case-item {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.case-item:last-child { border-bottom: none; }
+.case-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.case-id { font-weight: 700; font-size: 0.85rem; color: var(--navy); font-family: monospace; }
+.case-date { font-size: 0.82rem; color: var(--gray-400); margin-top: 2px; }
+.case-subject { font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
+.case-desc { font-size: 0.88rem; color: var(--gray-600); }
+.case-actions { margin-top: 16px; display: flex; gap: 10px; }
+
+/* Profile */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.profile-field {
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--gray-100);
+  border-right: 1px solid var(--gray-100);
+}
+.profile-field:nth-child(even) { border-right: none; }
+.profile-field:nth-last-child(-n+2) { border-bottom: none; }
+.profile-field-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 4px; }
+.profile-field-value { font-size: 0.92rem; color: var(--gray-800); font-weight: 500; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .category-grid { grid-template-columns: 1fr 1fr; }
+  .category-grid .cat-wide { grid-column: span 1; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .channels-grid { grid-template-columns: 1fr 1fr; }
+  .shop-categories { grid-template-columns: 1fr; }
+  .account-layout { flex-direction: column; }
+  .account-sidebar { width: 100%; position: static; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .profile-field { border-right: none; }
+}
+@media (max-width: 640px) {
+  .container { padding: 0 20px; }
+  .category-grid { grid-template-columns: 1fr; }
+  .channels-grid { grid-template-columns: 1fr; }
+  .promo-banner { flex-direction: column; align-items: flex-start; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: column; gap: 20px; }
+  .nav-links { display: none; }
+}
+@media print {
+  .navbar, .topnav-bar, footer { display: none; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topnav-bar">
+  <div class="container">
+    <div class="topnav-links">
+      <a href="#" onclick="navigate('support');return false;">Store Locator</a>
+      <a href="#" onclick="navigate('support');return false;">Track Order</a>
+      <a href="#" onclick="navigate('support');return false;">Help Center</a>
+    </div>
+    <div style="font-size:0.8rem;color:var(--gray-600);">Free shipping on orders over $75 · Premium member perks active</div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="navbar">
+  <div class="container">
+    <div class="nav-logo" onclick="navigate('home')" style="cursor:pointer;">ABC <span>Retail</span></div>
+    <ul class="nav-links">
+      <li><button class="nav-link-btn" data-page="home" onclick="navigate('home')">Home</button></li>
+      <li><button class="nav-link-btn" data-page="shop" onclick="navigate('shop')">Shop</button></li>
+      <li><button class="nav-link-btn" data-page="support" onclick="navigate('support')">Support</button></li>
+      <li><button class="nav-link-btn" data-page="account" onclick="navigate('account')">My Account</button></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-icon-btn" title="Search" aria-label="Search">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="nav-icon-btn" title="Wishlist" aria-label="Wishlist">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <button class="nav-icon-btn" title="Cart" aria-label="Shopping cart" style="position:relative;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-count">2</span>
+      </button>
+      <button class="nav-account-btn" onclick="navigate('account')">
+        <div class="nav-avatar">PR</div>
+        Philip R.
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HOME PAGE ══ -->
+<div id="page-home" class="page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-pattern"></div>
+    <div class="container">
+      <div class="hero-eyebrow">Spring Collection 2026</div>
+      <h1>Curated for the Way You Live</h1>
+      <p>From coastal living rooms to home offices and beyond — discover premium essentials that elevate every corner of your world.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" onclick="navigate('shop')">Shop Now</button>
+        <button class="btn btn-outline-white" onclick="navigate('shop')">View Lookbook</button>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">50K+</div>
+          <div class="hero-stat-label">Happy customers</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">5</div>
+          <div class="hero-stat-label">Premium categories</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">4.9★</div>
+          <div class="hero-stat-label">Average rating</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">Free</div>
+          <div class="hero-stat-label">Returns within 60 days</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category grid -->
+  <section class="section" style="padding-bottom:24px;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Browse by Category</div>
+        <h2>Find Your Perfect Style</h2>
+        <p>Explore our carefully curated collections designed to fit every lifestyle and budget.</p>
+      </div>
+      <div class="category-grid">
+        <div class="cat-card cat-wide" onclick="navigate('shop')">
+          <div class="cat-bg cat-home"></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-content">
+            <div class="cat-tag">Bestseller</div>
+            <h3>Home &amp; Living</h3>
+            <p>Furniture, décor &amp; soft furnishings</p>
+          </div>
+          <div class="cat-arrow">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </div>
+        <div class="cat-card cat-tall" onclick="navigate('shop')">
+          <div class="cat-bg cat-luxury"></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-content">
+            <div class="cat-tag">Premium</div>
+            <h3>Luxury &amp; Gifts</h3>
+            <p>Exclusive pieces &amp; gift sets</p>
+          </div>
+          <div class="cat-arrow">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </div>
+        <div class="cat-card" onclick="navigate('shop')">
+          <div class="cat-bg cat-office"></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-content">
+            <div class="cat-tag">New</div>
+            <h3>Office &amp; Workspace</h3>
+            <p>Desks, chairs &amp; organizers</p>
+          </div>
+          <div class="cat-arrow">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </div>
+        <div class="cat-card" onclick="navigate('shop')">
+          <div class="cat-bg cat-sports"></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-content">
+            <div class="cat-tag">Trending</div>
+            <h3>Sports &amp; Fitness</h3>
+            <p>Equipment &amp; activewear</p>
+          </div>
+          <div class="cat-arrow">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </div>
+        <div class="cat-card" onclick="navigate('shop')">
+          <div class="cat-bg cat-tech"></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-content">
+            <div class="cat-tag">Hot</div>
+            <h3>Electronics &amp; Tech</h3>
+            <p>Gadgets &amp; smart home</p>
+          </div>
+          <div class="cat-arrow">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promo banner -->
+  <section class="section" style="padding-top:24px;padding-bottom:24px;">
+    <div class="container">
+      <div class="promo-banner">
+        <div class="promo-text">
+          <span class="badge badge-gold">Premium Members</span>
+          <h2>Unlock Exclusive Access &amp; Early Releases</h2>
+          <p>As a Premium member you enjoy free expedited shipping, early sale access, dedicated support, and members-only pricing on select lines.</p>
+        </div>
+        <div class="promo-ctas">
+          <button class="btn btn-primary" onclick="navigate('account')">View Member Benefits</button>
+          <button class="btn btn-outline-white" onclick="navigate('shop')">Shop Members Picks</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust bar -->
+  <div class="trust-bar">
+    <div class="container">
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">Free Shipping</div>
+          <div class="trust-sub">On orders over $75</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">Easy Returns</div>
+          <div class="trust-sub">60-day hassle-free returns</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">Secure Shopping</div>
+          <div class="trust-sub">256-bit SSL encryption</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">24/7 Support</div>
+          <div class="trust-sub">Real agents, real help</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">Premium Quality</div>
+          <div class="trust-sub">Curated &amp; quality-checked</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-home -->
+
+<!-- ══ SHOP PAGE ══ -->
+<div id="page-shop" class="page">
+
+  <div class="shop-hero">
+    <div class="container">
+      <div class="section-eyebrow" style="margin-bottom:8px;">Our Collections</div>
+      <h1>Shop All Categories</h1>
+      <p>Explore 5 premium lifestyle categories — from coastal interiors to cutting-edge tech.</p>
+    </div>
+  </div>
+
+  <div class="shop-filter-bar">
+    <div class="container">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active" onclick="setFilter(this)">All</button>
+      <button class="filter-btn" onclick="setFilter(this)">Home &amp; Living</button>
+      <button class="filter-btn" onclick="setFilter(this)">Office &amp; Workspace</button>
+      <button class="filter-btn" onclick="setFilter(this)">Sports &amp; Fitness</button>
+      <button class="filter-btn" onclick="setFilter(this)">Electronics &amp; Tech</button>
+      <button class="filter-btn" onclick="setFilter(this)">Luxury &amp; Gifts</button>
+    </div>
+  </div>
+
+  <div class="shop-grid">
+    <div class="container">
+      <div class="shop-categories">
+
+        <div class="shop-cat-card" onclick="navigate('support')">
+          <div class="shop-cat-visual">
+            <div class="cat-bg cat-home"></div>
+            <div class="cat-overlay"></div>
+          </div>
+          <div class="shop-cat-info">
+            <h3>Home &amp; Living</h3>
+            <p>Transform your living spaces with our curated range of furniture, soft furnishings, wall art, and décor pieces for every room and style.</p>
+            <div class="shop-cat-meta">
+              <span class="shop-cat-count">240+ products</span>
+              <span class="shop-cat-link">
+                Browse collection
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shop-cat-card" onclick="navigate('support')">
+          <div class="shop-cat-visual">
+            <div class="cat-bg cat-office"></div>
+            <div class="cat-overlay"></div>
+          </div>
+          <div class="shop-cat-info">
+            <h3>Office &amp; Workspace</h3>
+            <p>Productive, beautiful workspaces start here. Ergonomic chairs, standing desks, cable management, and smart organizers for home and office.</p>
+            <div class="shop-cat-meta">
+              <span class="shop-cat-count">180+ products</span>
+              <span class="shop-cat-link">
+                Browse collection
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shop-cat-card" onclick="navigate('support')">
+          <div class="shop-cat-visual">
+            <div class="cat-bg cat-sports"></div>
+            <div class="cat-overlay"></div>
+          </div>
+          <div class="shop-cat-info">
+            <h3>Sports &amp; Fitness</h3>
+            <p>Gear up with premium equipment, activewear, and recovery tools. Whether you're training at home or hitting the trail, we've got you covered.</p>
+            <div class="shop-cat-meta">
+              <span class="shop-cat-count">320+ products</span>
+              <span class="shop-cat-link">
+                Browse collection
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shop-cat-card" onclick="navigate('support')">
+          <div class="shop-cat-visual">
+            <div class="cat-bg cat-tech"></div>
+            <div class="cat-overlay"></div>
+          </div>
+          <div class="shop-cat-info">
+            <h3>Electronics &amp; Tech</h3>
+            <p>Smart home devices, audio gear, monitors, accessories and the latest gadgets — rigorously tested and curated by our tech team.</p>
+            <div class="shop-cat-meta">
+              <span class="shop-cat-count">290+ products</span>
+              <span class="shop-cat-link">
+                Browse collection
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shop-cat-card" onclick="navigate('support')" style="grid-column:1/-1;">
+          <div style="display:flex;gap:0;overflow:hidden;border-radius:var(--radius-lg);">
+            <div class="shop-cat-visual" style="width:45%;flex-shrink:0;height:220px;border-radius:0;">
+              <div class="cat-bg cat-luxury"></div>
+              <div class="cat-overlay"></div>
+            </div>
+            <div class="shop-cat-info" style="display:flex;flex-direction:column;justify-content:center;padding:32px 36px;">
+              <span class="badge badge-gold" style="margin-bottom:12px;display:inline-block;">Premium Exclusives</span>
+              <h3 style="font-size:1.4rem;margin-bottom:10px;">Luxury &amp; Gifts</h3>
+              <p style="margin-bottom:20px;">Discover our most coveted pieces — hand-selected luxury items, curated gift sets, and limited-edition collaborations for those who appreciate the finest things.</p>
+              <div class="shop-cat-meta">
+                <span class="shop-cat-count">95 exclusive products</span>
+                <span class="shop-cat-link">
+                  Browse collection
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="featured-banner">
+        <div>
+          <h3>Premium Member Early Access</h3>
+          <p>As a Premium member, you get 48-hour early access to new arrivals and seasonal sales.</p>
+        </div>
+        <button class="btn-white" onclick="navigate('account')">View My Perks</button>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /page-shop -->
+
+<!-- ══ SUPPORT PAGE ══ -->
+<div id="page-support" class="page">
+
+  <div class="support-hero">
+    <div class="container">
+      <div class="section-eyebrow" style="margin-bottom:8px;">We're Here to Help</div>
+      <h1>Customer Support</h1>
+      <p>Get help with your orders, returns, account, or anything else. Our team is ready.</p>
+    </div>
+  </div>
+
+  <!-- Contact channels -->
+  <section class="support-channels">
+    <div class="container">
+      <div class="channels-grid">
+
+        <div class="channel-card">
+          <div class="channel-icon navy">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <h3>Call Us</h3>
+          <p>Speak directly with a customer service agent. Average wait time under 2 minutes.</p>
+          <div class="channel-avail">Mon–Sat, 8am–9pm PT</div>
+          <button class="btn btn-outline" style="width:100%;">1-800-ABC-RETAIL</button>
+        </div>
+
+        <div class="channel-card" style="border:2px solid var(--gold);">
+          <div class="channel-icon gold">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3>Chat with AVA</h3>
+          <p>Our AI virtual assistant can resolve most questions instantly — or connect you to a live agent.</p>
+          <div class="channel-avail">Available 24/7</div>
+          <button class="btn btn-primary" style="width:100%;">Start Live Chat</button>
+          <!-- Genesys Messenger snippet goes here -->
+        </div>
+
+        <div class="channel-card">
+          <div class="channel-icon green">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+          </div>
+          <h3>Email Support</h3>
+          <p>Send us a message and we'll respond within 4 business hours. Great for non-urgent inquiries.</p>
+          <div class="channel-avail">Response within 4 hrs</div>
+          <button class="btn btn-outline" style="width:100%;">Send an Email</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Order lookup -->
+  <section class="order-lookup-section">
+    <div class="container">
+      <div class="order-lookup-card">
+        <h3>Track Your Order</h3>
+        <p>Enter your order ID or reference number to check your order status instantly.</p>
+        <div class="lookup-row">
+          <input class="lookup-input" id="orderInput" type="text" placeholder="e.g. TXN001 or CASE-2026-0042" autocomplete="off"/>
+          <button class="btn btn-primary" onclick="lookupOrder()">Look Up</button>
+        </div>
+        <div class="lookup-result" id="lookupResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How do I track my order?
+            <svg class="faq-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">You can track your order using the order lookup tool above, or by visiting My Account → Orders. You'll also receive tracking email updates at every stage of delivery. If you have a tracking number, you can visit the carrier's website directly.</div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What is your return policy?
+            <svg class="faq-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">We offer free returns within 60 days of purchase for all items in original condition. Premium members receive extended 90-day returns. Simply initiate a return from your account page and we'll send a prepaid label to your email.</div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            My item arrived damaged — what should I do?
+            <svg class="faq-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">We're sorry to hear that. Please contact our support team via chat or phone as soon as possible — ideally within 48 hours of delivery. Take photos of the damage and have your order number ready. We'll arrange a replacement part or full replacement at no cost to you.</div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How long does shipping take?
+            <svg class="faq-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Standard shipping is 5–7 business days. Expedited shipping (2–3 business days) is available at checkout. Premium members receive free expedited shipping on all orders. Large furniture items may require scheduled delivery — our team will contact you to arrange a time.</div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How do I upgrade to a Premium membership?
+            <svg class="faq-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">You can upgrade to Premium from your account page. Premium membership is $9.99/month or $89/year and includes free expedited shipping, 90-day returns, members-only pricing, early sale access, and dedicated phone support. A 30-day free trial is available for new members.</div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Can I change or cancel an order after placing it?
+            <svg class="faq-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Orders can be modified or cancelled within 1 hour of placement. After that, if the order has moved to processing or shipping, we're unable to cancel it — but you can return it once received. Contact our chat or phone support immediately if you need to make changes.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-support -->
+
+<!-- ══ ACCOUNT PAGE ══ -->
+<div id="page-account" class="page">
+
+  <div class="account-hero">
+    <div class="container">
+      <div class="account-avatar-lg">PR</div>
+      <div class="account-hero-info">
+        <h1>Philip Rivers</h1>
+        <div class="account-sub">Customer ID: C1001 · ACCT-C1001</div>
+        <div class="account-badges">
+          <span class="badge badge-gold">Premium Member</span>
+          <span class="badge" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);font-size:0.75rem;">Member since 2019</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="account-layout">
+
+      <!-- Sidebar -->
+      <div class="account-sidebar">
+        <div class="account-sidebar-label">My Account</div>
+        <button class="acct-tab active" onclick="showTab('orders',this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Orders
+        </button>
+        <button class="acct-tab" onclick="showTab('cases',this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Support Cases
+        </button>
+        <button class="acct-tab" onclick="showTab('profile',this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </button>
+        <div class="account-sidebar-label">Quick Links</div>
+        <button class="acct-tab" onclick="navigate('support')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Get Support
+        </button>
+        <button class="acct-tab" onclick="navigate('shop')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Member Picks
+        </button>
+      </div>
+
+      <!-- Main -->
+      <div class="account-main">
+
+        <!-- Orders panel -->
+        <div class="acct-panel active" id="panel-orders">
+          <div class="acct-card">
+            <div class="acct-card-header">
+              <h3>My Orders</h3>
+              <span class="badge badge-navy">1 Active</span>
+            </div>
+            <div class="acct-card-body">
+              <div class="order-item">
+                <div class="order-header">
+                  <div>
+                    <div class="order-id">TXN001</div>
+                    <div class="order-date">Placed April 2, 2026</div>
+                  </div>
+                  <span class="badge badge-amber">Shipped</span>
+                </div>
+                <div class="order-product">Coastal Living Sectional Sofa — Slate Blue, 3-Piece</div>
+                <div class="order-meta">Qty: 1 · $2,499.00 · Free Premium Shipping · Est. delivery May 5–7, 2026</div>
+                <div class="order-timeline">
+                  <div class="timeline-step done">
+                    <div class="timeline-dot">
+                      <svg width="10" height="10" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="timeline-label">Ordered</div>
+                  </div>
+                  <div class="timeline-step done">
+                    <div class="timeline-dot">
+                      <svg width="10" height="10" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="timeline-label">Processing</div>
+                  </div>
+                  <div class="timeline-step current">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Shipped</div>
+                  </div>
+                  <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Out for Delivery</div>
+                  </div>
+                  <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Delivered</div>
+                  </div>
+                </div>
+                <div style="margin-top:16px;display:flex;gap:10px;">
+                  <button class="btn btn-outline" style="font-size:0.82rem;padding:8px 18px;" onclick="navigate('support')">Report Issue</button>
+                  <button class="btn" style="font-size:0.82rem;padding:8px 18px;background:var(--cream);color:var(--navy);">Track Package</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acct-card">
+            <div class="acct-card-header">
+              <h3>Past Orders</h3>
+              <span class="badge badge-navy">3 Completed</span>
+            </div>
+            <div class="acct-card-body">
+              <div class="order-item">
+                <div class="order-header">
+                  <div>
+                    <div class="order-id">TXN-0094</div>
+                    <div class="order-date">February 14, 2026</div>
+                  </div>
+                  <span class="badge badge-green">Delivered</span>
+                </div>
+                <div class="order-product">Coastal Oak Writing Desk + Monitor Arm Bundle</div>
+                <div class="order-meta">Qty: 1 · $849.00</div>
+              </div>
+              <div class="order-item">
+                <div class="order-header">
+                  <div>
+                    <div class="order-id">TXN-0071</div>
+                    <div class="order-date">December 10, 2025</div>
+                  </div>
+                  <span class="badge badge-green">Delivered</span>
+                </div>
+                <div class="order-product">Premium Noise-Cancelling Headphones (Matte Black)</div>
+                <div class="order-meta">Qty: 1 · $329.00</div>
+              </div>
+              <div class="order-item">
+                <div class="order-header">
+                  <div>
+                    <div class="order-id">TXN-0058</div>
+                    <div class="order-date">October 3, 2025</div>
+                  </div>
+                  <span class="badge badge-green">Delivered</span>
+                </div>
+                <div class="order-product">Luxury Throw Blanket Set — Ivory Merino Wool</div>
+                <div class="order-meta">Qty: 2 · $218.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cases panel -->
+        <div class="acct-panel" id="panel-cases">
+          <div class="acct-card">
+            <div class="acct-card-header">
+              <h3>Support Cases</h3>
+              <span class="badge badge-amber">1 Open</span>
+            </div>
+            <div class="acct-card-body">
+              <div class="case-item">
+                <div class="case-header">
+                  <div>
+                    <div class="case-id">CASE-2026-0042</div>
+                    <div class="case-date">Opened April 18, 2026 · Last updated April 22, 2026</div>
+                  </div>
+                  <span class="badge badge-amber">In Progress</span>
+                </div>
+                <div class="case-subject">Damaged corner piece on delivery — Coastal Living Sectional Sofa</div>
+                <div class="case-desc">Customer reported that one corner section of the sofa (TXN001) arrived with visible damage to the frame and upholstery. Photos provided. Awaiting replacement part shipment confirmation from warehouse team. Reference order: TXN001.</div>
+                <div class="case-actions">
+                  <button class="btn btn-outline" style="font-size:0.82rem;padding:8px 18px;" onclick="navigate('support')">Continue via Chat</button>
+                  <button class="btn" style="font-size:0.82rem;padding:8px 18px;background:var(--cream);color:var(--navy);">View Case Details</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acct-card">
+            <div class="acct-card-header">
+              <h3>Resolved Cases</h3>
+              <span class="badge badge-navy">2 Resolved</span>
+            </div>
+            <div class="acct-card-body">
+              <div class="case-item">
+                <div class="case-header">
+                  <div>
+                    <div class="case-id">CASE-2025-0119</div>
+                    <div class="case-date">December 15, 2025</div>
+                  </div>
+                  <span class="badge badge-green">Resolved</span>
+                </div>
+                <div class="case-subject">Delayed delivery — Headphones order TXN-0071</div>
+                <div class="case-desc">Package delayed by carrier; reshipped and delivered December 19, 2025. $15 store credit issued.</div>
+              </div>
+              <div class="case-item">
+                <div class="case-header">
+                  <div>
+                    <div class="case-id">CASE-2025-0088</div>
+                    <div class="case-date">October 10, 2025</div>
+                  </div>
+                  <span class="badge badge-green">Resolved</span>
+                </div>
+                <div class="case-subject">Wrong color variant received — Throw Blanket (TXN-0058)</div>
+                <div class="case-desc">Correct Ivory variant shipped same day. Return label provided for incorrect item. Resolved in 1 business day.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile panel -->
+        <div class="acct-panel" id="panel-profile">
+          <div class="acct-card">
+            <div class="acct-card-header">
+              <h3>Personal Information</h3>
+              <button class="btn btn-outline" style="font-size:0.82rem;padding:7px 16px;">Edit</button>
+            </div>
+            <div class="acct-card-body">
+              <div class="profile-grid">
+                <div class="profile-field">
+                  <div class="profile-field-label">Full Name</div>
+                  <div class="profile-field-value">Philip Rivers</div>
+                </div>
+                <div class="profile-field">
+                  <div class="profile-field-label">Customer ID</div>
+                  <div class="profile-field-value">C1001</div>
+                </div>
+                <div class="profile-field">
+                  <div class="profile-field-label">Email Address</div>
+                  <div class="profile-field-value">philip.rivers@riversliving.com</div>
+                </div>
+                <div class="profile-field">
+                  <div class="profile-field-label">Phone</div>
+                  <div class="profile-field-value">(949) 295-5945</div>
+                </div>
+                <div class="profile-field" style="grid-column:1/-1;">
+                  <div class="profile-field-label">Shipping Address</div>
+                  <div class="profile-field-value">4515 Cherry Lane, Dana Point, CA 92629</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acct-card">
+            <div class="acct-card-header">
+              <h3>Membership &amp; Perks</h3>
+              <span class="badge badge-gold">Premium Active</span>
+            </div>
+            <div class="acct-card-body" style="padding:24px 28px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+                  <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div>
+                    <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">Free Expedited Shipping</div>
+                    <div style="font-size:0.8rem;color:var(--gray-600);">On all orders, always</div>
+                  </div>
+                </div>
+                <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+                  <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div>
+                    <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">90-Day Returns</div>
+                    <div style="font-size:0.8rem;color:var(--gray-600);">Extended return window</div>
+                  </div>
+                </div>
+                <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+                  <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div>
+                    <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">Early Access</div>
+                    <div style="font-size:0.8rem;color:var(--gray-600);">48hr before public sales</div>
+                  </div>
+                </div>
+                <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+                  <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div>
+                    <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">Priority Support</div>
+                    <div style="font-size:0.8rem;color:var(--gray-600);">Dedicated phone line</div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:20px;padding:16px 20px;background:var(--gold-lt);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-weight:600;font-size:0.9rem;color:#7a5518;">Store Credit Balance</div>
+                  <div style="font-size:0.82rem;color:var(--gray-600);">From promotions &amp; returns</div>
+                </div>
+                <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#7a5518;">$47.50</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-account -->
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">ABC <span>Retail</span></div>
+        <p>Premium lifestyle shopping for the modern home. Curated collections, exceptional service, and a commitment to quality that our customers can rely on.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><button onclick="navigate('shop')">Home &amp; Living</button></li>
+          <li><button onclick="navigate('shop')">Office &amp; Workspace</button></li>
+          <li><button onclick="navigate('shop')">Sports &amp; Fitness</button></li>
+          <li><button onclick="navigate('shop')">Electronics &amp; Tech</button></li>
+          <li><button onclick="navigate('shop')">Luxury &amp; Gifts</button></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><button onclick="navigate('support')">Track Your Order</button></li>
+          <li><button onclick="navigate('support')">Returns &amp; Exchanges</button></li>
+          <li><button onclick="navigate('support')">Help Center / FAQ</button></li>
+          <li><button onclick="navigate('support')">Contact Us</button></li>
+          <li><button onclick="navigate('support')">Live Chat</button></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><button onclick="navigate('account')">My Account</button></li>
+          <li><button onclick="showTab('orders', null); navigate('account')">My Orders</button></li>
+          <li><button onclick="showTab('cases', null); navigate('account')">Support Cases</button></li>
+          <li><button onclick="navigate('account')">Premium Membership</button></li>
+          <li><button onclick="showTab('profile', null); navigate('account')">Profile &amp; Settings</button></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div style="font-size:0.82rem;">© 2026 ABC Retail, Inc. All rights reserved.</div>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Router ──
+const pages = ['home', 'shop', 'support', 'account'];
+
+function navigate(page) {
+  pages.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.toggle('active', p === page);
+  });
+  document.querySelectorAll('.nav-link-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === page);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Account tabs ──
+function showTab(tab, btn) {
+  document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById('panel-' + tab);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── FAQ accordion ──
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  // close all
+  document.querySelectorAll('.faq-question.open').forEach(q => {
+    q.classList.remove('open');
+    q.nextElementSibling.style.maxHeight = '0';
+  });
+  if (!isOpen) {
+    btn.classList.add('open');
+    answer.style.maxHeight = answer.scrollHeight + 'px';
+  }
+}
+
+// ── Filter buttons (shop page) ──
+function setFilter(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Order lookup ──
+const DEMO_DATA = {
+  'TXN001': {
+    type: 'order',
+    id: 'TXN001',
+    status: 'Shipped',
+    statusClass: 'badge-amber',
+    product: 'Coastal Living Sectional Sofa — Slate Blue, 3-Piece',
+    placed: 'April 2, 2026',
+    estimated: 'May 5–7, 2026',
+    total: '$2,499.00'
+  },
+  'TXN-0094': {
+    type: 'order',
+    id: 'TXN-0094',
+    status: 'Delivered',
+    statusClass: 'badge-green',
+    product: 'Coastal Oak Writing Desk + Monitor Arm Bundle',
+    placed: 'February 14, 2026',
+    estimated: 'Delivered February 20, 2026',
+    total: '$849.00'
+  },
+  'CASE-2026-0042': {
+    type: 'case',
+    id: 'CASE-2026-0042',
+    status: 'In Progress',
+    statusClass: 'badge-amber',
+    subject: 'Damaged corner piece on delivery — Sectional Sofa',
+    opened: 'April 18, 2026',
+    updated: 'April 22, 2026',
+    related: 'TXN001'
+  }
+};
+
+function lookupOrder() {
+  const input = document.getElementById('orderInput');
+  const result = document.getElementById('lookupResult');
+  const val = (input.value || '').trim().toUpperCase();
+
+  if (!val) {
+    result.className = 'lookup-result visible';
+    result.style.borderColor = 'var(--red)';
+    result.innerHTML = '<div style="color:var(--red);font-size:0.9rem;font-weight:500;">Please enter an order ID or case number.</div>';
+    return;
+  }
+
+  const key = Object.keys(DEMO_DATA).find(k => k.toUpperCase() === val);
+  if (!key) {
+    result.className = 'lookup-result visible';
+    result.style.borderColor = 'var(--red)';
+    result.innerHTML = `<div style="color:var(--red);font-size:0.9rem;font-weight:500;">No record found for <strong>${val}</strong>. Try <strong>TXN001</strong> or <strong>CASE-2026-0042</strong>.</div>`;
+    return;
+  }
+
+  const d = DEMO_DATA[key];
+  result.style.borderColor = 'var(--gray-200)';
+  result.className = 'lookup-result visible';
+
+  if (d.type === 'order') {
+    result.innerHTML = `
+      <div class="lookup-result-header">
+        <div>
+          <div class="lookup-result-id">Order ${d.id}</div>
+          <div style="font-size:0.8rem;color:var(--gray-400);margin-top:2px;">Placed ${d.placed}</div>
+        </div>
+        <span class="badge ${d.statusClass}">${d.status}</span>
+      </div>
+      <div class="lookup-result-rows">
+        <div class="lookup-result-row"><span class="lbl">Product</span><span class="val">${d.product}</span></div>
+        <div class="lookup-result-row"><span class="lbl">Delivery Est.</span><span class="val">${d.estimated}</span></div>
+        <div class="lookup-result-row"><span class="lbl">Order Total</span><span class="val">${d.total}</span></div>
+      </div>
+    `;
+  } else {
+    result.innerHTML = `
+      <div class="lookup-result-header">
+        <div>
+          <div class="lookup-result-id">Case ${d.id}</div>
+          <div style="font-size:0.8rem;color:var(--gray-400);margin-top:2px;">Opened ${d.opened}</div>
+        </div>
+        <span class="badge ${d.statusClass}">${d.status}</span>
+      </div>
+      <div class="lookup-result-rows">
+        <div class="lookup-result-row"><span class="lbl">Subject</span><span class="val">${d.subject}</span></div>
+        <div class="lookup-result-row"><span class="lbl">Related Order</span><span class="val">${d.related}</span></div>
+        <div class="lookup-result-row"><span class="lbl">Last Updated</span><span class="val">${d.updated}</span></div>
+      </div>
+    `;
+  }
+}
+
+// enter key on lookup
+document.getElementById('orderInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') lookupOrder();
+});
+
+// Init
+navigate('home');
+</script>
+</body>
+</html>
