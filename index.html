@@ -9,34 +9,36 @@
 /* ── Reset & Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --navy:     #1A2B4A;
-  --navy-mid: #243561;
-  --gold:     #C8973A;
-  --gold-lt:  #F2E0BC;
-  --cream:    #F9F6F0;
-  --white:    #ffffff;
-  --gray-100: #f0ede8;
-  --gray-200: #ddd9d2;
-  --gray-400: #a09890;
-  --gray-600: #6b6460;
-  --gray-800: #2e2a26;
-  --green:    #2a7a55;
-  --green-lt: #e4f4ed;
-  --amber:    #b45309;
-  --amber-lt: #fef3c7;
-  --red:      #9b1c1c;
-  --red-lt:   #fde8e8;
-  --radius:   8px;
-  --radius-lg:16px;
-  --shadow:   0 2px 12px rgba(26,43,74,0.10);
-  --shadow-lg:0 8px 32px rgba(26,43,74,0.16);
+  --navy:      #1A3A6B;
+  --navy-mid:  #1E4A8A;
+  --blue:      #4A90D9;
+  --blue-dk:   #2E74C0;
+  --blue-lt:   #E8F2FC;
+  --cream:     #F4F6F9;
+  --white:     #ffffff;
+  --gray-100:  #eef0f3;
+  --gray-200:  #d8dce3;
+  --gray-500:  #6b7a90;
+  --gray-700:  #3d4a5c;
+  --green:     #1e8c5a;
+  --green-lt:  #e3f5ed;
+  --amber:     #d97706;
+  --amber-lt:  #fef3cd;
+  --red:       #c0392b;
+  --red-lt:    #fde8e6;
+  --purple:    #6B4FA8;
+  --purple-lt: #EDE8F7;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --shadow:    0 3px 12px rgba(26,58,107,0.10);
+  --shadow-lg: 0 8px 28px rgba(26,58,107,0.16);
   --transition: 0.2s ease;
 }
 html { scroll-behavior: smooth; }
 body {
   background: var(--cream);
   font-family: 'DM Sans', sans-serif;
-  color: var(--gray-800);
+  color: var(--gray-700);
   font-size: 15px;
   line-height: 1.6;
   min-height: 100vh;
@@ -63,8 +65,8 @@ img { max-width: 100%; display: block; }
   transition: var(--transition);
   cursor: pointer;
 }
-.btn-primary { background: var(--gold); color: var(--white); }
-.btn-primary:hover { background: #b5831f; }
+.btn-primary { background: var(--blue); color: var(--white); }
+.btn-primary:hover { background: #2E74C0; }
 .btn-outline {
   background: transparent;
   color: var(--navy);
@@ -89,7 +91,7 @@ img { max-width: 100%; display: block; }
 .badge-amber { background: var(--amber-lt); color: var(--amber); }
 .badge-red   { background: var(--red-lt);   color: var(--red); }
 .badge-navy  { background: rgba(26,43,74,0.1); color: var(--navy); }
-.badge-gold  { background: var(--gold-lt); color: #7a5518; }
+.badge-gold  { background: var(--blue-lt); color: #1E4A8A; }
 
 /* ── Navigation ── */
 .topnav-bar {
@@ -97,7 +99,7 @@ img { max-width: 100%; display: block; }
   border-bottom: 1px solid var(--gray-200);
   padding: 8px 0;
   font-size: 0.8rem;
-  color: var(--gray-600);
+  color: var(--gray-500);
 }
 .topnav-bar .container {
   display: flex;
@@ -105,7 +107,7 @@ img { max-width: 100%; display: block; }
   align-items: center;
 }
 .topnav-links { display: flex; gap: 24px; }
-.topnav-links a:hover { color: var(--gold); }
+.topnav-links a:hover { color: var(--blue); }
 
 .navbar {
   background: var(--navy);
@@ -128,7 +130,7 @@ img { max-width: 100%; display: block; }
   letter-spacing: 0.5px;
   cursor: pointer;
 }
-.nav-logo span { color: var(--gold); }
+.nav-logo span { color: var(--blue); }
 .nav-links {
   display: flex;
   align-items: center;
@@ -157,7 +159,7 @@ img { max-width: 100%; display: block; }
 }
 .nav-links li a.active,
 .nav-links li button.active {
-  color: var(--gold);
+  color: var(--blue);
 }
 .nav-right {
   display: flex;
@@ -178,7 +180,7 @@ img { max-width: 100%; display: block; }
   position: absolute;
   top: 4px; right: 4px;
   width: 16px; height: 16px;
-  background: var(--gold);
+  background: var(--blue);
   color: var(--white);
   font-size: 0.65rem;
   font-weight: 700;
@@ -206,7 +208,7 @@ img { max-width: 100%; display: block; }
 .nav-avatar {
   width: 28px; height: 28px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--blue);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.7rem;
   font-weight: 700;
@@ -235,7 +237,7 @@ footer {
   color: var(--white);
   margin-bottom: 12px;
 }
-.footer-brand .footer-logo span { color: var(--gold); }
+.footer-brand .footer-logo span { color: var(--blue); }
 .footer-brand p { font-size: 0.88rem; line-height: 1.7; max-width: 260px; }
 .footer-col h4 {
   font-family: 'DM Sans', sans-serif;
@@ -259,7 +261,7 @@ footer {
   text-align: left;
 }
 .footer-col ul li a:hover,
-.footer-col ul li button:hover { color: var(--gold); }
+.footer-col ul li button:hover { color: var(--blue); }
 .footer-bottom {
   display: flex;
   justify-content: space-between;
@@ -268,13 +270,13 @@ footer {
 }
 .footer-legal { display: flex; gap: 20px; }
 .footer-legal a { transition: var(--transition); }
-.footer-legal a:hover { color: var(--gold); }
+.footer-legal a:hover { color: var(--blue); }
 
 /* ══════════════════════════════
    HOME PAGE
 ══════════════════════════════ */
 .hero {
-  background: linear-gradient(135deg, var(--navy) 0%, #2a3f6b 60%, #1e3a5f 100%);
+  background: linear-gradient(135deg, var(--navy) 0%, #1E4A8A 60%, #1A3A6B 100%);
   min-height: 560px;
   display: flex;
   align-items: center;
@@ -307,7 +309,7 @@ footer {
   font-weight: 600;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--blue);
   margin-bottom: 16px;
 }
 .hero h1 {
@@ -336,7 +338,7 @@ footer {
   font-family: 'Playfair Display', serif;
   font-size: 1.9rem;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--blue);
   line-height: 1;
 }
 .hero-stat-label {
@@ -352,11 +354,11 @@ footer {
   font-weight: 600;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--blue);
   margin-bottom: 10px;
 }
 .section-header h2 { font-size: 2rem; color: var(--navy); margin-bottom: 12px; }
-.section-header p { color: var(--gray-600); max-width: 500px; margin: 0 auto; }
+.section-header p { color: var(--gray-500); max-width: 500px; margin: 0 auto; }
 
 /* Category Grid */
 .category-grid {
@@ -394,7 +396,7 @@ footer {
 }
 .cat-tag {
   display: inline-block;
-  background: var(--gold);
+  background: var(--blue);
   color: var(--white);
   font-size: 0.68rem;
   font-weight: 600;
@@ -421,7 +423,7 @@ footer {
 .cat-card:hover .cat-arrow { opacity: 1; transform: translateX(0); }
 
 /* Category gradients */
-.cat-home   { background: linear-gradient(135deg, #8B6914 0%, #C8973A 40%, #E8C585 100%); }
+.cat-home   { background: linear-gradient(135deg, #1A3A6B 0%, #2E74C0 40%, #E8F2FC 100%); }
 .cat-office { background: linear-gradient(135deg, #1A3A5C 0%, #2E5E8A 60%, #4A8AC4 100%); }
 .cat-sports { background: linear-gradient(135deg, #1A4A2E 0%, #2E7A4E 60%, #52A87A 100%); }
 .cat-tech   { background: linear-gradient(135deg, #1A1A3A 0%, #2E2E6A 60%, #5050A0 100%); }
@@ -483,13 +485,13 @@ footer {
 .trust-icon {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: var(--gold-lt);
+  background: var(--blue-lt);
   display: flex; align-items: center; justify-content: center;
-  color: var(--gold);
+  color: var(--blue);
   flex-shrink: 0;
 }
 .trust-label { font-weight: 600; font-size: 0.9rem; color: var(--navy); }
-.trust-sub { font-size: 0.8rem; color: var(--gray-600); }
+.trust-sub { font-size: 0.8rem; color: var(--gray-500); }
 
 /* ══════════════════════════════
    SHOP PAGE
@@ -516,13 +518,13 @@ footer {
   gap: 10px;
   flex-wrap: wrap;
 }
-.filter-label { font-size: 0.8rem; font-weight: 600; color: var(--gray-600); margin-right: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+.filter-label { font-size: 0.8rem; font-weight: 600; color: var(--gray-500); margin-right: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
 .filter-btn {
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--gray-800);
+  color: var(--gray-700);
   background: var(--gray-100);
   border: 1.5px solid transparent;
   transition: var(--transition);
@@ -558,24 +560,24 @@ footer {
 .shop-cat-visual .cat-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(26,43,74,0.5) 100%); }
 .shop-cat-info { padding: 24px 28px; }
 .shop-cat-info h3 { font-size: 1.2rem; color: var(--navy); margin-bottom: 6px; }
-.shop-cat-info p { font-size: 0.88rem; color: var(--gray-600); margin-bottom: 16px; }
+.shop-cat-info p { font-size: 0.88rem; color: var(--gray-500); margin-bottom: 16px; }
 .shop-cat-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.shop-cat-count { font-size: 0.82rem; color: var(--gray-400); }
+.shop-cat-count { font-size: 0.82rem; color: var(--gray-500); }
 .shop-cat-link {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--blue);
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
 .featured-banner {
-  background: linear-gradient(135deg, #8B6914 0%, #C8973A 100%);
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
   border-radius: var(--radius-lg);
   padding: 40px 44px;
   margin-top: 24px;
@@ -626,10 +628,10 @@ footer {
   font-size: 1.5rem;
 }
 .channel-icon.navy  { background: rgba(26,43,74,0.08); color: var(--navy); }
-.channel-icon.gold  { background: var(--gold-lt); color: var(--gold); }
+.channel-icon.gold  { background: var(--blue-lt); color: var(--blue); }
 .channel-icon.green { background: var(--green-lt); color: var(--green); }
 .channel-card h3 { font-size: 1.05rem; color: var(--navy); margin-bottom: 8px; }
-.channel-card p { font-size: 0.87rem; color: var(--gray-600); margin-bottom: 20px; }
+.channel-card p { font-size: 0.87rem; color: var(--gray-500); margin-bottom: 20px; }
 .channel-avail {
   font-size: 0.78rem;
   font-weight: 600;
@@ -653,13 +655,13 @@ footer {
 .messenger-placeholder-icon {
   width: 64px; height: 64px;
   border-radius: 50%;
-  background: var(--gold-lt);
+  background: var(--blue-lt);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
-  color: var(--gold);
+  color: var(--blue);
 }
 .messenger-placeholder h3 { font-size: 1.05rem; color: var(--navy); margin-bottom: 6px; }
-.messenger-placeholder p { font-size: 0.87rem; color: var(--gray-600); }
+.messenger-placeholder p { font-size: 0.87rem; color: var(--gray-500); }
 
 <!-- Genesys Messenger snippet goes here -->
 
@@ -674,7 +676,7 @@ footer {
   margin: 0 auto;
 }
 .order-lookup-card h3 { font-size: 1.15rem; color: var(--navy); margin-bottom: 6px; }
-.order-lookup-card p { font-size: 0.88rem; color: var(--gray-600); margin-bottom: 24px; }
+.order-lookup-card p { font-size: 0.88rem; color: var(--gray-500); margin-bottom: 24px; }
 .lookup-row { display: flex; gap: 12px; }
 .lookup-input {
   flex: 1;
@@ -683,7 +685,7 @@ footer {
   border-radius: var(--radius);
   font-family: inherit;
   font-size: 0.92rem;
-  color: var(--gray-800);
+  color: var(--gray-700);
   transition: var(--transition);
   outline: none;
 }
@@ -705,8 +707,8 @@ footer {
 .lookup-result-id { font-weight: 600; color: var(--navy); font-size: 0.95rem; }
 .lookup-result-rows { display: flex; flex-direction: column; gap: 6px; }
 .lookup-result-row { display: flex; gap: 12px; font-size: 0.87rem; }
-.lookup-result-row .lbl { color: var(--gray-600); width: 120px; flex-shrink: 0; }
-.lookup-result-row .val { color: var(--gray-800); font-weight: 500; }
+.lookup-result-row .lbl { color: var(--gray-500); width: 120px; flex-shrink: 0; }
+.lookup-result-row .val { color: var(--gray-700); font-weight: 500; }
 
 /* FAQ */
 .faq-section { padding: 48px 0 64px; }
@@ -737,7 +739,7 @@ footer {
 }
 .faq-question:hover { background: var(--cream); }
 .faq-question.open { background: var(--cream); }
-.faq-chevron { flex-shrink: 0; transition: transform 0.25s ease; color: var(--gray-400); }
+.faq-chevron { flex-shrink: 0; transition: transform 0.25s ease; color: var(--gray-500); }
 .faq-question.open .faq-chevron { transform: rotate(180deg); }
 .faq-answer {
   max-height: 0;
@@ -747,7 +749,7 @@ footer {
 .faq-answer-inner {
   padding: 0 24px 20px;
   font-size: 0.9rem;
-  color: var(--gray-600);
+  color: var(--gray-500);
   line-height: 1.75;
 }
 
@@ -766,7 +768,7 @@ footer {
 .account-avatar-lg {
   width: 72px; height: 72px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--blue);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
@@ -780,7 +782,7 @@ footer {
 .account-badges { display: flex; gap: 8px; flex-wrap: wrap; }
 .account-badges .badge-gold {
   background: rgba(200,151,58,0.2);
-  color: var(--gold);
+  color: var(--blue);
   border: 1px solid rgba(200,151,58,0.35);
 }
 
@@ -805,7 +807,7 @@ footer {
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--gray-400);
+  color: var(--gray-500);
   padding: 8px 20px;
   margin-top: 8px;
 }
@@ -828,9 +830,9 @@ footer {
   border-left: 3px solid transparent;
 }
 .acct-tab:hover { background: var(--cream); color: var(--navy); }
-.acct-tab.active { background: var(--cream); color: var(--navy); font-weight: 600; border-left-color: var(--gold); }
-.acct-tab svg { flex-shrink: 0; color: var(--gray-400); }
-.acct-tab.active svg { color: var(--gold); }
+.acct-tab.active { background: var(--cream); color: var(--navy); font-weight: 600; border-left-color: var(--blue); }
+.acct-tab svg { flex-shrink: 0; color: var(--gray-500); }
+.acct-tab.active svg { color: var(--blue); }
 
 .account-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .acct-panel { display: none; }
@@ -867,9 +869,9 @@ footer {
   flex-wrap: wrap;
 }
 .order-id { font-weight: 700; font-size: 0.85rem; color: var(--navy); font-family: monospace; }
-.order-date { font-size: 0.82rem; color: var(--gray-400); margin-top: 2px; }
-.order-product { font-weight: 600; color: var(--gray-800); margin-bottom: 4px; }
-.order-meta { font-size: 0.85rem; color: var(--gray-600); }
+.order-date { font-size: 0.82rem; color: var(--gray-500); margin-top: 2px; }
+.order-product { font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+.order-meta { font-size: 0.85rem; color: var(--gray-500); }
 .order-timeline {
   margin-top: 16px;
   display: flex;
@@ -903,16 +905,16 @@ footer {
   z-index: 1;
 }
 .timeline-step.done .timeline-dot { background: var(--green); }
-.timeline-step.current .timeline-dot { background: var(--gold); }
+.timeline-step.current .timeline-dot { background: var(--blue); }
 .timeline-label {
   font-size: 0.72rem;
-  color: var(--gray-400);
+  color: var(--gray-500);
   margin-top: 6px;
   font-weight: 500;
   text-align: center;
 }
 .timeline-step.done .timeline-label { color: var(--green); }
-.timeline-step.current .timeline-label { color: var(--gold); font-weight: 600; }
+.timeline-step.current .timeline-label { color: var(--blue); font-weight: 600; }
 
 /* Case card */
 .case-item {
@@ -929,9 +931,9 @@ footer {
   flex-wrap: wrap;
 }
 .case-id { font-weight: 700; font-size: 0.85rem; color: var(--navy); font-family: monospace; }
-.case-date { font-size: 0.82rem; color: var(--gray-400); margin-top: 2px; }
-.case-subject { font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
-.case-desc { font-size: 0.88rem; color: var(--gray-600); }
+.case-date { font-size: 0.82rem; color: var(--gray-500); margin-top: 2px; }
+.case-subject { font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+.case-desc { font-size: 0.88rem; color: var(--gray-500); }
 .case-actions { margin-top: 16px; display: flex; gap: 10px; }
 
 /* Profile */
@@ -947,8 +949,8 @@ footer {
 }
 .profile-field:nth-child(even) { border-right: none; }
 .profile-field:nth-last-child(-n+2) { border-bottom: none; }
-.profile-field-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 4px; }
-.profile-field-value { font-size: 0.92rem; color: var(--gray-800); font-weight: 500; }
+.profile-field-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-500); margin-bottom: 4px; }
+.profile-field-value { font-size: 0.92rem; color: var(--gray-700); font-weight: 500; }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
@@ -987,7 +989,7 @@ footer {
       <a href="#" onclick="navigate('support');return false;">Track Order</a>
       <a href="#" onclick="navigate('support');return false;">Help Center</a>
     </div>
-    <div style="font-size:0.8rem;color:var(--gray-600);">Free shipping on orders over $75 · Premium member perks active</div>
+    <div style="font-size:0.8rem;color:var(--gray-500);">Free shipping on orders over $75 · Premium member perks active</div>
   </div>
 </div>
 
@@ -1359,7 +1361,7 @@ footer {
           <button class="btn btn-outline" style="width:100%;">1-800-ABC-RETAIL</button>
         </div>
 
-        <div class="channel-card" style="border:2px solid var(--gold);">
+        <div class="channel-card" style="border:2px solid var(--blue);">
           <div class="channel-icon gold">
             <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
@@ -1717,37 +1719,37 @@ footer {
                   <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
                   <div>
                     <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">Free Expedited Shipping</div>
-                    <div style="font-size:0.8rem;color:var(--gray-600);">On all orders, always</div>
+                    <div style="font-size:0.8rem;color:var(--gray-500);">On all orders, always</div>
                   </div>
                 </div>
                 <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
                   <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
                   <div>
                     <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">90-Day Returns</div>
-                    <div style="font-size:0.8rem;color:var(--gray-600);">Extended return window</div>
+                    <div style="font-size:0.8rem;color:var(--gray-500);">Extended return window</div>
                   </div>
                 </div>
                 <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
                   <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
                   <div>
                     <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">Early Access</div>
-                    <div style="font-size:0.8rem;color:var(--gray-600);">48hr before public sales</div>
+                    <div style="font-size:0.8rem;color:var(--gray-500);">48hr before public sales</div>
                   </div>
                 </div>
                 <div style="padding:16px;background:var(--green-lt);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
                   <svg width="18" height="18" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
                   <div>
                     <div style="font-weight:600;font-size:0.88rem;color:var(--navy);">Priority Support</div>
-                    <div style="font-size:0.8rem;color:var(--gray-600);">Dedicated phone line</div>
+                    <div style="font-size:0.8rem;color:var(--gray-500);">Dedicated phone line</div>
                   </div>
                 </div>
               </div>
-              <div style="margin-top:20px;padding:16px 20px;background:var(--gold-lt);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;">
+              <div style="margin-top:20px;padding:16px 20px;background:var(--blue-lt);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <div style="font-weight:600;font-size:0.9rem;color:#7a5518;">Store Credit Balance</div>
-                  <div style="font-size:0.82rem;color:var(--gray-600);">From promotions &amp; returns</div>
+                  <div style="font-weight:600;font-size:0.9rem;color:#1E4A8A;">Store Credit Balance</div>
+                  <div style="font-size:0.82rem;color:var(--gray-500);">From promotions &amp; returns</div>
                 </div>
-                <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#7a5518;">$47.50</div>
+                <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#1E4A8A;">$47.50</div>
               </div>
             </div>
           </div>
@@ -1927,7 +1929,7 @@ function lookupOrder() {
       <div class="lookup-result-header">
         <div>
           <div class="lookup-result-id">Order ${d.id}</div>
-          <div style="font-size:0.8rem;color:var(--gray-400);margin-top:2px;">Placed ${d.placed}</div>
+          <div style="font-size:0.8rem;color:var(--gray-500);margin-top:2px;">Placed ${d.placed}</div>
         </div>
         <span class="badge ${d.statusClass}">${d.status}</span>
       </div>
@@ -1942,7 +1944,7 @@ function lookupOrder() {
       <div class="lookup-result-header">
         <div>
           <div class="lookup-result-id">Case ${d.id}</div>
-          <div style="font-size:0.8rem;color:var(--gray-400);margin-top:2px;">Opened ${d.opened}</div>
+          <div style="font-size:0.8rem;color:var(--gray-500);margin-top:2px;">Opened ${d.opened}</div>
         </div>
         <span class="badge ${d.statusClass}">${d.status}</span>
       </div>
