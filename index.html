@@ -1,1 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Retail — Premium Lifestyle Shopping</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1A3A6B;
+      --navy-mid: #1E4A8A;
+      --navy-light: #2E74C0;
+      --gold: #4A90D9;
+      --gold-light: #5EA8E8;
+      --gold-pale: #E8F2FC;
+      --cream: #F4F6F9;
+      --white: #FFFFFF;
+      --text-dark: #1C1C1E;
+      --text-mid: #6b7a90;
+      --text-light: #8a96a8;
+      --border: #d8dce3;
+      --shadow-sm: 0 3px 12px rgba(26,58,107,0.08);
+      --shadow-md: 0 8px 24px rgba(26,58,107,0.12);
+      --shadow-lg: 0 8px 28px rgba(26,58,107,0.16);
+    }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    h1, h2, h3, h4 { font-family: 'Barlow Condensed', sans-serif; line-height: 1.15; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: 'Barlow', sans-serif; }
+
+    /* ── NAV ─────────────────────────────────── */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      background: var(--navy);
+      color: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .nav-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 56px; height: 68px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.85rem; font-weight: 700;
+      letter-spacing: -0.01em; cursor: pointer;
+      user-select: none;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-logo em { font-style: italic; opacity: 0.55; font-size: 0.8rem; margin-left: 8px; font-family: 'Barlow', sans-serif; font-weight: 300; letter-spacing: 0.08em; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .nav-icon-btn {
+      background: none; border: none; color: rgba(255,255,255,0.7);
+      padding: 8px 14px; border-radius: 4px; cursor: pointer;
+      font-size: 0.8125rem; font-weight: 500;
+      transition: all 0.2s; display: flex; align-items: center; gap: 7px;
+    }
+    .nav-icon-btn:hover { color: white; background: rgba(255,255,255,0.07); }
+    .nav-account-btn {
+      gap: 10px; padding: 6px 14px 6px 8px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 24px;
+    }
+    .nav-account-btn:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.25); }
+    .nav-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--gold); color: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em;
+      flex-shrink: 0;
+    }
+    .nav-account-info { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+    .nav-account-name { font-size: 0.8rem; font-weight: 600; color: white; line-height: 1.2; }
+    .nav-account-sub  { font-size: 0.65rem; color: var(--gold); font-weight: 600; letter-spacing: 0.04em; line-height: 1.2; }
+    .nav-chat-btn {
+      background: var(--gold); color: var(--navy);
+      border: none; padding: 9px 22px; border-radius: 4px;
+      font-size: 0.8125rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; letter-spacing: 0.02em; margin-left: 8px;
+    }
+    .nav-chat-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .nav-bottom {
+      display: flex; align-items: center;
+      padding: 0 56px; height: 44px; gap: 0;
+    }
+    .nav-link {
+      padding: 0 11px; height: 44px;
+      display: flex; align-items: center;
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      opacity: 0.55; cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { opacity: 0.85; }
+    .nav-link.active { opacity: 1; border-bottom-color: var(--gold); }
+
+    /* ── PAGES ───────────────────────────────── */
+    .page { display: none; animation: fadeIn 0.3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── ANNOUNCEMENT ────────────────────────── */
+    .announcement {
+      background: var(--gold); color: var(--navy);
+      text-align: center; padding: 9px 48px;
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── HERO ────────────────────────────────── */
+    .hero {
+      position: relative; background: var(--navy);
+      color: white; min-height: 560px;
+      display: flex; align-items: center; overflow: hidden;
+    }
+    .hero-bg-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 80% at 75% 50%, rgba(74,144,217,0.13) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 20% 90%, rgba(74,144,217,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 40% at 85% 10%, rgba(255,255,255,0.03) 0%, transparent 60%);
+    }
+    .hero-pattern {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 48px, rgba(255,255,255,0.013) 48px, rgba(255,255,255,0.013) 49px),
+        repeating-linear-gradient(-45deg, transparent, transparent 48px, rgba(255,255,255,0.008) 48px, rgba(255,255,255,0.008) 49px);
+    }
+    .hero-content {
+      position: relative; padding: 80px 56px;
+      max-width: 640px; z-index: 1;
+    }
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 20px;
+    }
+    .hero-label::before, .hero-label::after {
+      content: ''; display: block; height: 1px;
+      width: 28px; background: var(--gold); opacity: 0.6;
+    }
+    .hero-title {
+      font-size: 3.4rem; font-weight: 700;
+      line-height: 1.08; margin-bottom: 20px;
+      letter-spacing: -0.025em;
+    }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-sub {
+      font-size: 1rem; opacity: 0.68;
+      margin-bottom: 36px; line-height: 1.75; max-width: 460px;
+    }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--gold); color: var(--navy);
+      border: none; padding: 14px 34px; border-radius: 3px;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; letter-spacing: 0.03em;
+    }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,144,217,0.35); }
+    .btn-ghost {
+      background: transparent; color: rgba(255,255,255,0.85);
+      border: 1.5px solid rgba(255,255,255,0.28); padding: 14px 34px;
+      border-radius: 3px; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+    .hero-aside {
+      position: absolute; right: 56px; top: 50%;
+      transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 0;
+      z-index: 1;
+    }
+    .hero-stat {
+      padding: 20px 28px; border-left: 2px solid rgba(74,144,217,0.3);
+    }
+    .hero-stat:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .hero-stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem; font-weight: 700; color: var(--gold);
+    }
+    .hero-stat-label {
+      font-size: 0.7rem; opacity: 0.5;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px;
+    }
+
+    /* ── SECTION ─────────────────────────────── */
+    .section { padding: 72px 56px; }
+    .section-header { margin-bottom: 44px; }
+    .section-label {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 2rem; font-weight: 600;
+      color: var(--navy); letter-spacing: -0.02em;
+    }
+
+    /* ── CATEGORY GRID (HOME) ────────────────── */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px;
+    }
+    .cat-card {
+      border-radius: 6px; overflow: hidden;
+      cursor: pointer; transition: all 0.3s ease;
+      background: white;
+      border: 1px solid var(--border);
+    }
+    .cat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .cat-visual {
+      height: 188px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background-size: cover; background-position: center;
+    }
+    .cat-visual::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.08) 60%, transparent 100%);
+    }
+    .cat-v-luxury  { background: linear-gradient(145deg, #3D0A20 0%, #7A1D43 50%, #4A90D9 100%); }
+    .cat-info { padding: 14px 16px 16px; }
+    .cat-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 3px;
+    }
+    .cat-count { font-size: 0.72rem; color: var(--text-light); }
+
+    /* ── PROMO ───────────────────────────────── */
+    .promo {
+      background: var(--navy); color: white;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; gap: 64px;
+      padding: 72px 56px;
+    }
+    .promo-label {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 14px;
+    }
+    .promo-title { font-size: 2.2rem; font-weight: 700; line-height: 1.15; margin-bottom: 14px; }
+    .promo-body { opacity: 0.68; line-height: 1.75; margin-bottom: 28px; font-size: 0.9375rem; }
+    .promo-visual {
+      height: 300px;
+      background: linear-gradient(135deg, rgba(74,144,217,0.18) 0%, rgba(74,144,217,0.05) 100%);
+      border-radius: 6px; border: 1px solid rgba(74,144,217,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6rem; opacity: 0.6;
+    }
+
+    /* ── TRUST BAR ───────────────────────────── */
+    .trust-bar {
+      background: white;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 28px 56px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      text-align: center; gap: 24px;
+    }
+    .trust-icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .trust-title { font-size: 0.85rem; font-weight: 600; color: var(--navy); }
+    .trust-sub { font-size: 0.72rem; color: var(--text-light); margin-top: 2px; }
+
+    /* ── SHOP PAGE ───────────────────────────── */
+    .page-header {
+      background: var(--navy); color: white;
+      padding: 52px 56px;
+    }
+    .page-header h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 8px; }
+    .page-header p { opacity: 0.62; font-size: 0.9375rem; }
+
+    .shop-grid {
+      padding: 56px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .shop-cat-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden; cursor: pointer;
+      transition: all 0.3s;
+    }
+    .shop-cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .shop-cat-visual {
+      height: 220px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      background-size: cover; background-position: center;
+    }
+    .shop-cat-visual::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.08) 60%, transparent 100%);
+    }
+    .shop-cat-info { padding: 22px 24px 24px; }
+    .shop-cat-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.2rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 7px;
+    }
+    .shop-cat-desc { font-size: 0.8375rem; color: var(--text-mid); line-height: 1.65; margin-bottom: 14px; }
+    .shop-cat-link { font-size: 0.8rem; font-weight: 700; color: var(--gold); letter-spacing: 0.04em; }
+
+    /* ── SUPPORT PAGE ────────────────────────── */
+    .support-layout {
+      display: grid; grid-template-columns: 1fr 420px;
+      gap: 48px; padding: 56px; max-width: 1240px; margin: 0 auto;
+    }
+    .channel-cards { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+    .channel-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 6px; padding: 20px 22px;
+      display: flex; gap: 14px; align-items: flex-start;
+      transition: all 0.2s; cursor: pointer;
+    }
+    .channel-card:hover { border-color: var(--gold); box-shadow: var(--shadow-sm); }
+    .channel-ico {
+      width: 42px; height: 42px; border-radius: 8px;
+      background: var(--cream); display: flex; align-items: center;
+      justify-content: center; font-size: 1.15rem; flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .channel-title { font-weight: 600; font-size: 0.9rem; color: var(--navy); margin-bottom: 3px; }
+    .channel-desc { font-size: 0.8rem; color: var(--text-mid); margin-bottom: 8px; line-height: 1.55; }
+    .channel-link { font-size: 0.78rem; font-weight: 700; color: var(--gold); }
+
+    /* FAQ */
+    .faq-heading { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+    .faq-item { background: white; border: 1px solid var(--border); border-radius: 5px; margin-bottom: 8px; overflow: hidden; }
+    .faq-q {
+      padding: 14px 18px; font-size: 0.875rem; font-weight: 500;
+      color: var(--navy); cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background 0.15s;
+    }
+    .faq-q:hover { background: var(--cream); }
+    .faq-chevron { font-style: normal; opacity: 0.5; transition: transform 0.25s; flex-shrink: 0; }
+    .faq-a {
+      max-height: 0; overflow: hidden; transition: all 0.3s;
+      font-size: 0.845rem; color: var(--text-mid); line-height: 1.7;
+      padding: 0 18px;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding: 10px 18px 16px; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    /* Messenger Placeholder */
+    .messenger-placeholder {
+      background: white; border: 2px dashed var(--border);
+      border-radius: 8px; padding: 48px 28px;
+      text-align: center; display: flex;
+      flex-direction: column; align-items: center;
+      justify-content: center; min-height: 460px; gap: 10px;
+      position: sticky; top: 132px;
+    }
+    .mp-icon { font-size: 2.5rem; opacity: 0.2; margin-bottom: 4px; }
+    .mp-title { font-size: 1rem; font-weight: 600; color: var(--text-mid); }
+    .mp-body { font-size: 0.8rem; color: var(--text-light); max-width: 240px; line-height: 1.6; }
+    .mp-code {
+      font-size: 0.72rem; font-family: monospace;
+      background: var(--cream); border: 1px solid var(--border);
+      padding: 10px 16px; border-radius: 4px; color: var(--text-mid);
+      width: 100%; text-align: left; margin-top: 8px;
+      white-space: nowrap; overflow-x: auto;
+    }
+
+    /* ── ACCOUNT PAGE ────────────────────────── */
+    .account-header-bar {
+      background: var(--navy); color: white; padding: 40px 56px;
+    }
+    .acct-hd-inner { display: flex; align-items: center; gap: 20px; }
+    .acct-avatar {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: var(--gold); display: flex; align-items: center;
+      justify-content: center; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--navy);
+      flex-shrink: 0;
+    }
+    .acct-name { font-size: 1.65rem; font-weight: 700; margin-bottom: 4px; }
+    .acct-meta { opacity: 0.58; font-size: 0.825rem; }
+    .acct-badge {
+      display: inline-block; background: var(--gold); color: var(--navy);
+      padding: 2px 10px; border-radius: 20px; font-size: 0.65rem;
+      font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
+      margin-left: 9px; vertical-align: middle;
+    }
+    .account-body {
+      padding: 48px 56px;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 32px;
+    }
+    .acct-nav { display: flex; flex-direction: column; gap: 2px; }
+    .acct-nav-item {
+      padding: 11px 15px; border-radius: 5px;
+      font-size: 0.875rem; cursor: pointer;
+      display: flex; align-items: center; gap: 9px;
+      color: var(--text-mid); transition: all 0.2s;
+    }
+    .acct-nav-item:hover { background: white; color: var(--navy); }
+    .acct-nav-item.active { background: var(--navy); color: white; font-weight: 600; }
+
+    .acct-panel { display: none; }
+    .acct-panel.active { display: block; }
+    .panel-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.2rem; font-weight: 600; color: var(--navy);
+      margin-bottom: 22px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Order / Case cards */
+    .order-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 6px; padding: 22px; margin-bottom: 14px;
+    }
+    .order-hd { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .order-num { font-weight: 700; color: var(--navy); font-size: 0.9rem; }
+    .order-date { font-size: 0.76rem; color: var(--text-light); margin-top: 2px; }
+    .order-items { font-size: 0.845rem; color: var(--text-mid); margin-bottom: 10px; }
+    .order-total { font-weight: 700; color: var(--navy); }
+    .badge {
+      display: inline-block; padding: 3px 11px;
+      border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .b-delivered { background: #E8F5E9; color: #2E7D32; }
+    .b-shipped    { background: #E3F2FD; color: #1565C0; }
+    .b-delayed    { background: #FFF8E1; color: #E65100; }
+    .b-processing { background: #FFF3E0; color: #BF360C; }
+    .b-open       { background: #FFF3E0; color: #BF360C; }
+    .b-resolved   { background: #E8F5E9; color: #2E7D32; }
+
+    /* Profile form */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .form-field label {
+      display: block; font-size: 0.76rem; font-weight: 600;
+      color: var(--text-mid); margin-bottom: 5px;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .form-field input {
+      width: 100%; padding: 10px 13px;
+      border: 1px solid var(--border); border-radius: 4px;
+      font-family: 'Barlow', sans-serif; font-size: 0.9rem;
+      color: var(--text-dark); background: white; outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-field input:focus { border-color: var(--navy); }
+    .full-col { grid-column: 1 / -1; }
+    .form-save-btn {
+      margin-top: 20px; background: var(--navy); color: white;
+      border: none; padding: 11px 28px; border-radius: 4px;
+      font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .form-save-btn:hover { background: var(--navy-light); }
+
+    /* ── FOOTER ──────────────────────────────── */
+    footer {
+      background: var(--navy); color: white;
+      padding: 56px 56px 32px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 48px; margin-bottom: 44px;
+    }
+    .footer-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.25rem; font-weight: 700; margin-bottom: 12px;
+    }
+    .footer-logo span { color: var(--gold); }
+    .footer-tagline { font-size: 0.845rem; opacity: 0.55; line-height: 1.75; }
+    .footer-col-label {
+      font-size: 0.67rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; opacity: 0.4; margin-bottom: 16px;
+    }
+    .footer-links { display: flex; flex-direction: column; gap: 9px; }
+    .footer-link {
+      font-size: 0.845rem; opacity: 0.65; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .footer-link:hover { opacity: 1; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 22px; display: flex;
+      justify-content: space-between; align-items: center;
+      font-size: 0.76rem; opacity: 0.38;
+    }
+
+    /* ── CATEGORY PRODUCT PAGE ────────────────── */
+    .cat-back { display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; font-weight:600; color:rgba(255,255,255,0.75); cursor:pointer; margin-bottom:10px; border:none; background:none; transition:color 0.15s; font-family:'Barlow',sans-serif; }
+    .cat-back:hover { color:white; }
+    .product-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:48px 56px; }
+    .product-card { background:white; border:1px solid var(--border); border-radius:8px; overflow:hidden; transition:all 0.25s; display:flex; flex-direction:column; }
+    .product-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+    .product-img { height:210px; background-size:cover; background-position:center; background-color:var(--cream); }
+    .product-info { padding:18px; flex:1; display:flex; flex-direction:column; }
+    .product-name { font-family:'Barlow Condensed',sans-serif; font-size:1.05rem; font-weight:700; color:var(--navy); margin-bottom:5px; line-height:1.2; }
+    .product-desc { font-size:0.8rem; color:var(--text-mid); margin-bottom:14px; line-height:1.55; flex:1; }
+    .product-footer { display:flex; align-items:center; justify-content:space-between; }
+    .product-price { font-size:1.05rem; font-weight:700; color:var(--navy); }
+    .product-add-btn { background:var(--navy); color:white; border:none; padding:9px 18px; border-radius:4px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:background 0.18s; font-family:'Barlow',sans-serif; letter-spacing:0.02em; }
+    .product-add-btn:hover { background:var(--navy-mid); }
+
+    /* ── CART PANEL ───────────────────────────── */
+    .cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:300; display:none; }
+    .cart-overlay.open { display:block; }
+    .cart-panel { position:fixed; top:0; right:0; width:420px; height:100vh; background:white; z-index:301; transform:translateX(100%); transition:transform 0.3s ease; display:flex; flex-direction:column; box-shadow:-4px 0 32px rgba(26,58,107,0.18); }
+    .cart-panel.open { transform:translateX(0); }
+    .cart-hd { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--navy); color:white; flex-shrink:0; }
+    .cart-hd-title { font-family:'Barlow Condensed',sans-serif; font-size:1.15rem; font-weight:700; letter-spacing:0.05em; }
+    .cart-close-btn { background:rgba(255,255,255,0.12); border:none; color:white; width:28px; height:28px; border-radius:50%; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s; }
+    .cart-close-btn:hover { background:rgba(255,255,255,0.22); }
+    .cart-body { flex:1; overflow-y:auto; padding:8px 24px 16px; }
+    .cart-empty { padding:64px 0; text-align:center; color:var(--text-light); font-size:0.9rem; line-height:2; }
+    .cart-item { display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--border); align-items:center; }
+    .cart-item:last-child { border-bottom:none; }
+    .cart-item-img { width:68px; height:68px; border-radius:6px; background-size:cover; background-position:center; flex-shrink:0; background-color:var(--cream); border:1px solid var(--border); }
+    .cart-item-info { flex:1; }
+    .cart-item-name { font-size:0.88rem; font-weight:600; color:var(--navy); margin-bottom:3px; line-height:1.3; }
+    .cart-item-meta { font-size:0.8rem; color:var(--text-mid); }
+    .cart-qty-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+    .cart-qty-btn { background:var(--cream); border:1px solid var(--border); color:var(--navy); width:24px; height:24px; border-radius:4px; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; transition:background 0.15s; }
+    .cart-qty-btn:hover { background:var(--border); }
+    .cart-qty-num { font-size:0.88rem; font-weight:600; color:var(--navy); min-width:20px; text-align:center; }
+    .cart-item-remove { background:none; border:none; color:var(--text-light); font-size:1rem; cursor:pointer; padding:4px 6px; transition:color 0.15s; flex-shrink:0; }
+    .cart-item-remove:hover { color:#c0392b; }
+    .cart-footer { padding:16px 24px 20px; border-top:1px solid var(--border); background:white; flex-shrink:0; }
+    .cart-subtotal { display:flex; justify-content:space-between; margin-bottom:14px; font-weight:700; color:var(--navy); font-size:0.95rem; }
+    .cart-checkout-btn { width:100%; padding:13px; background:var(--navy); color:white; border:none; border-radius:4px; font-size:0.9rem; font-weight:700; cursor:pointer; transition:background 0.2s; letter-spacing:0.03em; font-family:'Barlow',sans-serif; }
+    .cart-checkout-btn:hover { background:var(--navy-mid); }
+
+    /* ── CART BADGE ───────────────────────────── */
+    .cart-badge-pill { display:inline-flex; align-items:center; justify-content:center; background:var(--gold); color:white; border-radius:999px; font-size:0.65rem; font-weight:800; min-width:17px; height:17px; padding:0 4px; margin-left:3px; }
+
+    /* ── TOAST ────────────────────────────────── */
+    .add-toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(72px); background:var(--navy); color:white; padding:11px 26px; border-radius:24px; font-size:0.84rem; font-weight:600; z-index:400; transition:transform 0.28s ease,opacity 0.28s ease; opacity:0; white-space:nowrap; box-shadow:0 8px 24px rgba(26,58,107,0.28); pointer-events:none; }
+    .add-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+    /* ── PRODUCT DETAIL PAGE ──────────────────── */
+    .pd-layout { display:grid; grid-template-columns:1fr 1fr; gap:56px; padding:52px 56px; max-width:1280px; margin:0 auto; }
+    .pd-img-wrap { position:relative; border-radius:10px; overflow:hidden; background:var(--cream); aspect-ratio:4/3; }
+    .pd-img { width:100%; height:100%; object-fit:cover; background-size:cover; background-position:center; background-color:var(--cream); }
+    .pd-badge { display:inline-block; background:var(--gold); color:white; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:4px 12px; border-radius:3px; margin-bottom:14px; }
+    .pd-name { font-family:'Barlow Condensed',sans-serif; font-size:2rem; font-weight:700; color:var(--navy); line-height:1.15; margin-bottom:10px; }
+    .pd-price { font-size:1.6rem; font-weight:700; color:var(--navy); margin-bottom:16px; }
+    .pd-desc { font-size:0.95rem; color:var(--text-mid); line-height:1.7; margin-bottom:28px; }
+    .pd-add-btn { width:100%; padding:15px; background:var(--navy); color:white; border:none; border-radius:4px; font-size:1rem; font-weight:700; cursor:pointer; transition:background 0.2s; font-family:'Barlow',sans-serif; letter-spacing:0.03em; margin-bottom:32px; }
+    .pd-add-btn:hover { background:var(--navy-mid); }
+    .pd-section-title { font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+    .pd-features { list-style:none; margin-bottom:28px; display:flex; flex-direction:column; gap:8px; }
+    .pd-features li { font-size:0.875rem; color:var(--text-mid); display:flex; gap:10px; align-items:flex-start; line-height:1.5; }
+    .pd-features li::before { content:'✓'; color:var(--navy); font-weight:700; flex-shrink:0; margin-top:1px; }
+    .pd-specs { width:100%; border-collapse:collapse; font-size:0.845rem; }
+    .pd-specs tr { border-bottom:1px solid var(--border); }
+    .pd-specs tr:last-child { border-bottom:none; }
+    .pd-specs td { padding:9px 0; vertical-align:top; }
+    .pd-specs td:first-child { color:var(--text-mid); width:44%; font-weight:500; }
+    .pd-specs td:last-child { color:var(--navy); font-weight:500; }
+  </style>
+</head>
+<body>
+
+<!-- ──────────── NAVIGATION ──────────── -->
+<nav class="nav">
+  <div class="nav-top">
+    <div class="nav-logo" onclick="showPage('home')">
+      ABC <span>Retail</span><em>premium lifestyle</em>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-icon-btn nav-account-btn" onclick="showPage('account')">
+        <span class="nav-avatar">PR</span>
+        <span class="nav-account-info">
+          <span class="nav-account-name">Philip Rivers</span>
+          <span class="nav-account-sub">Premium Member</span>
+        </span>
+      </button>
+      <button class="nav-icon-btn" onclick="openCart()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Cart <span class="cart-badge-pill" id="cart-count" style="display:none">0</span>
+      </button>
+      <button class="nav-chat-btn" onclick="showPage('support')">💬 Get Support</button>
+    </div>
+  </div>
+  <div class="nav-bottom">
+    <div class="nav-link active" id="nl-home" onclick="showPage('home')">Home</div>
+    <div class="nav-link" id="nl-cat-home"   onclick="showCategory('home')">Home &amp; Living</div>
+    <div class="nav-link" id="nl-cat-office" onclick="showCategory('office')">Office &amp; Workspace</div>
+    <div class="nav-link" id="nl-cat-sports" onclick="showCategory('sports')">Sports &amp; Fitness</div>
+    <div class="nav-link" id="nl-cat-tech"   onclick="showCategory('tech')">Electronics &amp; Tech</div>
+    <div class="nav-link" id="nl-cat-luxury" onclick="showCategory('luxury')">Luxury &amp; Gifts</div>
+    <div class="nav-link" id="nl-support"    onclick="showPage('support')">Support</div>
+    <div class="nav-link" id="nl-account"    onclick="showPage('account')">My Account</div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- HOME PAGE                                      -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <div class="announcement">
+    ✦ &nbsp;Free shipping on orders over $75 &nbsp;&nbsp;|&nbsp;&nbsp; New arrivals: Spring Living Collection &nbsp;&nbsp;|&nbsp;&nbsp; Premium members earn 3× points this week &nbsp;✦
+  </div>
+
+  <section class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+      <div class="hero-label">New Season Collection</div>
+      <h1 class="hero-title">Quality for Every<br><em>Corner</em> of Your Life</h1>
+      <p class="hero-sub">From home and living to sports, tech, and luxury — ABC Retail brings curated, premium products to everyday life. Backed by service that actually shows up.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="showPage('shop')">Shop Now</button>
+        <button class="btn-ghost" onclick="showPage('support')">Talk to an Expert</button>
+      </div>
+    </div>
+    <div class="hero-aside">
+      <div class="hero-stat">
+        <div class="hero-stat-value">50K+</div>
+        <div class="hero-stat-label">Products</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">98%</div>
+        <div class="hero-stat-label">Satisfaction</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">24/7</div>
+        <div class="hero-stat-label">Support</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div class="section-label">Browse by Category</div>
+      <h2 class="section-title">Everything You Need, All in One Place</h2>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="showCategory('home')">
+        <div class="cat-visual" style="background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop')"></div>
+        <div class="cat-info">
+          <div class="cat-name">Home & Living</div>
+          <div class="cat-count">2,400+ products</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="showCategory('office')">
+        <div class="cat-visual" style="background-image:url('https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop')"></div>
+        <div class="cat-info">
+          <div class="cat-name">Office & Workspace</div>
+          <div class="cat-count">1,200+ products</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="showCategory('sports')">
+        <div class="cat-visual" style="background-image:url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&fit=crop')"></div>
+        <div class="cat-info">
+          <div class="cat-name">Sports & Fitness</div>
+          <div class="cat-count">980+ products</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="showCategory('tech')">
+        <div class="cat-visual" style="background-image:url('https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80&fit=crop')"></div>
+        <div class="cat-info">
+          <div class="cat-name">Electronics & Tech</div>
+          <div class="cat-count">1,650+ products</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="showCategory('luxury')">
+        <div class="cat-visual" style="background-image:url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fit=crop')"></div>
+        <div class="cat-info">
+          <div class="cat-name">Luxury & Gifts</div>
+          <div class="cat-count">640+ products</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="promo">
+    <div>
+      <div class="promo-label">Premium Membership</div>
+      <h2 class="promo-title">More Perks.<br>More Savings.<br>More You.</h2>
+      <p class="promo-body">Upgrade to ABC Retail Premium for priority support, free 2-day shipping, exclusive member pricing, and 3× reward points on every purchase.</p>
+      <button class="btn-primary">Learn About Premium</button>
+    </div>
+    <div class="promo-visual">⭐</div>
+  </section>
+
+  <div class="trust-bar">
+    <div>
+      <div class="trust-icon">🚚</div>
+      <div class="trust-title">Free Shipping</div>
+      <div class="trust-sub">On all orders over $75</div>
+    </div>
+    <div>
+      <div class="trust-icon">↩️</div>
+      <div class="trust-title">Easy Returns</div>
+      <div class="trust-sub">30-day hassle-free policy</div>
+    </div>
+    <div>
+      <div class="trust-icon">🛡️</div>
+      <div class="trust-title">Secure Checkout</div>
+      <div class="trust-sub">256-bit SSL encryption</div>
+    </div>
+    <div>
+      <div class="trust-icon">💬</div>
+      <div class="trust-title">24/7 Support</div>
+      <div class="trust-sub">Chat, phone &amp; email</div>
+    </div>
+  </div>
+
+</div><!-- /home -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SHOP PAGE                                      -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="page-shop">
+
+  <div class="page-header">
+    <h1>Shop All Categories</h1>
+    <p>Browse our full range of premium products across every lifestyle category</p>
+  </div>
+
+  <div class="shop-grid">
+
+    <div class="shop-cat-card">
+      <div class="shop-cat-visual" style="background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop'); cursor:pointer" onclick="showCategory('home')"></div>
+      <div class="shop-cat-info" onclick="showCategory('home')" style="cursor:pointer">
+        <div class="shop-cat-name">Home &amp; Living</div>
+        <div class="shop-cat-desc">Furniture, décor, bedding, kitchen essentials, and everything to make your space feel like home. Curated for quality and style.</div>
+        <div class="shop-cat-link">Browse Category →</div>
+      </div>
+    </div>
+
+    <div class="shop-cat-card">
+      <div class="shop-cat-visual" style="background-image:url('https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop'); cursor:pointer" onclick="showCategory('office')"></div>
+      <div class="shop-cat-info" onclick="showCategory('office')" style="cursor:pointer">
+        <div class="shop-cat-name">Office &amp; Workspace</div>
+        <div class="shop-cat-desc">Desks, ergonomic chairs, storage solutions, and tech accessories for a productive and organized modern workplace.</div>
+        <div class="shop-cat-link">Browse Category →</div>
+      </div>
+    </div>
+
+    <div class="shop-cat-card">
+      <div class="shop-cat-visual" style="background-image:url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&fit=crop'); cursor:pointer" onclick="showCategory('sports')"></div>
+      <div class="shop-cat-info" onclick="showCategory('sports')" style="cursor:pointer">
+        <div class="shop-cat-name">Sports &amp; Fitness</div>
+        <div class="shop-cat-desc">Equipment, apparel, supplements, and gear for athletes and active lifestyle enthusiasts of every level.</div>
+        <div class="shop-cat-link">Browse Category →</div>
+      </div>
+    </div>
+
+    <div class="shop-cat-card">
+      <div class="shop-cat-visual" style="background-image:url('https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80&fit=crop'); cursor:pointer" onclick="showCategory('tech')"></div>
+      <div class="shop-cat-info" onclick="showCategory('tech')" style="cursor:pointer">
+        <div class="shop-cat-name">Electronics &amp; Tech</div>
+        <div class="shop-cat-desc">Smartphones, laptops, smart home devices, audio equipment, and the latest consumer electronics.</div>
+        <div class="shop-cat-link">Browse Category →</div>
+      </div>
+    </div>
+
+    <div class="shop-cat-card">
+      <div class="shop-cat-visual" style="background-image:url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fit=crop'); cursor:pointer" onclick="showCategory('luxury')"></div>
+      <div class="shop-cat-info" onclick="showCategory('luxury')" style="cursor:pointer">
+        <div class="shop-cat-name">Luxury &amp; Gifts</div>
+        <div class="shop-cat-desc">Curated premium gifts, fine accessories, and luxury items for life's most meaningful moments and celebrations.</div>
+        <div class="shop-cat-link">Browse Category →</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /shop -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- CATEGORY PAGE (dynamic)                        -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="page-category">
+  <div class="page-header">
+    <button class="cat-back" onclick="history.back()">← Back</button>
+    <h1 id="cat-page-title"></h1>
+    <p id="cat-page-desc"></p>
+  </div>
+  <div class="product-grid" id="product-grid"></div>
+</div><!-- /category -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PRODUCT DETAIL PAGE (dynamic)                  -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="page-product">
+  <div class="page-header">
+    <button class="cat-back" id="pd-back-btn" onclick="history.back()">← Back</button>
+    <div id="pd-breadcrumb" style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
+  </div>
+  <div class="pd-layout">
+    <div class="pd-img-wrap">
+      <div class="pd-img" id="pd-img"></div>
+    </div>
+    <div>
+      <div class="pd-badge" id="pd-cat-badge"></div>
+      <div class="pd-name"  id="pd-name"></div>
+      <div class="pd-price" id="pd-price"></div>
+      <div class="pd-desc"  id="pd-desc"></div>
+      <button class="pd-add-btn" id="pd-add-btn">Add to Cart</button>
+      <div class="pd-section-title">Features</div>
+      <ul  class="pd-features" id="pd-features"></ul>
+      <div class="pd-section-title">Specifications</div>
+      <table class="pd-specs" id="pd-specs"></table>
+    </div>
+  </div>
+</div><!-- /product -->
+
+
+
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SUPPORT PAGE                                   -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="page-support">
+
+  <div class="page-header" style="text-align:center;">
+    <h1>Customer Support</h1>
+    <p>We're here when you need us. Choose how you'd like to connect.</p>
+  </div>
+
+  <div class="support-layout">
+
+    <div>
+      <div style="margin-bottom:10px; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold);">Contact Options</div>
+      <div class="channel-cards">
+        <div class="channel-card">
+          <div class="channel-ico">💬</div>
+          <div>
+            <div class="channel-title">Live Chat</div>
+            <div class="channel-desc">Chat with AVA, our AI assistant, or a live support specialist. Average wait time under 1 minute.</div>
+            <div class="channel-link">Start a Chat →</div>
+          </div>
+        </div>
+        <div class="channel-card">
+          <div class="channel-ico">📞</div>
+          <div>
+            <div class="channel-title">Phone Support</div>
+            <div class="channel-desc">Speak directly with a live agent. Available Mon–Fri 8am–8pm, Sat 9am–5pm Pacific.</div>
+            <div class="channel-link">1-800-ABC-RTAIL</div>
+          </div>
+        </div>
+        <div class="channel-card">
+          <div class="channel-ico">✉️</div>
+          <div>
+            <div class="channel-title">Email Support</div>
+            <div class="channel-desc">Send a message and we'll respond within one business day. Attach photos for faster resolution.</div>
+            <div class="channel-link">support@abcretail.com</div>
+          </div>
+        </div>
+        <div class="channel-card">
+          <div class="channel-ico">📱</div>
+          <div>
+            <div class="channel-title">SMS / Text</div>
+            <div class="channel-desc">Text us for quick answers on orders, returns, and more. Reply to any order confirmation to get started.</div>
+            <div class="channel-link">Text START to 77222</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-heading">Frequently Asked Questions</div>
+      <div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How do I track my order?
+            <i class="faq-chevron">▾</i>
+          </div>
+          <div class="faq-a">Log in to your account and visit the Orders section. Your order confirmation email also contains a direct tracking link updated in real time.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            What is your return policy?
+            <i class="faq-chevron">▾</i>
+          </div>
+          <div class="faq-a">We offer hassle-free returns within 30 days of delivery for most items. Premium members enjoy an extended 60-day return window. Items must be in original, unused condition.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How long does shipping take?
+            <i class="faq-chevron">▾</i>
+          </div>
+          <div class="faq-a">Standard shipping takes 3–5 business days. Expedited 2-day shipping is available at checkout. Premium members receive complimentary 2-day shipping on all orders.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            Can I change or cancel my order?
+            <i class="faq-chevron">▾</i>
+          </div>
+          <div class="faq-a">Orders can be modified or cancelled within 1 hour of placement. After that, please contact our support team and we'll do our best to help based on fulfillment status.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            My item arrived damaged — what do I do?
+            <i class="faq-chevron">▾</i>
+          </div>
+          <div class="faq-a">We're sorry to hear that. Please contact support within 48 hours of delivery with photos of the damage. We'll arrange a replacement or full refund at no additional cost to you.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSENGER WIDGET PLACEHOLDER -->
+    <div>
+      <div class="messenger-placeholder">
+        <div class="mp-icon">💬</div>
+        <div class="mp-title">Genesys Web Messenger</div>
+        <div class="mp-body">The live chat widget will appear here once the Messenger deployment snippet is configured.</div>
+        <div class="mp-code">&lt;!-- Genesys Messenger snippet --&gt;</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /support -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- ACCOUNT PAGE                                   -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="page-account">
+
+  <div class="account-header-bar">
+    <div class="acct-hd-inner">
+      <div class="acct-avatar">PR</div>
+      <div>
+        <div class="acct-name">
+          Philip Rivers
+          <span class="acct-badge">Premium</span>
+        </div>
+        <div class="acct-meta">
+          Customer ID: C1001 &nbsp;·&nbsp; Member since January 2021 &nbsp;·&nbsp; philip.rivers@riversliving.com
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="account-body">
+    <div class="acct-nav">
+      <div class="acct-nav-item active" onclick="showPanel('orders', this)">📦 &nbsp;Orders</div>
+      <div class="acct-nav-item" onclick="showPanel('cases', this)">🎫 &nbsp;Support Cases</div>
+      <div class="acct-nav-item" onclick="showPanel('profile', this)">👤 &nbsp;Profile</div>
+    </div>
+
+    <div>
+
+      <!-- Orders -->
+      <div class="acct-panel active" id="panel-orders">
+        <div class="panel-title">Order History</div>
+
+        <div class="order-card">
+          <div class="order-hd">
+            <div>
+              <div class="order-num">Order #TXN001</div>
+              <div class="order-date">Placed March 14, 2026</div>
+            </div>
+            <span class="badge b-delayed">Delayed</span>
+          </div>
+          <div class="order-items">Coastal Living Sectional Sofa — 3-Piece Set (Driftwood)</div>
+          <div class="order-total">$4,280.00</div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-hd">
+            <div>
+              <div class="order-num">Order #TXN002</div>
+              <div class="order-date">Placed January 28, 2026</div>
+            </div>
+            <span class="badge b-delivered">Delivered</span>
+          </div>
+          <div class="order-items">Artisan Ceramic Tableware Set (16 pc) &nbsp;·&nbsp; Premium Linen Bedding Set — King</div>
+          <div class="order-total">$847.00</div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-hd">
+            <div>
+              <div class="order-num">Order #TXN003</div>
+              <div class="order-date">Placed November 5, 2025</div>
+            </div>
+            <span class="badge b-delivered">Delivered</span>
+          </div>
+          <div class="order-items">Smart Home Hub (Gen 3) &nbsp;·&nbsp; Smart Bulb 4-Pack (Warm White)</div>
+          <div class="order-total">$312.00</div>
+        </div>
+
+      </div>
+
+      <!-- Cases -->
+      <div class="acct-panel" id="panel-cases">
+        <div class="panel-title">Support Cases</div>
+
+        <div class="order-card">
+          <div class="order-hd">
+            <div>
+              <div class="order-num">CASE-2026-0042</div>
+              <div class="order-date">Opened March 15, 2026 &nbsp;·&nbsp; Linked to Order #TXN001</div>
+            </div>
+            <span class="badge b-open">Open</span>
+          </div>
+          <div class="order-items">Coastal Living Sectional Sofa shipment delayed due to weather hold. Order has been in transit 11+ days past estimated delivery. Logistics team follow-up in progress — Stage 2 escalation active.</div>
+        </div>
+
+      </div>
+
+      <!-- Profile -->
+      <div class="acct-panel" id="panel-profile">
+        <div class="panel-title">Profile Information</div>
+        <div class="profile-grid">
+          <div class="form-field">
+            <label>First Name</label>
+            <input type="text" value="Philip">
+          </div>
+          <div class="form-field">
+            <label>Last Name</label>
+            <input type="text" value="Rivers">
+          </div>
+          <div class="form-field">
+            <label>Email Address</label>
+            <input type="email" value="philip.rivers@riversliving.com">
+          </div>
+          <div class="form-field">
+            <label>Phone</label>
+            <input type="tel" value="(949) 295-5945">
+          </div>
+          <div class="form-field full-col">
+            <label>Street Address</label>
+            <input type="text" value="4515 Cherry Lane">
+          </div>
+          <div class="form-field">
+            <label>City / State / ZIP</label>
+            <input type="text" value="Dana Point, CA 92629">
+          </div>
+          <div class="form-field">
+            <label>Preferred Channel</label>
+            <input type="text" value="Voice">
+          </div>
+        </div>
+        <button class="form-save-btn">Save Changes</button>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /account -->
+
+<!-- ──────────── FOOTER ──────────── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">ABC <span>Retail</span></div>
+      <div class="footer-tagline">Premium products for every corner of your life. Quality you can trust, backed by service that actually shows up — 24 hours a day.</div>
+    </div>
+    <div>
+      <div class="footer-col-label">Shop</div>
+      <div class="footer-links">
+        <div class="footer-link" onclick="showPage('shop')">Home &amp; Living</div>
+        <div class="footer-link" onclick="showPage('shop')">Office &amp; Workspace</div>
+        <div class="footer-link" onclick="showPage('shop')">Sports &amp; Fitness</div>
+        <div class="footer-link" onclick="showPage('shop')">Electronics &amp; Tech</div>
+        <div class="footer-link" onclick="showPage('shop')">Luxury &amp; Gifts</div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-label">Support</div>
+      <div class="footer-links">
+        <div class="footer-link" onclick="showPage('account')">Track My Order</div>
+        <div class="footer-link" onclick="showPage('support')">Returns &amp; Exchanges</div>
+        <div class="footer-link" onclick="showPage('support')">Shipping Info</div>
+        <div class="footer-link" onclick="showPage('support')">Contact Us</div>
+        <div class="footer-link" onclick="showPage('support')">FAQ</div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-label">Company</div>
+      <div class="footer-links">
+        <div class="footer-link">About ABC Retail</div>
+        <div class="footer-link">Premium Membership</div>
+        <div class="footer-link">Careers</div>
+        <div class="footer-link">Privacy Policy</div>
+        <div class="footer-link">Terms of Service</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 ABC Retail. All rights reserved.</div>
+    <div>Dana Point, CA &nbsp;·&nbsp; support@abcretail.com &nbsp;·&nbsp; 1-800-ABC-RTAIL</div>
+  </div>
+</footer>
+
+<script>
+// ══ CATALOG ════════════════════════════════════════════════════
+const PHOTO = {
+  home:   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop',
+  office: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop',
+  sports: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&fit=crop',
+  tech:   'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80&fit=crop',
+  luxury: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fit=crop',
+};
+const CATALOG = {
+  home: {
+    label:'Home & Living', desc:'Furniture, décor, bedding, and everything to make your space feel like home.',
+    products:[
+      {id:'H001',photo:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop',name:'Coastal Living Sectional Sofa',desc:'3-piece set in Driftwood finish, cloud comfort foam',price:4280,
+        features:['Cloud comfort foam cushions — 8" deep seat','Stain-resistant performance velvet fabric','Solid hardwood frame with lifetime warranty','Modular design — reconfigurable layout','Available in 6 colorways'],
+        specs:{'Dimensions':'118" W × 85" D × 34" H','Seat Height':'18"','Weight Capacity':'800 lbs','Material':'Performance velvet / solid oak legs','Delivery':'White-glove setup included'}},
+      {id:'H002',photo:'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80&fit=crop',name:'Solid Oak Dining Table',desc:'Seats 6–8 comfortably, hand-rubbed natural finish',price:1890,
+        features:['Sustainably sourced solid white oak','Hand-rubbed oil finish — resists stains & heat','Extendable leaf adds 24" of length','Mortise & tenon joinery — heirloom quality','Available in Natural, Walnut, and Ebony'],
+        specs:{'Dimensions':'84" W × 40" D × 30" H','Extended':'108" with leaf','Seats':'6–8','Material':'Solid white oak','Weight':'142 lbs'}},
+      {id:'H003',photo:'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=600&q=80&fit=crop',name:'Artisan Ceramic Tableware Set',desc:'16-piece handcrafted stoneware, dishwasher safe',price:289,
+        features:['16-piece set — 4 each: dinner plate, salad plate, bowl, mug','Handcrafted in Portugal by artisan potters','Lead-free, food-safe reactive glaze','Dishwasher, microwave & oven safe to 500°F','Reactive glaze — each piece subtly unique'],
+        specs:{'Set':'16 pieces (×4 of each)','Dinner Plate':'11" diameter','Mug Capacity':'14 oz','Material':'Stoneware ceramic','Oven Safe':'Up to 500°F'}},
+      {id:'H004',photo:'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&fit=crop',name:'Premium Linen Bedding Set',desc:'King size, 100% organic linen, 4-piece set',price:449,
+        features:['100% organic European flax linen','GOTS certified — no harmful chemicals','Pre-washed for immediate softness','Gets softer with every wash','Includes duvet cover, flat sheet & 2 pillowcases'],
+        specs:{'Size':'King','Duvet Cover':'108" W × 96" L','Pillowcases':'2 × Standard (20" × 36")','Material':'100% organic linen','Care':'Machine wash cold, tumble dry low'}},
+      {id:'H005',photo:'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop',name:'Woven Jute Area Rug 8×10',desc:'Natural fibre, coastal weave pattern, reversible',price:389,
+        features:['Hand-woven by artisans in India','Natural jute fibre — biodegradable & eco-friendly','Reversible double-sided weave design','Non-slip latex backing included','UV & fade resistant for indoor use'],
+        specs:{'Dimensions':"8' × 10' (96\" × 120\")","Pile Height":'0.35"','Material':'100% natural jute','Backing':'Non-slip latex','Weight':'18 lbs'}},
+      {id:'H006',photo:'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop',name:'Hammered Brass Floor Lamp',desc:'Adjustable arc arm, warm Edison filament bulb',price:349,
+        features:['Hand-hammered solid brass shade','Adjustable arc arm — 3 height positions','Includes vintage Edison filament bulb (2700K)','In-line dimmer switch on cord','Weighted marble base for stability'],
+        specs:{'Height':'60"–72" (adjustable)','Arm Reach':'24"','Bulb':'E26, max 60W / LED compatible','Shade':'12" diameter','Base':'Marble','Weight':'11 lbs'}},
+    ]
+  },
+  office: {
+    label:'Office & Workspace', desc:'Desks, ergonomic chairs, and accessories for a productive modern workplace.',
+    products:[
+      {id:'O001',photo:'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop',name:'Standing Desk Pro 60"',desc:'Electric height-adjustable, solid walnut surface, memory presets',price:1290,
+        features:['Dual-motor electric height adjustment','4 programmable memory presets','Anti-collision safety sensor','Solid walnut surface — sustainably sourced','Cable management tray included'],
+        specs:{'Surface':'60" W × 30" D','Height Range':'24.5"–50.5"','Motor':'Dual 350W brushless','Load Capacity':'275 lbs','Speed':'1.5" per second','Weight':'105 lbs'}},
+      {id:'O002',photo:'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&q=80&fit=crop',name:'Ergonomic Mesh Chair',desc:'Lumbar support, adjustable armrests & headrest, 5-yr warranty',price:879,
+        features:['4-way adaptive lumbar support','Breathable 3D mesh back panel','Adjustable armrests — height, width, pivot, depth','Synchro-tilt with 5 lock positions','5-year commercial warranty'],
+        specs:{'Seat':'20" W × 18" D','Height Range':'17"–21"','Weight Capacity':'300 lbs','Back Height':'24"','Material':'Mesh / die-cast aluminium','Weight':'42 lbs'}},
+      {id:'O003',photo:'https://images.unsplash.com/photo-1547082999-f1f08f9df8c7?w=600&q=80&fit=crop',name:'Dual Monitor Arm',desc:'Holds two 32" monitors, full articulation, cable management',price:249,
+        features:['Supports two monitors up to 32" / 17.6 lbs each','Full articulation — tilt, swivel, rotate 360°','Integrated cable management channels','Tool-free height adjustment','C-clamp & grommet mount both included'],
+        specs:{'Monitor Size':'Up to 32"','Per Arm Capacity':'17.6 lbs','VESA':'75×75 / 100×100 mm','Arm Reach':'17" per arm','Adjustment':'Height, tilt ±90°, swivel 360°','Weight':'8.4 lbs'}},
+      {id:'O004',photo:'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80&fit=crop',name:'USB-C Hub Docking Station',desc:'12-in-1, 4K HDMI, 100W pass-through charging',price:189,
+        features:['12-in-1 connectivity in a single hub','Dual 4K HDMI outputs at 60Hz','100W USB-C Power Delivery pass-through','3× USB-A 3.0 (5Gbps) + 1× USB-C 3.0','SD & MicroSD card readers, Gigabit Ethernet, 3.5mm audio'],
+        specs:{'Ports':'12 total','HDMI':'2× 4K @ 60Hz','USB-C PD':'100W','USB-A':'3× USB 3.0','Ethernet':'Gigabit RJ45','Compatibility':'Windows, macOS, ChromeOS'}},
+      {id:'O005',photo:'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&q=80&fit=crop',name:'Bamboo Desktop Organizer Set',desc:'5-piece modular system, cable cutouts, pen holder',price:129,
+        features:['5-piece fully modular layout system','Sustainably sourced moso bamboo','Cable cutout slots on all tray pieces','Non-slip felt base on every component','Includes monitor stand, pencil cup, file tray, 2 small trays'],
+        specs:{'Monitor Stand':'20" W × 10" D × 5" H','Load Capacity':'22 lbs','Material':'Natural moso bamboo','Finish':'Food-safe lacquer','Pieces':'5'}},
+      {id:'O006',photo:'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80&fit=crop',name:'Acoustic Panel Set',desc:'4-piece, reduces echo 60%, premium felt finish, wall-mount',price:299,
+        features:['NRC 0.60 — 60% noise reduction coefficient','Premium polyester fill — allergen free','Bevelled linen fabric face in 9 colour options','Wall mounting hardware included','Effective from 250Hz to 8kHz frequency range'],
+        specs:{'Pieces':'4 panels','Panel Size':'24" × 12" × 2"','NRC Rating':'0.60','Material':'Polyester fill / linen face','Coverage':'8 sq ft per set','Per Panel Weight':'2.2 lbs'}},
+    ]
+  },
+  sports: {
+    label:'Sports & Fitness', desc:'Equipment and gear for athletes and active lifestyle enthusiasts of every level.',
+    products:[
+      {id:'S001',photo:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&fit=crop',name:'Adjustable Kettlebell Set',desc:'5–50 lbs, quick-change selector mechanism, rubber base',price:349,
+        features:['Single handle replaces 5 separate weights','Quick-select dial — 5 lb increments, 5–50 lbs','Flat base for renegade rows & push-ups','Durable cast iron core with rubber protective base','Compact storage cradle included'],
+        specs:{'Weight Range':'5–50 lbs (22 settings)','Handle':'35mm diameter','Dimensions':'13.5" L × 7" W × 7" H','Material':'Cast iron / rubber base','Storage':'Cradle tray included'}},
+      {id:'S002',photo:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80&fit=crop',name:'Pull-Up & Dip Station',desc:'Heavy-duty steel, 400 lb capacity, no-bolt freestanding',price:499,
+        features:['Multi-grip pull-up bar — wide, narrow, neutral','Angled dip handles reduce shoulder strain','No-bolt freestanding — zero wall damage','Tested to 400 lb weight capacity','Includes push-up handles & leg raise pads'],
+        specs:{'Height':'84"','Width':'52"','Depth':'48"','Weight Capacity':'400 lbs','Material':'14-gauge steel','Unit Weight':'68 lbs'}},
+      {id:'S003',photo:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80&fit=crop',name:'Resistance Band Kit',desc:'5 resistance levels, non-slip handles, carrying case',price:89,
+        features:['5 resistance levels: 10, 20, 30, 40, 50 lbs','Natural latex — snap-resistant up to 2,000 lbs','2 foam-grip handles, 2 ankle straps, door anchor','Stackable — up to 150 lbs combined resistance','Includes mesh carry bag & illustrated exercise guide'],
+        specs:{'Levels':'5 bands (10/20/30/40/50 lbs)','Material':'100% natural latex','Accessories':'Handles, ankle straps, door anchor','Combined Max':'150 lbs','Storage':'Mesh carry bag'}},
+      {id:'S004',photo:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80&fit=crop',name:'Non-Slip Yoga Mat Pro',desc:'6mm thick, alignment guide lines, carry strap included',price:129,
+        features:['6mm dual-layer cushioning — joints protected','Alignment guide lines screen-printed on surface','Moisture-wicking microfibre top layer','Natural tree rubber base — zero slipping','Includes carry strap & zippered storage bag'],
+        specs:{'Dimensions':'68" L × 24" W × 6mm thick','Weight':'4.2 lbs','Top Layer':'Microfibre (moisture-wicking)','Base':'Natural tree rubber','Care':'Wipe clean or hand wash cold'}},
+      {id:'S005',photo:'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80&fit=crop',name:'Foam Roller Recovery Kit',desc:'3-piece deep tissue set — standard, vibrating, mini',price:79,
+        features:['3-piece set: standard, vibrating & mini roller','EVA foam — firm density for deep tissue work','Vibrating roller: 3 intensity levels, 2hr battery','Textured ridged surface targets trigger points','Suitable for all fitness levels'],
+        specs:{'Standard Roller':'18" L × 6" D','Mini Roller':'12" L × 4" D','Material':'High-density EVA foam','Vibrating Speeds':'3 (low / med / high)','Battery':'2,000mAh, ~2hr runtime'}},
+      {id:'S006',photo:'https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=600&q=80&fit=crop',name:'Smart Fitness Jump Rope',desc:'Digital rep counter, adjustable cable, app connected',price:149,
+        features:['LCD display — reps, calories burned, time','Adjustable PVC cable — fits heights 4\'7" to 6\'7"','Ball-bearing handles for smooth, tangle-free rotation','Connects to fitness app via Bluetooth 5.0','90-day battery life (CR2032)'],
+        specs:{'Display':'LCD (reps, calories, time)','Cable':'Adjustable PVC, 10ft max','Handles':'Aluminium with ball-bearings','Connectivity':'Bluetooth 5.0','Battery':'CR2032 (~90 days)','Weight':'0.55 lbs'}},
+    ]
+  },
+  tech: {
+    label:'Electronics & Tech', desc:'Smart home devices, audio equipment, and the latest consumer electronics.',
+    products:[
+      {id:'T001',photo:'https://images.unsplash.com/photo-1558002038-1055907df827?w=600&q=80&fit=crop',name:'Smart Home Hub Gen 3',desc:'Zigbee & Z-Wave, works with Alexa, Google & HomeKit',price:199,
+        features:['Zigbee 3.0 & Z-Wave Plus dual protocol','Works with Alexa, Google Home & Apple HomeKit','Controls up to 100 smart devices','Local processing — works without internet','Built-in Wi-Fi 6 & Gigabit Ethernet'],
+        specs:{'Protocols':'Zigbee 3.0, Z-Wave Plus, Wi-Fi 6, BT 5.2','Connectivity':'Ethernet + Wi-Fi','Device Limit':'100','Power':'5V USB-C','Dimensions':'4.5" × 4.5" × 1"','Compatibility':'Alexa, Google, HomeKit'}},
+      {id:'T002',photo:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80&fit=crop',name:'Noise-Cancelling Headphones',desc:'40-hr battery, foldable design, premium 40mm drivers',price:449,
+        features:['Industry-leading active noise cancellation','40-hour battery (30hr with ANC on)','Multipoint — connects to 2 devices simultaneously','Foldable design with premium hard carry case','Transparency mode for ambient awareness'],
+        specs:{'Driver':'40mm dynamic','Frequency':'4Hz–40kHz','Battery':'40hr (30hr ANC)','Charging':'USB-C, 10 min = 5hr','Connectivity':'Bluetooth 5.3 + 3.5mm jack','Weight':'8.8 oz'}},
+      {id:'T003',photo:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80&fit=crop',name:'Smart Bulb 4-Pack',desc:'Warm white 2700K, dimmable, no hub required, 15W',price:89,
+        features:['Warm white 2700K — matches incandescent tone','Dimmable 5%–100% via app or voice command','No hub required — direct Wi-Fi 2.4GHz connection','15W, equivalent to 100W incandescent','25,000 hour lifespan — lasts 22+ years'],
+        specs:{'Color Temp':'2700K warm white','Wattage':'15W (100W equivalent)','Lumens':'1,100 lm','Base':'E26 standard','Lifespan':'25,000 hrs','Connectivity':'Wi-Fi 2.4GHz'}},
+      {id:'T004',photo:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&q=80&fit=crop',name:'Portable Bluetooth Speaker',desc:'360° sound, IP67 waterproof, 24-hr battery life',price:299,
+        features:['360° omnidirectional room-filling sound','IP67 waterproof & dustproof rated','24-hour battery at moderate volume','True stereo pairing — link two speakers','Built-in speakerphone with noise rejection'],
+        specs:{'Output':'30W RMS','Frequency':'60Hz–20kHz','Battery':'24hr, charges in 3.5hr','Rating':'IP67','Connectivity':'Bluetooth 5.3','Dimensions':'3.5" H × 3.5" D','Weight':'1.4 lbs'}},
+      {id:'T005',photo:'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=600&q=80&fit=crop',name:'4K Webcam Pro',desc:'Auto-focus, dual noise-cancelling mics, plug & play USB-C',price:249,
+        features:['4K 30fps / 1080p 60fps dual resolution modes','AI-powered auto-focus & exposure correction','Dual noise-cancelling omnidirectional microphones','Plug & play — no driver installation required','Built-in privacy shutter'],
+        specs:{'Resolution':'4K 30fps / 1080p 60fps','FOV':'90° wide angle','Microphones':'Dual omnidirectional','Focus':'AI autofocus','Connection':'USB-C','Compatibility':'Windows, macOS, Linux','Weight':'4.8 oz'}},
+      {id:'T006',photo:'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&q=80&fit=crop',name:'Wireless Charging Pad',desc:'15W fast charge, Qi-certified, dual-device, LED indicator',price:79,
+        features:['15W fast charge for Samsung; MagSafe compatible','Charges 2 devices simultaneously','LED indicator dims automatically at night','Foreign object detection — prevents damage','Ultra-slim 5mm profile'],
+        specs:{'Output':'5W / 10W / 15W adaptive','Standard':'Qi certified + MagSafe','Devices':'2 simultaneously','Input':'USB-C 20W (adapter included)','Dimensions':'4" × 4" × 0.2"','Weight':'3.2 oz'}},
+    ]
+  },
+  luxury: {
+    label:'Luxury & Gifts', desc:"Premium gifts and curated luxury items for life's most meaningful moments.",
+    products:[
+      {id:'L001',photo:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fit=crop',name:'Swiss Automatic Watch',desc:'Sapphire crystal, 50m water resistance, leather strap',price:2890,
+        features:['Swiss ETA 2824-2 automatic movement','Sapphire crystal — scratch resistant (9H hardness)','50m / 165ft water resistance','Exhibition caseback — visible movement','Includes Italian leather strap + extra NATO strap'],
+        specs:{'Movement':'Swiss ETA 2824-2 automatic','Case':'40mm, 316L stainless steel','Crystal':'Sapphire (hardness 9H)','Water Resistance':'50m / 165ft','Power Reserve':'38 hours','Warranty':'2 years international'}},
+      {id:'L002',photo:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80&fit=crop',name:'Italian Full-Grain Leather Wallet',desc:'8-card capacity, coin pocket, gift-boxed',price:289,
+        features:['Full-grain vegetable-tanned Italian calf leather','RFID blocking lining (13.56 MHz)','8 card slots + 2 bill compartments + coin pocket','Develops a rich patina naturally with age','Gift-boxed with leather care card'],
+        specs:{'Dimensions':'4.5" × 3.7" × 0.5" (slim, loaded)','Material':'Full-grain calf leather','Lining':'RFID blocking','Cards':'8 slots + 2 bill + 1 coin','Colors':'Cognac, Black, Dark Brown'}},
+      {id:'L003',photo:'https://images.unsplash.com/photo-1532522750741-628fde798c73?w=600&q=80&fit=crop',name:'Mongolian Cashmere Throw',desc:'100% Grade-A cashmere, 50"×70", hand-finished fringe',price:449,
+        features:['100% Grade-A Mongolian cashmere — finest grade','Hand-finished knotted fringe border','Naturally hypoallergenic & temperature-regulating','Full lap coverage at 50" × 70"','Gift-ready box with ribbon'],
+        specs:{'Dimensions':'50" W × 70" L','Grade':'Grade-A Mongolian cashmere','Weight':'14 oz','Ply':'2-ply','Care':'Dry clean or hand wash cold','Colors':'8 available'}},
+      {id:'L004',photo:'https://images.unsplash.com/photo-1602874801007-ed9c0d89d6a1?w=600&q=80&fit=crop',name:'Handcrafted Candle Collection',desc:'3-piece soy wax set, 60-hr burn each, linen-wrapped',price:189,
+        features:['3 signature scents: Coastal Driftwood, Amber & Oud, Fresh Linen','100% pure soy wax — clean, even burn','60-hour burn time per candle','Hand-poured in small batches','Linen-wrapped borosilicate glass vessels — reusable'],
+        specs:{'Pieces':'3 candles','Burn Time':'60 hrs each','Wax':'100% soy','Wicks':'Cotton (lead & zinc free)','Vessel':'Hand-blown borosilicate glass','Net Weight':'10 oz each'}},
+      {id:'L005',photo:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop',name:'Crystal Decanter Set',desc:'Hand-blown lead-free crystal, decanter + 6 glasses',price:379,
+        features:['Hand-blown lead-free crystal — exceptional clarity','Includes decanter + 6 matching wine glasses','Wide aerating base enhances wine & spirits','Dishwasher safe (hand wash recommended)','Presented in velvet-lined gift box'],
+        specs:{'Set':'1 decanter + 6 glasses','Decanter':'32 oz (950ml)','Glass':'10 oz (300ml) each','Material':'Lead-free crystal','Height':'Decanter 12", Glass 5"','Total Weight':'4.8 lbs'}},
+      {id:'L006',photo:'https://images.unsplash.com/photo-1517697471339-4aa32003c11a?w=600&q=80&fit=crop',name:'Leather-Bound Journal',desc:'Personalized embossing, 240 acid-free pages, ribbon bookmark',price:149,
+        features:['Personalized debossed embossing on cover','Full-grain leather cover — ages beautifully','240 acid-free, cream-tinted pages (90gsm)','Lay-flat sewn binding — stays open while writing','Satin ribbon bookmark & interior back pocket'],
+        specs:{'Dimensions':'8.5" × 5.5"','Pages':'240 (120 leaves)','Paper':'90gsm acid-free','Ruling':'Lined, dot grid, or blank','Personalization':'Up to 20 characters','Lead Time':'4 weeks for personalized orders'}},
+    ]
+  }
+};
+
+// ══ CART ═══════════════════════════════════════════════════════
+let cart = [];
+
+function addToCart(productId, catId) {
+  const product = CATALOG[catId].products.find(p => p.id === productId);
+  if (!product) return;
+  const existing = cart.find(i => i.id === productId);
+  if (existing) { existing.qty++; } else { cart.push({...product, catId, qty:1}); }
+  updateCartUI();
+  showToast('Added to cart: ' + product.name);
+}
+
+function changeQty(productId, delta) {
+  const item = cart.find(i => i.id === productId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== productId);
+  updateCartUI();
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(i => i.id !== productId);
+  updateCartUI();
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s,i) => s+i.qty, 0);
+  const badge = document.getElementById('cart-count');
+  if (badge) { badge.textContent = total; badge.style.display = total > 0 ? 'inline-flex' : 'none'; }
+  renderCartPanel();
+}
+
+function openCart() {
+  document.getElementById('cart-overlay').classList.add('open');
+  document.getElementById('cart-panel').classList.add('open');
+  renderCartPanel();
+}
+function closeCart() {
+  document.getElementById('cart-overlay').classList.remove('open');
+  document.getElementById('cart-panel').classList.remove('open');
+}
+
+function renderCartPanel() {
+  const body   = document.getElementById('cart-items');
+  const footer = document.getElementById('cart-footer');
+  if (!body) return;
+  if (cart.length === 0) {
+    body.innerHTML = '<div class="cart-empty">🛒<br><br>Your cart is empty.<br><span style="font-size:0.78rem">Browse our categories to find something you love.</span></div>';
+    if (footer) footer.innerHTML = '';
+    return;
+  }
+  body.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-img" style="background-image:url('${item.photo || PHOTO[item.catId]}')"></div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-meta">$${item.price.toLocaleString()}</div>
+        <div class="cart-qty-row">
+          <button class="cart-qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+          <span class="cart-qty-num">${item.qty}</span>
+          <button class="cart-qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+        </div>
+      </div>
+      <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="Remove">✕</button>
+    </div>
+  `).join('');
+  const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const itemCount = cart.reduce((s,i) => s+i.qty, 0);
+  if (footer) footer.innerHTML = `
+    <div class="cart-subtotal">
+      <span>Subtotal (${itemCount} item${itemCount!==1?'s':''})</span>
+      <span>$${subtotal.toLocaleString()}</span>
+    </div>
+    <button class="cart-checkout-btn">Proceed to Checkout →</button>
+  `;
+}
+
+// ══ TOAST ══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('add-toast');
+  if (!t) return;
+  t.textContent = '✓  ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ══ PAGE NAVIGATION ════════════════════════════════════════════
+function showPage(id, push=true) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const nl = document.getElementById('nl-' + id);
+  if (nl) nl.classList.add('active');
+  window.scrollTo({top:0});
+  if (push) history.pushState({type:'page', id}, '', '#' + id);
+}
+
+function showCategory(catId, push=true) {
+  const cat = CATALOG[catId];
+  if (!cat) return;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-category').classList.add('active');
+  const nl = document.getElementById('nl-cat-' + catId);
+  if (nl) nl.classList.add('active');
+  document.getElementById('cat-page-title').textContent = cat.label;
+  document.getElementById('cat-page-desc').textContent  = cat.desc;
+  document.getElementById('product-grid').innerHTML = cat.products.map(p => `
+    <div class="product-card">
+      <div class="product-img" style="background-image:url('${p.photo || PHOTO[catId]}');cursor:pointer" onclick="showProduct('${p.id}','${catId}')"></div>
+      <div class="product-info">
+        <div class="product-name" style="cursor:pointer" onclick="showProduct('${p.id}','${catId}')">${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="product-footer">
+          <div class="product-price">$${p.price.toLocaleString()}</div>
+          <button class="product-add-btn" onclick="addToCart('${p.id}','${catId}')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  window.scrollTo({top:0});
+  if (push) history.pushState({type:'category', catId}, '', '#cat-' + catId);
+}
+
+
+function showProduct(productId, catId, push=true) {
+  const cat     = CATALOG[catId];
+  const product = cat.products.find(p => p.id === productId);
+  if (!product) return;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-product').classList.add('active');
+  const nl = document.getElementById('nl-cat-' + catId);
+  if (nl) nl.classList.add('active');
+  // Populate detail
+  document.getElementById('pd-img').style.backgroundImage = `url('${product.photo || PHOTO[catId]}')`;
+  document.getElementById('pd-cat-badge').textContent     = cat.label;
+  document.getElementById('pd-name').textContent          = product.name;
+  document.getElementById('pd-price').textContent         = '$' + product.price.toLocaleString();
+  document.getElementById('pd-desc').textContent          = product.desc;
+  document.getElementById('pd-breadcrumb').textContent    = 'Shop / ' + cat.label + ' / ' + product.name;
+  document.getElementById('pd-add-btn').onclick           = () => { addToCart(productId, catId); };
+  document.getElementById('pd-features').innerHTML =
+    (product.features || []).map(f => `<li>${f}</li>`).join('');
+  document.getElementById('pd-specs').innerHTML =
+    Object.entries(product.specs || {}).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+  window.scrollTo({top:0});
+  if (push) history.pushState({type:'product', productId, catId}, '', '#product-' + productId);
+}
+function showPanel(id, el) {
+  document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.acct-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
+
+// ══ BROWSER BACK / FORWARD ═════════════════════════════════════
+window.addEventListener('popstate', e => {
+  const s = e.state;
+  if (!s)                    { showPage('home',     false); return; }
+  if (s.type === 'page')     { showPage(s.id,       false); return; }
+  if (s.type === 'category') { showCategory(s.catId,false); return; }
+  if (s.type === 'product')  { showProduct(s.productId, s.catId, false); return; }
+});
+
+// Seed initial history entry so back works from page 1
+history.replaceState({type:'page', id:'home'}, '', window.location.pathname + window.location.search);
+</script>
+
+
+<!-- ── CART PANEL ──────────────────────────── -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-hd">
+    <div class="cart-hd-title">Shopping Cart</div>
+    <button class="cart-close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-body" id="cart-items">
+    <div class="cart-empty">🛒<br><br>Your cart is empty.</div>
+  </div>
+  <div id="cart-footer"></div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────── -->
+<div class="add-toast" id="add-toast"></div>
+
+</body>
+</html>
