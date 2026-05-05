@@ -567,6 +567,38 @@
     .pd-specs td:first-child { color:var(--text-mid); width:44%; font-weight:500; }
     .pd-specs td:last-child { color:var(--navy); font-weight:500; }
   </style>
+
+  <!-- Genesys Web Messenger -->
+  <script type="text/javascript" charset="utf-8">
+    (function (g, e, n, es, ys) {
+      g['_genesysJs'] = e;
+      g[e] = g[e] || function () {
+        (g[e].q = g[e].q || []).push(arguments)
+      };
+      g[e].t = 1 * new Date();
+      g[e].c = es;
+      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+    })(window, 'Genesys', 'https://apps.mypurecloud.com/genesys-bootstrap/genesys.min.js', {
+      environment: 'use1',
+      deploymentId: 'cd1b2975-a305-4a13-b5be-d88f85078da6'
+    });
+  </script>
+
+  <!-- Inject logged-in customer ID as custom attribute -->
+  <script type="text/javascript">
+    window.addEventListener('load', function () {
+      Genesys('subscribe', 'Messenger.ready', function () {
+        Genesys('command', 'Database.set', {
+          messaging: {
+            customAttributes: {
+              customerId: 'C1001',
+              customerName: 'Philip Rivers'
+            }
+          }
+        });
+      });
+    });
+  </script>
 </head>
 <body>
 
