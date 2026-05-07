@@ -587,7 +587,7 @@
   <!-- Inject logged-in customer ID as custom attribute -->
   <script type="text/javascript">
     window.addEventListener('load', function () {
-      Genesys('subscribe', 'Messenger.ready', function () {
+      Genesys('subscribe', 'Messenger.opened', function () {
         Genesys('command', 'Database.set', {
           messaging: {
             customAttributes: {
