@@ -768,6 +768,36 @@
       font-size: 0.82rem; font-weight: 700;
     }
   </style>
+
+  <!-- Genesys Web Messenger -->
+  <script type="text/javascript" charset="utf-8">
+    (function (g, e, n, es, ys) {
+      g['_genesysJs'] = e;
+      g[e] = g[e] || function () { (g[e].q = g[e].q || []).push(arguments) };
+      g[e].t = 1 * new Date();
+      g[e].c = es;
+      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+    })(window, 'Genesys', 'https://apps.mypurecloud.com/genesys-bootstrap/genesys.min.js', {
+      environment: 'prod',
+      deploymentId: '71de76d1-6ead-4112-b5b2-386c3b935d9a'
+    });
+  </script>
+
+  <!-- Inject customer ID on Messenger open -->
+  <script type="text/javascript">
+    window.addEventListener('load', function () {
+      Genesys('subscribe', 'Messenger.opened', function () {
+        Genesys('command', 'Database.set', {
+          messaging: {
+            customAttributes: {
+              customerId: 'C1001',
+              customerName: 'Philip Rivers'
+            }
+          }
+        });
+      });
+    });
+  </script>
 </head>
 <body>
 
@@ -889,28 +919,28 @@
           <div class="section-title">Our Commitments</div>
         </div>
         <div class="trust-bar">
-          <div class="trust-item">
+          <div class="trust-item" onclick="showToast('Free shipping on all orders over $75')">
             <div class="trust-ico">🚚</div>
             <div>
               <div class="trust-ttl">Free Shipping</div>
               <div class="trust-sub">Orders over $75</div>
             </div>
           </div>
-          <div class="trust-item">
+          <div class="trust-item" onclick="showScreen('support'); navStack=['support']">
             <div class="trust-ico">↩️</div>
             <div>
               <div class="trust-ttl">Easy Returns</div>
               <div class="trust-sub">30-day policy</div>
             </div>
           </div>
-          <div class="trust-item">
+          <div class="trust-item" onclick="showToast('256-bit SSL encryption on all transactions')">
             <div class="trust-ico">🛡️</div>
             <div>
               <div class="trust-ttl">Secure Pay</div>
               <div class="trust-sub">256-bit SSL</div>
             </div>
           </div>
-          <div class="trust-item">
+          <div class="trust-item" onclick="showScreen('support'); navStack=['support']">
             <div class="trust-ico">💬</div>
             <div>
               <div class="trust-ttl">24/7 Support</div>
@@ -1016,7 +1046,7 @@
         </div>
 
         <div class="channel-list">
-          <div class="channel-row">
+          <div class="channel-row" onclick="openMessenger()">
             <div class="ch-ico">💬</div>
             <div>
               <div class="ch-title">Web Messaging</div>
@@ -1050,7 +1080,7 @@
           </div>
         </div>
 
-        <button class="chat-btn-big">
+        <button class="chat-btn-big" onclick="openMessenger()">
           <span class="chat-btn-pulse"></span>
           Chat with AVA Now
           <span style="font-size:1.1rem">💬</span>
@@ -1470,6 +1500,15 @@ function renderCartBody() {
       <button class="checkout-btn-m">Proceed to Checkout →</button>
     </div>
   `;
+}
+
+// ── MESSENGER ───────────────────────────────────────────────────
+function openMessenger() {
+  if (typeof Genesys === 'function') {
+    Genesys('command', 'Messenger.open');
+  } else {
+    showToast('Messenger loading — please try again in a moment');
+  }
 }
 
 // ── SWIPE NAVIGATION ────────────────────────────────────────────
