@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Retail — Mobile App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:       #1A3A6B;
+      --navy-mid:   #1E4A8A;
+      --navy-light: #2E74C0;
+      --blue:       #4A90D9;
+      --blue-light: #5EA8E8;
+      --blue-pale:  #E8F2FC;
+      --cream:      #F4F6F9;
+      --white:      #FFFFFF;
+      --text-dark:  #1C1C1E;
+      --text-mid:   #6b7a90;
+      --text-light: #8a96a8;
+      --border:     #d8dce3;
+      --green:      #2ECC71;
+      --amber:      #F39C12;
+      --red:        #E74C3C;
+      --shadow-sm:  0 2px 10px rgba(26,58,107,0.10);
+      --shadow-md:  0 6px 20px rgba(26,58,107,0.14);
+      --radius:     12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Barlow', sans-serif;
+      background: #1a1a2e;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    h1,h2,h3,h4 { font-family: 'Barlow Condensed', sans-serif; line-height: 1.15; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: 'Barlow', sans-serif; cursor: pointer; border: none; }
+    input { font-family: 'Barlow', sans-serif; }
+
+    /* ── DEVICE FRAME ─────────────────────── */
+    .device-frame {
+      position: relative;
+      width: 393px;
+      min-height: 852px;
+      background: var(--cream);
+      border-radius: 50px;
+      box-shadow:
+        0 0 0 12px #1a1a2e,
+        0 0 0 14px #2a2a3e,
+        0 0 0 16px #111,
+        0 60px 120px rgba(0,0,0,0.7),
+        inset 0 0 0 1px rgba(255,255,255,0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* notch */
+    .device-frame::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 34px;
+      background: #111;
+      border-radius: 0 0 20px 20px;
+      z-index: 9999;
+    }
+
+    /* status bar */
+    .status-bar {
+      height: 48px;
+      background: var(--navy);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 28px 8px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 100;
+    }
+    .status-time { font-size: 0.75rem; font-weight: 600; color: white; }
+    .status-icons { display: flex; gap: 6px; align-items: center; }
+    .status-icons span { font-size: 0.65rem; color: white; opacity: 0.9; }
+
+    /* ── APP SHELL ────────────────────────── */
+    .app-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── TOP BAR ──────────────────────────── */
+    .top-bar {
+      background: var(--navy);
+      padding: 12px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 50;
+    }
+    .top-bar-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: white; letter-spacing: -0.01em;
+      cursor: pointer; user-select: none;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .top-bar-logo span { color: var(--blue); }
+    .top-bar-logo:active { opacity: 0.75; }
+    .home-pill {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 3px 10px 3px 7px;
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      display: flex; align-items: center; gap: 4px;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .home-pill:active { background: rgba(255,255,255,0.18); color: white; }
+    .top-bar-actions { display: flex; gap: 4px; align-items: center; }
+    .top-icon-btn {
+      background: rgba(255,255,255,0.08);
+      border: none; border-radius: 10px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 1rem; cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .top-icon-btn:active { background: rgba(255,255,255,0.18); }
+    .cart-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--blue); color: white;
+      font-size: 0.55rem; font-weight: 700;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: none; align-items: center; justify-content: center;
+      border: 2px solid var(--navy);
+    }
+    .cart-badge.show { display: flex; }
+
+    /* ── SCROLL AREA ──────────────────────── */
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    /* ── SCREENS ──────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── ANNOUNCEMENT ─────────────────────── */
+    .announcement {
+      background: var(--blue);
+      color: white;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── HERO ─────────────────────────────── */
+    .hero {
+      background: var(--navy);
+      padding: 28px 20px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 80% at 110% 50%, rgba(74,144,217,0.2), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-label {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hero-label::before, .hero-label::after {
+      content: ''; display: block; height: 1px;
+      width: 20px; background: var(--blue); opacity: 0.6;
+    }
+    .hero-title {
+      font-size: 2.2rem; font-weight: 700;
+      color: white; line-height: 1.08;
+      margin-bottom: 12px; letter-spacing: -0.02em;
+    }
+    .hero-title em { font-style: italic; color: var(--blue); }
+    .hero-sub {
+      font-size: 0.825rem; color: rgba(255,255,255,0.62);
+      line-height: 1.65; margin-bottom: 22px;
+    }
+    .hero-btns { display: flex; gap: 10px; }
+    .btn-primary {
+      background: var(--blue); color: white;
+      padding: 11px 22px; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 0.02em; transition: all 0.2s;
+    }
+    .btn-primary:active { opacity: 0.85; transform: scale(0.97); }
+    .btn-ghost {
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 11px 22px; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 500;
+    }
+    .btn-ghost:active { background: rgba(255,255,255,0.18); }
+    .hero-stats {
+      display: flex; gap: 0;
+      margin-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 20px;
+    }
+    .hero-stat { flex: 1; text-align: center; }
+    .hero-stat:not(:last-child) {
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-stat-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 700; color: var(--blue);
+    }
+    .hero-stat-lbl {
+      font-size: 0.6rem; opacity: 0.45;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── SECTION ──────────────────────────── */
+    .section { padding: 24px 16px; }
+    .section-hd { margin-bottom: 16px; }
+    .section-label {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: 1.3rem; font-weight: 600;
+      color: var(--navy); letter-spacing: -0.02em;
+    }
+
+    /* ── CATEGORY SCROLL (HOME) ───────────── */
+    .cat-scroll {
+      display: flex; gap: 12px;
+      overflow-x: auto; padding: 0 16px 4px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .cat-scroll::-webkit-scrollbar { display: none; }
+    .cat-chip {
+      flex-shrink: 0; width: 120px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cat-chip:active { transform: scale(0.96); }
+    .cat-chip-img {
+      height: 80px;
+      background-size: cover; background-position: center;
+    }
+    .cat-chip-info { padding: 8px 10px 10px; }
+    .cat-chip-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--navy); line-height: 1.2;
+    }
+    .cat-chip-count { font-size: 0.65rem; color: var(--text-light); margin-top: 2px; }
+
+    /* ── TRUST BAR ────────────────────────── */
+    .trust-bar {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; padding: 0 16px 24px;
+    }
+    .trust-item {
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .trust-ico { font-size: 1.2rem; flex-shrink: 0; }
+    .trust-ttl { font-size: 0.78rem; font-weight: 600; color: var(--navy); }
+    .trust-sub { font-size: 0.65rem; color: var(--text-light); margin-top: 1px; }
+
+    /* ── PROMO BANNER ─────────────────────── */
+    .promo-banner {
+      background: var(--navy); margin: 0 16px 24px;
+      border-radius: 16px; padding: 22px 20px;
+      position: relative; overflow: hidden;
+    }
+    .promo-banner::after {
+      content: '⭐';
+      position: absolute; right: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 3.5rem; opacity: 0.15;
+    }
+    .promo-lbl {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 6px;
+    }
+    .promo-title {
+      font-size: 1.2rem; font-weight: 700;
+      color: white; line-height: 1.2; margin-bottom: 8px;
+    }
+    .promo-body {
+      font-size: 0.75rem; color: rgba(255,255,255,0.6);
+      line-height: 1.6; margin-bottom: 14px; max-width: 220px;
+    }
+
+    /* ── SHOP SCREEN ──────────────────────── */
+    .page-header-bar {
+      background: var(--navy); color: white;
+      padding: 18px 20px 20px;
+    }
+    .page-header-bar h1 {
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .page-header-bar p { font-size: 0.8rem; opacity: 0.6; }
+    .back-btn {
+      background: rgba(255,255,255,0.12);
+      color: white; border: none;
+      padding: 7px 14px 7px 10px;
+      border-radius: 20px; font-size: 0.78rem;
+      font-weight: 500; display: inline-flex;
+      align-items: center; gap: 4px;
+      margin-bottom: 10px; cursor: pointer;
+    }
+    .back-btn:active { background: rgba(255,255,255,0.2); }
+
+    .shop-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .shop-cat-row {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      display: flex; gap: 0; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .shop-cat-row:active { transform: scale(0.98); }
+    .shop-cat-img {
+      width: 100px; flex-shrink: 0;
+      background-size: cover; background-position: center;
+    }
+    .shop-cat-body { padding: 14px 14px 14px; flex: 1; }
+    .shop-cat-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 600; color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .shop-cat-desc { font-size: 0.73rem; color: var(--text-mid); line-height: 1.5; margin-bottom: 6px; }
+    .shop-cat-link { font-size: 0.72rem; font-weight: 700; color: var(--blue); }
+
+    /* ── PRODUCT GRID ─────────────────────── */
+    .product-grid-mobile {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; padding: 16px;
+    }
+    .product-card-mobile {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .product-card-mobile:active { transform: scale(0.97); }
+    .product-card-img {
+      height: 130px;
+      background-size: cover; background-position: center;
+    }
+    .product-card-body { padding: 10px 10px 12px; }
+    .product-card-name {
+      font-size: 0.78rem; font-weight: 600; color: var(--navy);
+      margin-bottom: 3px; line-height: 1.3;
+    }
+    .product-card-desc { font-size: 0.66rem; color: var(--text-light); line-height: 1.4; margin-bottom: 8px; }
+    .product-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .product-card-price { font-size: 0.85rem; font-weight: 700; color: var(--navy); }
+    .add-btn-sm {
+      background: var(--blue); color: white;
+      border: none; padding: 6px 10px;
+      border-radius: 8px; font-size: 0.68rem;
+      font-weight: 700;
+    }
+    .add-btn-sm:active { opacity: 0.8; }
+
+    /* ── PRODUCT DETAIL ───────────────────── */
+    .pd-img-mobile {
+      width: 100%; height: 260px;
+      background-size: cover; background-position: center;
+    }
+    .pd-body { padding: 20px; }
+    .pd-badge-m {
+      display: inline-block;
+      background: var(--blue-pale); color: var(--blue);
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .pd-name-m {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--navy); margin-bottom: 4px;
+    }
+    .pd-price-m {
+      font-size: 1.3rem; font-weight: 700;
+      color: var(--blue); margin-bottom: 12px;
+    }
+    .pd-desc-m { font-size: 0.82rem; color: var(--text-mid); line-height: 1.65; margin-bottom: 20px; }
+    .pd-add-btn-m {
+      width: 100%; background: var(--blue); color: white;
+      padding: 15px; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 700;
+      letter-spacing: 0.02em; margin-bottom: 24px;
+      transition: opacity 0.2s;
+    }
+    .pd-add-btn-m:active { opacity: 0.85; }
+    .pd-section { margin-bottom: 20px; }
+    .pd-section-ttl {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 10px;
+    }
+    .pd-features-m { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .pd-features-m li {
+      font-size: 0.8rem; color: var(--text-dark);
+      padding-left: 16px; position: relative;
+    }
+    .pd-features-m li::before {
+      content: '✓';
+      position: absolute; left: 0;
+      color: var(--blue); font-weight: 700; font-size: 0.7rem;
+    }
+    .pd-specs-m { width: 100%; border-collapse: collapse; }
+    .pd-specs-m tr { border-bottom: 1px solid var(--border); }
+    .pd-specs-m tr:last-child { border-bottom: none; }
+    .pd-specs-m td {
+      padding: 8px 4px; font-size: 0.75rem;
+      vertical-align: top;
+    }
+    .pd-specs-m td:first-child { color: var(--text-mid); width: 42%; }
+    .pd-specs-m td:last-child { color: var(--text-dark); font-weight: 500; }
+
+    /* ── SUPPORT SCREEN ───────────────────── */
+    .channel-list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .channel-row {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .channel-row:active { border-color: var(--blue); background: var(--blue-pale); }
+    .ch-ico {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--cream); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .ch-title { font-size: 0.88rem; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+    .ch-desc { font-size: 0.73rem; color: var(--text-mid); line-height: 1.5; margin-bottom: 5px; }
+    .ch-link { font-size: 0.72rem; font-weight: 700; color: var(--blue); }
+
+    .chat-btn-big {
+      margin: 0 16px 24px;
+      background: var(--navy); color: white;
+      width: calc(100% - 32px); padding: 18px;
+      border-radius: 14px; font-size: 0.9rem;
+      font-weight: 700; display: flex;
+      align-items: center; justify-content: center; gap: 10px;
+      transition: opacity 0.2s;
+    }
+    .chat-btn-big:active { opacity: 0.85; }
+    .chat-btn-pulse {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(46,204,113,0.3);
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(46,204,113,0.3); }
+      50% { box-shadow: 0 0 0 7px rgba(46,204,113,0.1); }
+    }
+
+    /* FAQ */
+    .faq-section { padding: 0 16px 24px; }
+    .faq-label {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 12px;
+    }
+    .faq-item {
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 8px; overflow: hidden;
+    }
+    .faq-q {
+      padding: 14px 16px; font-size: 0.83rem;
+      font-weight: 500; color: var(--navy); cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq-chevron { opacity: 0.4; transition: transform 0.25s; flex-shrink: 0; margin-left: 8px; font-style: normal; }
+    .faq-a {
+      max-height: 0; overflow: hidden; transition: all 0.3s;
+      font-size: 0.78rem; color: var(--text-mid); line-height: 1.65;
+      padding: 0 16px;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding: 0 16px 14px; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    /* ── ACCOUNT SCREEN ───────────────────── */
+    .acct-hero {
+      background: var(--navy); padding: 20px;
+      display: flex; gap: 14px; align-items: center;
+    }
+    .acct-avatar-m {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--blue); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .acct-name-m {
+      font-size: 1.1rem; font-weight: 700;
+      color: white; line-height: 1.2;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .acct-badge-m {
+      background: var(--blue); color: white;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+      letter-spacing: 0.04em;
+    }
+    .acct-meta-m { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 3px; }
+
+    .acct-tabs {
+      background: white; border-bottom: 1px solid var(--border);
+      display: flex; padding: 0 16px; gap: 0;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .acct-tab {
+      flex: 1; text-align: center;
+      padding: 13px 8px; font-size: 0.75rem;
+      font-weight: 600; color: var(--text-mid);
+      border-bottom: 2px solid transparent;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .acct-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    .acct-content { padding: 16px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.2rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 14px;
+    }
+
+    .order-card-m {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      margin-bottom: 12px;
+    }
+    .order-hd-m {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 10px;
+    }
+    .order-num-m { font-size: 0.82rem; font-weight: 700; color: var(--navy); }
+    .order-date-m { font-size: 0.68rem; color: var(--text-light); margin-top: 2px; }
+    .order-items-m { font-size: 0.75rem; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
+    .order-total-m { font-size: 0.82rem; font-weight: 700; color: var(--navy); }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.62rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 10px;
+      letter-spacing: 0.03em; flex-shrink: 0;
+    }
+    .b-delayed   { background: #FEF3CD; color: #856404; }
+    .b-delivered { background: #D1FAE5; color: #065F46; }
+    .b-shipped   { background: #DBEAFE; color: #1E40AF; }
+    .b-open      { background: #FEE2E2; color: #991B1B; }
+    .b-inprogress{ background: #E0E7FF; color: #3730A3; }
+
+    .case-card-m {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      margin-bottom: 12px;
+    }
+    .case-hd-m { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .case-id-m { font-size: 0.72rem; font-weight: 700; color: var(--text-light); }
+    .case-title-m { font-size: 0.85rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+    .case-stage-bar { margin-top: 12px; }
+    .case-stage-lbl { font-size: 0.62rem; color: var(--text-light); margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .stage-dots { display: flex; gap: 4px; }
+    .stage-dot {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: var(--border);
+    }
+    .stage-dot.done { background: var(--blue); }
+    .stage-dot.active { background: var(--amber); }
+
+    .profile-form { display: flex; flex-direction: column; gap: 12px; }
+    .form-row-m { display: flex; flex-direction: column; gap: 4px; }
+    .form-row-m label { font-size: 0.7rem; font-weight: 600; color: var(--text-mid); letter-spacing: 0.04em; text-transform: uppercase; }
+    .form-row-m input {
+      background: white; border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px;
+      font-size: 0.83rem; color: var(--text-dark);
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-row-m input:focus { border-color: var(--blue); }
+    .form-save-btn-m {
+      background: var(--navy); color: white;
+      padding: 14px; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 700;
+      margin-top: 8px;
+    }
+
+    /* ── BOTTOM NAV ───────────────────────── */
+    .bottom-nav {
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      height: 68px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 50;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      cursor: pointer; transition: all 0.2s;
+      padding-bottom: 4px;
+    }
+    .nav-item:active { background: var(--cream); }
+    .nav-ico { font-size: 1.3rem; line-height: 1; }
+    .nav-lbl {
+      font-size: 0.58rem; font-weight: 600;
+      color: var(--text-light); letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-item.active .nav-lbl { color: var(--blue); }
+    .nav-item.active .nav-ico { filter: none; }
+    .nav-active-dot {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 3px; border-radius: 0 0 3px 3px;
+      background: var(--blue);
+      display: none;
+    }
+    .nav-item.active .nav-active-dot { display: block; }
+
+    /* ── CART SHEET ───────────────────────── */
+    .sheet-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .sheet-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-sheet {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      max-height: 85%;
+      z-index: 201;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+      display: flex; flex-direction: column;
+    }
+    .cart-sheet.open { transform: translateY(0); }
+    .sheet-handle {
+      width: 36px; height: 4px; background: var(--border);
+      border-radius: 2px; margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+    .cart-sheet-hd {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px 12px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cart-sheet-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
+    .sheet-close {
+      background: var(--cream); border: none;
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; color: var(--text-mid);
+    }
+    .cart-sheet-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+    .cart-sheet-body::-webkit-scrollbar { display: none; }
+    .cart-empty-m {
+      text-align: center; padding: 40px 20px;
+      font-size: 0.85rem; color: var(--text-light);
+    }
+    .cart-item-m {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .cart-item-m:last-child { border-bottom: none; }
+    .cart-item-img-m {
+      width: 56px; height: 56px; border-radius: 8px;
+      background-size: cover; background-position: center;
+      flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .cart-item-name-m { font-size: 0.78rem; font-weight: 600; color: var(--navy); margin-bottom: 3px; line-height: 1.3; }
+    .cart-item-price-m { font-size: 0.75rem; color: var(--text-mid); margin-bottom: 8px; }
+    .cart-qty-row-m { display: flex; align-items: center; gap: 10px; }
+    .cart-qty-btn-m {
+      width: 26px; height: 26px; border-radius: 8px;
+      background: var(--cream); color: var(--navy);
+      font-size: 1rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cart-qty-num-m { font-size: 0.82rem; font-weight: 600; color: var(--navy); min-width: 16px; text-align: center; }
+    .cart-remove-m {
+      margin-left: auto; background: none;
+      font-size: 0.75rem; color: var(--text-light);
+    }
+    .cart-sheet-footer {
+      padding: 14px 16px 20px; border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cart-subtotal-m {
+      display: flex; justify-content: space-between;
+      font-size: 0.85rem; margin-bottom: 12px;
+    }
+    .cart-subtotal-m span:first-child { color: var(--text-mid); }
+    .cart-subtotal-m span:last-child { font-weight: 700; color: var(--navy); }
+    .checkout-btn-m {
+      width: 100%; background: var(--blue); color: white;
+      padding: 15px; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 700;
+    }
+
+    /* ── TOAST ────────────────────────────── */
+    .toast-m {
+      position: absolute; bottom: 80px; left: 20px; right: 20px;
+      background: var(--navy); color: white;
+      padding: 12px 16px; border-radius: 12px;
+      font-size: 0.8rem; font-weight: 500;
+      z-index: 500; opacity: 0; pointer-events: none;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      text-align: center;
+    }
+    .toast-m.show { opacity: 1; transform: translateY(0); }
+
+    /* home screen button */
+    .btn-primary-m {
+      background: var(--blue); color: white;
+      padding: 11px 22px; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<div class="device-frame">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <span>●●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div class="app-shell">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="top-bar-logo" onclick="goHome()">
+        ABC <span>Retail</span>
+        <div class="home-pill">🏠 Home</div>
+      </div>
+      <div class="top-bar-actions">
+        <button class="top-icon-btn" onclick="openCart()">
+          🛒
+          <span class="cart-badge" id="cart-badge"></span>
+        </button>
+        <button class="top-icon-btn">👤</button>
+      </div>
+    </div>
+
+    <!-- SCROLL AREA -->
+    <div class="scroll-area" id="main-scroll">
+
+      <!-- ── HOME SCREEN ── -->
+      <div class="screen active" id="screen-home">
+
+        <div class="announcement">✦ Free shipping over $75 &nbsp;·&nbsp; Spring Collection now live ✦</div>
+
+        <div class="hero">
+          <div class="hero-label">New Season Collection</div>
+          <h1 class="hero-title">Quality for Every<br><em>Corner</em> of Your Life</h1>
+          <p class="hero-sub">From home and living to sports, tech, and luxury — curated premium products backed by service that actually shows up.</p>
+          <div class="hero-btns">
+            <button class="btn-primary" onclick="showScreen('shop')">Shop Now</button>
+            <button class="btn-ghost" onclick="showScreen('support')">Get Help</button>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-val">50K+</div>
+              <div class="hero-stat-lbl">Products</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-val">98%</div>
+              <div class="hero-stat-lbl">Satisfaction</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-val">24/7</div>
+              <div class="hero-stat-lbl">Support</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-hd">
+            <div class="section-label">Browse by Category</div>
+            <div class="section-title">Shop All Departments</div>
+          </div>
+        </div>
+        <div class="cat-scroll">
+          <div class="cat-chip" onclick="showCategory('home')">
+            <div class="cat-chip-img" style="background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=80&fit=crop')"></div>
+            <div class="cat-chip-info">
+              <div class="cat-chip-name">Home & Living</div>
+              <div class="cat-chip-count">2,400+ products</div>
+            </div>
+          </div>
+          <div class="cat-chip" onclick="showCategory('office')">
+            <div class="cat-chip-img" style="background-image:url('https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&q=80&fit=crop')"></div>
+            <div class="cat-chip-info">
+              <div class="cat-chip-name">Office & Workspace</div>
+              <div class="cat-chip-count">1,200+ products</div>
+            </div>
+          </div>
+          <div class="cat-chip" onclick="showCategory('sports')">
+            <div class="cat-chip-img" style="background-image:url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&q=80&fit=crop')"></div>
+            <div class="cat-chip-info">
+              <div class="cat-chip-name">Sports & Fitness</div>
+              <div class="cat-chip-count">980+ products</div>
+            </div>
+          </div>
+          <div class="cat-chip" onclick="showCategory('tech')">
+            <div class="cat-chip-img" style="background-image:url('https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&q=80&fit=crop')"></div>
+            <div class="cat-chip-info">
+              <div class="cat-chip-name">Electronics & Tech</div>
+              <div class="cat-chip-count">1,650+ products</div>
+            </div>
+          </div>
+          <div class="cat-chip" onclick="showCategory('luxury')">
+            <div class="cat-chip-img" style="background-image:url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80&fit=crop')"></div>
+            <div class="cat-chip-info">
+              <div class="cat-chip-name">Luxury & Gifts</div>
+              <div class="cat-chip-count">640+ products</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="promo-banner" style="margin-top:24px">
+          <div class="promo-lbl">Premium Membership</div>
+          <div class="promo-title">More Perks.<br>More Savings.</div>
+          <div class="promo-body">Priority support, free 2-day shipping, and 3× reward points on every purchase.</div>
+          <button class="btn-primary-m">Learn More</button>
+        </div>
+
+        <div class="section" style="padding-bottom:8px">
+          <div class="section-label">Why ABC Retail</div>
+          <div class="section-title">Our Commitments</div>
+        </div>
+        <div class="trust-bar">
+          <div class="trust-item">
+            <div class="trust-ico">🚚</div>
+            <div>
+              <div class="trust-ttl">Free Shipping</div>
+              <div class="trust-sub">Orders over $75</div>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-ico">↩️</div>
+            <div>
+              <div class="trust-ttl">Easy Returns</div>
+              <div class="trust-sub">30-day policy</div>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-ico">🛡️</div>
+            <div>
+              <div class="trust-ttl">Secure Pay</div>
+              <div class="trust-sub">256-bit SSL</div>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-ico">💬</div>
+            <div>
+              <div class="trust-ttl">24/7 Support</div>
+              <div class="trust-sub">Chat, phone, SMS</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /home -->
+
+      <!-- ── SHOP SCREEN ── -->
+      <div class="screen" id="screen-shop">
+        <div class="page-header-bar">
+          <h1>Shop All Categories</h1>
+          <p>Browse premium products across every lifestyle category</p>
+        </div>
+        <div class="shop-list">
+          <div class="shop-cat-row" onclick="showCategory('home')">
+            <div class="shop-cat-img" style="background-image:url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&q=80&fit=crop')"></div>
+            <div class="shop-cat-body">
+              <div class="shop-cat-name">Home & Living</div>
+              <div class="shop-cat-desc">Furniture, décor, bedding, kitchen essentials.</div>
+              <div class="shop-cat-link">Browse →</div>
+            </div>
+          </div>
+          <div class="shop-cat-row" onclick="showCategory('office')">
+            <div class="shop-cat-img" style="background-image:url('https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=200&q=80&fit=crop')"></div>
+            <div class="shop-cat-body">
+              <div class="shop-cat-name">Office & Workspace</div>
+              <div class="shop-cat-desc">Desks, chairs, and productivity essentials.</div>
+              <div class="shop-cat-link">Browse →</div>
+            </div>
+          </div>
+          <div class="shop-cat-row" onclick="showCategory('sports')">
+            <div class="shop-cat-img" style="background-image:url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&q=80&fit=crop')"></div>
+            <div class="shop-cat-body">
+              <div class="shop-cat-name">Sports & Fitness</div>
+              <div class="shop-cat-desc">Equipment and gear for every activity level.</div>
+              <div class="shop-cat-link">Browse →</div>
+            </div>
+          </div>
+          <div class="shop-cat-row" onclick="showCategory('tech')">
+            <div class="shop-cat-img" style="background-image:url('https://images.unsplash.com/photo-1498049794561-7780e7231661?w=200&q=80&fit=crop')"></div>
+            <div class="shop-cat-body">
+              <div class="shop-cat-name">Electronics & Tech</div>
+              <div class="shop-cat-desc">Smart home, audio, and the latest consumer electronics.</div>
+              <div class="shop-cat-link">Browse →</div>
+            </div>
+          </div>
+          <div class="shop-cat-row" onclick="showCategory('luxury')">
+            <div class="shop-cat-img" style="background-image:url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80&fit=crop')"></div>
+            <div class="shop-cat-body">
+              <div class="shop-cat-name">Luxury & Gifts</div>
+              <div class="shop-cat-desc">Curated premium gifts for life's most meaningful moments.</div>
+              <div class="shop-cat-link">Browse →</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /shop -->
+
+      <!-- ── CATEGORY SCREEN (dynamic) ── -->
+      <div class="screen" id="screen-category">
+        <div class="page-header-bar">
+          <button class="back-btn" onclick="goBack()">← Back</button>
+          <h1 id="cat-title-m"></h1>
+          <p id="cat-desc-m"></p>
+        </div>
+        <div class="product-grid-mobile" id="product-grid-m"></div>
+      </div><!-- /category -->
+
+      <!-- ── PRODUCT DETAIL SCREEN (dynamic) ── -->
+      <div class="screen" id="screen-product">
+        <div style="background:var(--navy); padding: 12px 20px;">
+          <button class="back-btn" onclick="goBack()">← Back</button>
+        </div>
+        <div id="pd-img-m" class="pd-img-mobile"></div>
+        <div class="pd-body">
+          <div class="pd-badge-m" id="pd-badge-m"></div>
+          <div class="pd-name-m" id="pd-name-m"></div>
+          <div class="pd-price-m" id="pd-price-m"></div>
+          <div class="pd-desc-m" id="pd-desc-m"></div>
+          <button class="pd-add-btn-m" id="pd-add-btn-m">Add to Cart</button>
+          <div class="pd-section">
+            <div class="pd-section-ttl">Features</div>
+            <ul class="pd-features-m" id="pd-features-m"></ul>
+          </div>
+          <div class="pd-section">
+            <div class="pd-section-ttl">Specifications</div>
+            <table class="pd-specs-m" id="pd-specs-m"></table>
+          </div>
+        </div>
+      </div><!-- /product -->
+
+      <!-- ── SUPPORT SCREEN ── -->
+      <div class="screen" id="screen-support">
+        <div class="page-header-bar" style="text-align:center">
+          <h1>Customer Support</h1>
+          <p>We're here when you need us</p>
+        </div>
+
+        <div style="padding:16px 16px 8px">
+          <div class="section-label">Contact Options</div>
+        </div>
+
+        <div class="channel-list">
+          <div class="channel-row">
+            <div class="ch-ico">💬</div>
+            <div>
+              <div class="ch-title">Web Messaging</div>
+              <div class="ch-desc">Chat with AVA or a live specialist. Avg wait under 1 min.</div>
+              <div class="ch-link">Start a Chat →</div>
+            </div>
+          </div>
+          <div class="channel-row">
+            <div class="ch-ico">📞</div>
+            <div>
+              <div class="ch-title">Phone Support</div>
+              <div class="ch-desc">Speak directly with an agent. Mon–Fri 8am–8pm PT.</div>
+              <div class="ch-link">1-800-ABC-RTAIL</div>
+            </div>
+          </div>
+          <div class="channel-row">
+            <div class="ch-ico">✉️</div>
+            <div>
+              <div class="ch-title">Email Support</div>
+              <div class="ch-desc">We'll respond within one business day.</div>
+              <div class="ch-link">support@abcretail.com</div>
+            </div>
+          </div>
+          <div class="channel-row">
+            <div class="ch-ico">📱</div>
+            <div>
+              <div class="ch-title">SMS / Text</div>
+              <div class="ch-desc">Quick answers on orders, returns, and more.</div>
+              <div class="ch-link">Text START to 77222</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="chat-btn-big">
+          <span class="chat-btn-pulse"></span>
+          Chat with AVA Now
+          <span style="font-size:1.1rem">💬</span>
+        </button>
+
+        <div class="faq-section">
+          <div class="faq-label">Frequently Asked Questions</div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">How do I track my order? <i class="faq-chevron">▾</i></div>
+            <div class="faq-a">Log in to your account and visit the Orders section. Your order confirmation email also contains a direct tracking link updated in real time.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">What is your return policy? <i class="faq-chevron">▾</i></div>
+            <div class="faq-a">We offer hassle-free returns within 30 days of delivery. Premium members enjoy an extended 60-day return window. Items must be in original, unused condition.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">How long does shipping take? <i class="faq-chevron">▾</i></div>
+            <div class="faq-a">Standard shipping takes 3–5 business days. Expedited 2-day shipping is available at checkout. Premium members get complimentary 2-day shipping on all orders.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Can I change or cancel my order? <i class="faq-chevron">▾</i></div>
+            <div class="faq-a">Orders can be modified or cancelled within 1 hour of placement. After that, please contact our support team and we'll do our best based on fulfillment status.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">My item arrived damaged — what do I do? <i class="faq-chevron">▾</i></div>
+            <div class="faq-a">Contact support within 48 hours of delivery with photos of the damage. We'll arrange a replacement or full refund at no additional cost.</div>
+          </div>
+        </div>
+
+      </div><!-- /support -->
+
+      <!-- ── ACCOUNT SCREEN ── -->
+      <div class="screen" id="screen-account">
+
+        <div class="acct-hero">
+          <div class="acct-avatar-m">PR</div>
+          <div>
+            <div class="acct-name-m">Philip Rivers <span class="acct-badge-m">Premium</span></div>
+            <div class="acct-meta-m">C1001 · Member since Jan 2021</div>
+          </div>
+        </div>
+
+        <div class="acct-tabs">
+          <div class="acct-tab active" onclick="showPanel('orders', this)">📦 Orders</div>
+          <div class="acct-tab" onclick="showPanel('cases', this)">🎫 Cases</div>
+          <div class="acct-tab" onclick="showPanel('profile', this)">👤 Profile</div>
+        </div>
+
+        <div class="acct-content">
+
+          <!-- Orders Panel -->
+          <div class="panel active" id="panel-orders">
+            <div class="panel-title">Order History</div>
+
+            <div class="order-card-m">
+              <div class="order-hd-m">
+                <div>
+                  <div class="order-num-m">Order #TXN001</div>
+                  <div class="order-date-m">Placed March 14, 2026</div>
+                </div>
+                <span class="badge b-delayed">Delayed</span>
+              </div>
+              <div class="order-items-m">Coastal Living Sectional Sofa — 3-Piece Set (Driftwood)</div>
+              <div class="order-total-m">$4,280.00</div>
+            </div>
+
+            <div class="order-card-m">
+              <div class="order-hd-m">
+                <div>
+                  <div class="order-num-m">Order #TXN002</div>
+                  <div class="order-date-m">Placed January 28, 2026</div>
+                </div>
+                <span class="badge b-delivered">Delivered</span>
+              </div>
+              <div class="order-items-m">Standing Desk Pro 60", Ergonomic Mesh Chair</div>
+              <div class="order-total-m">$2,169.00</div>
+            </div>
+
+            <div class="order-card-m">
+              <div class="order-hd-m">
+                <div>
+                  <div class="order-num-m">Order #TXN003</div>
+                  <div class="order-date-m">Placed December 9, 2025</div>
+                </div>
+                <span class="badge b-delivered">Delivered</span>
+              </div>
+              <div class="order-items-m">Noise-Cancelling Headphones, Swiss Automatic Watch</div>
+              <div class="order-total-m">$3,339.00</div>
+            </div>
+          </div>
+
+          <!-- Cases Panel -->
+          <div class="panel" id="panel-cases">
+            <div class="panel-title">Support Cases</div>
+
+            <div class="case-card-m">
+              <div class="case-hd-m">
+                <div class="case-id-m">CASE-2026-0042</div>
+                <span class="badge b-inprogress">In Progress</span>
+              </div>
+              <div class="case-title-m">Damaged sofa corner piece — replacement request</div>
+              <div style="font-size:0.73rem; color:var(--text-mid)">Opened April 2, 2026 · Priority: High</div>
+              <div class="case-stage-bar">
+                <div class="case-stage-lbl">Resolution Progress</div>
+                <div class="stage-dots">
+                  <div class="stage-dot done"></div>
+                  <div class="stage-dot active"></div>
+                  <div class="stage-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="case-card-m">
+              <div class="case-hd-m">
+                <div class="case-id-m">CASE-2025-0891</div>
+                <span class="badge b-delivered">Resolved</span>
+              </div>
+              <div class="case-title-m">Missing item from TXN002 shipment</div>
+              <div style="font-size:0.73rem; color:var(--text-mid)">Opened February 4, 2026 · Resolved February 9, 2026</div>
+              <div class="case-stage-bar">
+                <div class="case-stage-lbl">Resolution Progress</div>
+                <div class="stage-dots">
+                  <div class="stage-dot done"></div>
+                  <div class="stage-dot done"></div>
+                  <div class="stage-dot done"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Panel -->
+          <div class="panel" id="panel-profile">
+            <div class="panel-title">My Profile</div>
+            <div class="profile-form">
+              <div class="form-row-m">
+                <label>First Name</label>
+                <input type="text" value="Philip">
+              </div>
+              <div class="form-row-m">
+                <label>Last Name</label>
+                <input type="text" value="Rivers">
+              </div>
+              <div class="form-row-m">
+                <label>Email</label>
+                <input type="email" value="philip.rivers@riversliving.com">
+              </div>
+              <div class="form-row-m">
+                <label>Phone</label>
+                <input type="tel" value="(949) 295-5945">
+              </div>
+              <div class="form-row-m">
+                <label>Address</label>
+                <input type="text" value="4515 Cherry Lane, Dana Point, CA 92629">
+              </div>
+              <div class="form-row-m">
+                <label>Preferred Channel</label>
+                <input type="text" value="Voice">
+              </div>
+              <button class="form-save-btn-m">Save Changes</button>
+            </div>
+          </div>
+
+        </div><!-- /acct-content -->
+      </div><!-- /account -->
+
+    </div><!-- /scroll-area -->
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <div class="nav-item active" id="nav-home" onclick="showScreen('home')">
+        <div class="nav-active-dot"></div>
+        <div class="nav-ico">🏠</div>
+        <div class="nav-lbl">Home</div>
+      </div>
+      <div class="nav-item" id="nav-shop" onclick="showScreen('shop')">
+        <div class="nav-active-dot"></div>
+        <div class="nav-ico">🛍️</div>
+        <div class="nav-lbl">Shop</div>
+      </div>
+      <div class="nav-item" id="nav-support" onclick="showScreen('support')">
+        <div class="nav-active-dot"></div>
+        <div class="nav-ico">💬</div>
+        <div class="nav-lbl">Support</div>
+      </div>
+      <div class="nav-item" id="nav-account" onclick="showScreen('account')">
+        <div class="nav-active-dot"></div>
+        <div class="nav-ico">👤</div>
+        <div class="nav-lbl">Account</div>
+      </div>
+    </div>
+
+    <!-- CART SHEET -->
+    <div class="sheet-overlay" id="sheet-overlay" onclick="closeCart()"></div>
+    <div class="cart-sheet" id="cart-sheet">
+      <div class="sheet-handle"></div>
+      <div class="cart-sheet-hd">
+        <div class="cart-sheet-title">Shopping Cart</div>
+        <button class="sheet-close" onclick="closeCart()">✕</button>
+      </div>
+      <div class="cart-sheet-body" id="cart-body-m">
+        <div class="cart-empty-m">🛒<br><br>Your cart is empty.</div>
+      </div>
+      <div id="cart-footer-m"></div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-m" id="toast-m"></div>
+
+  </div><!-- /app-shell -->
+</div><!-- /device-frame -->
+
+<script>
+// ── CATALOG ─────────────────────────────────────────────────────
+const PHOTO = {
+  home:   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop',
+  office: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop',
+  sports: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&fit=crop',
+  tech:   'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80&fit=crop',
+  luxury: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fit=crop',
+};
+const CATALOG = {
+  home:{label:'Home & Living',desc:'Furniture, décor, bedding, and everything to make your space feel like home.',products:[
+    {id:'H001',photo:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop',name:'Coastal Living Sectional Sofa',desc:'3-piece set in Driftwood finish, cloud comfort foam',price:4280,features:['Cloud comfort foam cushions — 8" deep seat','Stain-resistant performance velvet','Solid hardwood frame, lifetime warranty','Modular, reconfigurable layout','6 colorways available'],specs:{'Dimensions':'118" W × 85" D × 34" H','Seat Height':'18"','Weight Cap.':'800 lbs','Material':'Performance velvet / oak','Delivery':'White-glove setup'}},
+    {id:'H002',photo:'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80&fit=crop',name:'Solid Oak Dining Table',desc:'Seats 6–8, hand-rubbed natural finish, extendable',price:1890,features:['Sustainably sourced solid white oak','Hand-rubbed oil finish','Extendable leaf +24"','Mortise & tenon joinery'],specs:{'Dimensions':'84" W × 40" D × 30" H','Extended':'108" with leaf','Seats':'6–8','Weight':'142 lbs'}},
+    {id:'H003',photo:'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=600&q=80&fit=crop',name:'Artisan Ceramic Tableware Set',desc:'16-piece handcrafted stoneware, dishwasher safe',price:289,features:['16-piece set','Handcrafted in Portugal','Lead-free food-safe glaze','Dishwasher, microwave & oven safe'],specs:{'Set':'16 pieces','Dinner Plate':'11" diameter','Mug':'14 oz','Material':'Stoneware'}},
+    {id:'H004',photo:'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&fit=crop',name:'Premium Linen Bedding Set',desc:'King size, 100% organic linen, 4-piece',price:449,features:['100% organic European flax linen','GOTS certified','Pre-washed for softness','Duvet cover + sheet + 2 pillowcases'],specs:{'Size':'King','Material':'100% organic linen','Care':'Machine wash cold'}},
+    {id:'H005',photo:'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop',name:'Woven Jute Area Rug 8×10',desc:'Natural fibre, coastal weave, reversible',price:389,features:['Hand-woven in India','Natural jute — biodegradable','Reversible double-sided weave','Non-slip latex backing'],specs:{'Dimensions':"8' × 10'",'Material':'Natural jute','Backing':'Non-slip latex'}},
+    {id:'H006',photo:'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop',name:'Hammered Brass Floor Lamp',desc:'Adjustable arc arm, warm Edison filament',price:349,features:['Hand-hammered solid brass shade','Adjustable arc arm — 3 heights','Edison filament bulb (2700K) included','In-line dimmer switch'],specs:{'Height':'60"–72"','Bulb':'E26, max 60W','Base':'Marble','Weight':'11 lbs'}},
+  ]},
+  office:{label:'Office & Workspace',desc:'Desks, ergonomic chairs, and accessories for a productive modern workplace.',products:[
+    {id:'O001',photo:'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop',name:'Standing Desk Pro 60"',desc:'Electric height-adjustable, solid walnut surface, memory presets',price:1290,features:['Dual-motor electric adjustment','4 memory presets','Anti-collision sensor','Solid walnut surface'],specs:{'Surface':'60" W × 30" D','Height':'24.5"–50.5"','Capacity':'275 lbs'}},
+    {id:'O002',photo:'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&q=80&fit=crop',name:'Ergonomic Mesh Chair',desc:'Lumbar support, adjustable armrests & headrest, 5-yr warranty',price:879,features:['4-way adaptive lumbar support','Breathable 3D mesh back','Adjustable armrests (4-way)','5-year warranty'],specs:{'Seat':'20" W × 18" D','Capacity':'300 lbs','Material':'Mesh / aluminium'}},
+    {id:'O003',photo:'https://images.unsplash.com/photo-1593640495253-23196b27a87f?w=600&q=80&fit=crop',name:'Dual Monitor Arm',desc:'Holds two 32" monitors, full articulation',price:249,features:['Two monitors up to 32"','Full articulation','Integrated cable management'],specs:{'Monitor Size':'Up to 32"','Capacity':'17.6 lbs each','VESA':'75×75 / 100×100 mm'}},
+    {id:'O004',photo:'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80&fit=crop',name:'USB-C Hub Docking Station',desc:'12-in-1, 4K HDMI, 100W pass-through',price:189,features:['12-in-1 connectivity','Dual 4K HDMI @ 60Hz','100W USB-C PD pass-through','Gigabit Ethernet'],specs:{'HDMI':'2× 4K @ 60Hz','USB-C PD':'100W','Ethernet':'Gigabit RJ45'}},
+    {id:'O005',photo:'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&q=80&fit=crop',name:'Bamboo Desktop Organizer Set',desc:'5-piece modular system, cable cutouts',price:129,features:['5-piece modular layout','Sustainably sourced bamboo','Cable cutout slots','Monitor stand + pencil cup + trays'],specs:{'Monitor Stand':'20" W × 10" D','Material':'Moso bamboo','Pieces':'5'}},
+    {id:'O006',photo:'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80&fit=crop',name:'Acoustic Panel Set',desc:'4-piece, 60% noise reduction, premium felt',price:299,features:['NRC 0.60 — 60% noise reduction','Premium linen fabric face','Wall mounting hardware included'],specs:{'Pieces':'4 panels','NRC Rating':'0.60','Coverage':'8 sq ft per set'}},
+  ]},
+  sports:{label:'Sports & Fitness',desc:'Equipment and gear for athletes and active lifestyle enthusiasts.',products:[
+    {id:'S001',photo:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&fit=crop',name:'Adjustable Kettlebell Set',desc:'5–50 lbs, quick-change selector, rubber base',price:349,features:['Replaces 5 separate weights','Quick-select dial (5 lb increments)','Rubber base for floor protection'],specs:{'Weight Range':'5–50 lbs (22 settings)','Material':'Cast iron / rubber base'}},
+    {id:'S002',photo:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80&fit=crop',name:'Pull-Up & Dip Station',desc:'Heavy-duty steel, 400 lb capacity, freestanding',price:499,features:['Multi-grip pull-up bar','Angled dip handles','No-bolt freestanding','400 lb tested capacity'],specs:{'Height':'84"','Capacity':'400 lbs','Material':'14-gauge steel'}},
+    {id:'S003',photo:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80&fit=crop',name:'Resistance Band Kit',desc:'5 resistance levels, non-slip handles, case',price:89,features:['5 levels: 10–50 lbs','Natural latex','Handles, ankle straps, door anchor','Up to 150 lbs combined'],specs:{'Levels':'5 bands','Combined Max':'150 lbs','Material':'Natural latex'}},
+    {id:'S004',photo:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80&fit=crop',name:'Non-Slip Yoga Mat Pro',desc:'6mm thick, alignment lines, carry strap',price:129,features:['6mm dual-layer cushioning','Alignment guide lines','Moisture-wicking top layer','Natural rubber base'],specs:{'Dimensions':'68" L × 24" W × 6mm','Weight':'4.2 lbs','Base':'Natural tree rubber'}},
+    {id:'S005',photo:'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80&fit=crop',name:'Foam Roller Recovery Kit',desc:'3-piece deep tissue set — standard, vibrating, mini',price:79,features:['3-piece set (standard, vibrating, mini)','EVA foam — firm density','Vibrating: 3 intensity levels, 2hr battery'],specs:{'Standard':'18" L × 6" D','Battery':'2,000mAh ~2hr','Material':'High-density EVA'}},
+    {id:'S006',photo:'https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=600&q=80&fit=crop',name:'Smart Fitness Jump Rope',desc:'Digital rep counter, adjustable cable, app connected',price:149,features:['LCD: reps, calories, time','Adjustable PVC cable','Bluetooth 5.0 app sync','90-day battery life'],specs:{'Display':'LCD (reps/cal/time)','Connectivity':'Bluetooth 5.0','Weight':'0.55 lbs'}},
+  ]},
+  tech:{label:'Electronics & Tech',desc:'Smart home devices, audio equipment, and the latest consumer electronics.',products:[
+    {id:'T001',photo:'https://images.unsplash.com/photo-1558002038-1055907df827?w=600&q=80&fit=crop',name:'Smart Home Hub Gen 3',desc:'Zigbee & Z-Wave, works with Alexa, Google & HomeKit',price:199,features:['Zigbee 3.0 & Z-Wave Plus','Alexa, Google, HomeKit','Controls up to 100 devices','Local processing — works offline'],specs:{'Protocols':'Zigbee, Z-Wave, Wi-Fi 6','Device Limit':'100','Compatibility':'Alexa, Google, HomeKit'}},
+    {id:'T002',photo:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80&fit=crop',name:'Noise-Cancelling Headphones',desc:'40-hr battery, foldable, premium 40mm drivers',price:449,features:['Industry-leading ANC','40-hour battery','Multipoint: 2 devices','Foldable with hard case'],specs:{'Battery':'40hr (30hr ANC)','Charging':'USB-C, 10 min = 5hr','Weight':'8.8 oz'}},
+    {id:'T003',photo:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80&fit=crop',name:'Smart Bulb 4-Pack',desc:'2700K warm white, dimmable, no hub required',price:89,features:['Warm white 2700K','Dimmable 5–100%','No hub — direct Wi-Fi','25,000 hour lifespan'],specs:{'Color Temp':'2700K','Wattage':'15W (100W equiv.)','Lifespan':'25,000 hrs'}},
+    {id:'T004',photo:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&q=80&fit=crop',name:'Portable Bluetooth Speaker',desc:'360° sound, IP67, 24-hr battery',price:299,features:['360° omnidirectional sound','IP67 waterproof','24-hour battery','True stereo pairing'],specs:{'Output':'30W RMS','Rating':'IP67','Battery':'24hr, charges in 3.5hr'}},
+    {id:'T005',photo:'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=600&q=80&fit=crop',name:'4K Webcam Pro',desc:'Auto-focus, dual mics, plug & play USB-C',price:249,features:['4K 30fps / 1080p 60fps','AI autofocus & exposure','Dual noise-cancelling mics','Built-in privacy shutter'],specs:{'Resolution':'4K 30fps / 1080p 60fps','FOV':'90° wide angle','Connection':'USB-C'}},
+    {id:'T006',photo:'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&q=80&fit=crop',name:'Wireless Charging Pad',desc:'15W fast charge, Qi-certified, dual-device',price:79,features:['15W fast charge / MagSafe compatible','Charges 2 devices simultaneously','LED dims automatically at night'],specs:{'Output':'5W / 10W / 15W','Standard':'Qi + MagSafe','Devices':'2 simultaneously'}},
+  ]},
+  luxury:{label:'Luxury & Gifts',desc:"Premium gifts and curated luxury items for life's most meaningful moments.",products:[
+    {id:'L001',photo:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fit=crop',name:'Swiss Automatic Watch',desc:'Sapphire crystal, 50m water resistance, leather strap',price:2890,features:['Swiss ETA 2824-2 movement','Sapphire crystal (9H hardness)','50m water resistance','Exhibition caseback'],specs:{'Movement':'Swiss ETA 2824-2','Case':'40mm stainless steel','Water Resistance':'50m','Warranty':'2 years'}},
+    {id:'L002',photo:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80&fit=crop',name:'Italian Leather Wallet',desc:'8-card capacity, coin pocket, RFID blocking, gift-boxed',price:289,features:['Full-grain vegetable-tanned leather','RFID blocking lining','8 card slots + coin pocket','Gift-boxed'],specs:{'Cards':'8 slots + 2 bill + coin','Material':'Full-grain calf leather','Colors':'Cognac, Black, Dark Brown'}},
+    {id:'L003',photo:'https://images.unsplash.com/photo-1532522750741-628fde798c73?w=600&q=80&fit=crop',name:'Mongolian Cashmere Throw',desc:'100% Grade-A cashmere, 50"×70", hand-finished fringe',price:449,features:['100% Grade-A Mongolian cashmere','Hand-finished knotted fringe','Naturally hypoallergenic','Gift-ready box with ribbon'],specs:{'Dimensions':'50" W × 70" L','Grade':'Grade-A Mongolian cashmere','Weight':'14 oz'}},
+    {id:'L004',photo:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=600&q=80&fit=crop',name:'Handcrafted Candle Collection',desc:'3-piece soy wax set, 60-hr burn, linen-wrapped',price:189,features:['3 signature scents','100% pure soy wax','60-hour burn per candle','Reusable borosilicate glass vessels'],specs:{'Pieces':'3 candles','Burn Time':'60 hrs each','Wax':'100% soy'}},
+    {id:'L005',photo:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop',name:'Crystal Decanter Set',desc:'Hand-blown lead-free crystal, decanter + 6 glasses',price:379,features:['Hand-blown lead-free crystal','Decanter + 6 wine glasses','Wide aerating base','Velvet-lined gift box'],specs:{'Set':'1 decanter + 6 glasses','Decanter':'32 oz','Glass':'10 oz each'}},
+    {id:'L006',photo:'https://images.unsplash.com/photo-1517697471339-4aa32003c11a?w=600&q=80&fit=crop',name:'Leather-Bound Journal',desc:'Personalized embossing, 240 acid-free pages',price:149,features:['Personalized debossed cover','Full-grain leather','240 acid-free pages (90gsm)','Lay-flat sewn binding'],specs:{'Dimensions':'8.5" × 5.5"','Pages':'240','Paper':'90gsm acid-free'}},
+  ]},
+};
+
+// ── NAVIGATION STATE ────────────────────────────────────────────
+let navStack = ['home'];
+let currentCatId = null;
+
+function goHome() {
+  navStack = ['home'];
+  showScreen('home');
+}
+
+function showScreen(id, navId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navTarget = navId || id;
+  const navEl = document.getElementById('nav-' + navTarget);
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('main-scroll').scrollTop = 0;
+}
+
+function showCategory(catId) {
+  const cat = CATALOG[catId];
+  if (!cat) return;
+  currentCatId = catId;
+  document.getElementById('cat-title-m').textContent = cat.label;
+  document.getElementById('cat-desc-m').textContent = cat.desc;
+  document.getElementById('product-grid-m').innerHTML = cat.products.map(p => `
+    <div class="product-card-mobile" onclick="showProduct('${p.id}','${catId}')">
+      <div class="product-card-img" style="background-image:url('${p.photo || PHOTO[catId]}')"></div>
+      <div class="product-card-body">
+        <div class="product-card-name">${p.name}</div>
+        <div class="product-card-desc">${p.desc}</div>
+        <div class="product-card-footer">
+          <div class="product-card-price">$${p.price.toLocaleString()}</div>
+          <button class="add-btn-sm" onclick="event.stopPropagation(); addToCart('${p.id}','${catId}')">+ Cart</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  navStack.push('category');
+  showScreen('category', 'shop');
+}
+
+function showProduct(productId, catId) {
+  const cat = CATALOG[catId];
+  const product = cat.products.find(p => p.id === productId);
+  if (!product) return;
+  document.getElementById('pd-img-m').style.backgroundImage = `url('${product.photo || PHOTO[catId]}')`;
+  document.getElementById('pd-badge-m').textContent = cat.label;
+  document.getElementById('pd-name-m').textContent = product.name;
+  document.getElementById('pd-price-m').textContent = '$' + product.price.toLocaleString();
+  document.getElementById('pd-desc-m').textContent = product.desc;
+  document.getElementById('pd-add-btn-m').onclick = () => addToCart(productId, catId);
+  document.getElementById('pd-features-m').innerHTML = (product.features||[]).map(f => `<li>${f}</li>`).join('');
+  document.getElementById('pd-specs-m').innerHTML = Object.entries(product.specs||{}).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+  navStack.push('product');
+  showScreen('product', 'shop');
+}
+
+function goBack() {
+  navStack.pop();
+  const prev = navStack[navStack.length - 1];
+  if (prev === 'category') { showScreen('category', 'shop'); }
+  else if (prev === 'home') { navStack = ['home']; showScreen('home'); }
+  else { navStack = ['shop']; showScreen('shop'); }
+}
+
+// ── ACCOUNT TABS ────────────────────────────────────────────────
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── FAQ ─────────────────────────────────────────────────────────
+function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
+
+// ── CART ─────────────────────────────────────────────────────────
+let cart = [];
+
+function addToCart(productId, catId) {
+  const product = CATALOG[catId].products.find(p => p.id === productId);
+  if (!product) return;
+  const existing = cart.find(i => i.id === productId);
+  if (existing) { existing.qty++; } else { cart.push({...product, catId, qty:1}); }
+  updateCartUI();
+  showToast('Added: ' + product.name);
+}
+
+function changeQty(productId, delta) {
+  const item = cart.find(i => i.id === productId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== productId);
+  updateCartUI();
+  renderCartBody();
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(i => i.id !== productId);
+  updateCartUI();
+  renderCartBody();
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s,i) => s+i.qty, 0);
+  const badge = document.getElementById('cart-badge');
+  if (badge) { badge.textContent = total; badge.className = 'cart-badge' + (total > 0 ? ' show' : ''); }
+}
+
+function openCart() {
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.getElementById('cart-sheet').classList.add('open');
+  renderCartBody();
+}
+
+function closeCart() {
+  document.getElementById('sheet-overlay').classList.remove('open');
+  document.getElementById('cart-sheet').classList.remove('open');
+}
+
+function renderCartBody() {
+  const body   = document.getElementById('cart-body-m');
+  const footer = document.getElementById('cart-footer-m');
+  if (!body) return;
+  if (cart.length === 0) {
+    body.innerHTML = '<div class="cart-empty-m">🛒<br><br>Your cart is empty.<br><span style="font-size:0.73rem">Browse categories to find something you love.</span></div>';
+    if (footer) footer.innerHTML = '';
+    return;
+  }
+  body.innerHTML = cart.map(item => `
+    <div class="cart-item-m">
+      <div class="cart-item-img-m" style="background-image:url('${item.photo || PHOTO[item.catId]}')"></div>
+      <div style="flex:1">
+        <div class="cart-item-name-m">${item.name}</div>
+        <div class="cart-item-price-m">$${item.price.toLocaleString()}</div>
+        <div class="cart-qty-row-m">
+          <button class="cart-qty-btn-m" onclick="changeQty('${item.id}',-1)">−</button>
+          <span class="cart-qty-num-m">${item.qty}</span>
+          <button class="cart-qty-btn-m" onclick="changeQty('${item.id}',1)">+</button>
+        </div>
+      </div>
+      <button class="cart-remove-m" onclick="removeFromCart('${item.id}')">✕</button>
+    </div>
+  `).join('');
+  const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const count    = cart.reduce((s,i) => s + i.qty, 0);
+  if (footer) footer.innerHTML = `
+    <div class="cart-sheet-footer">
+      <div class="cart-subtotal-m">
+        <span>Subtotal (${count} item${count!==1?'s':''})</span>
+        <span>$${subtotal.toLocaleString()}</span>
+      </div>
+      <button class="checkout-btn-m">Proceed to Checkout →</button>
+    </div>
+  `;
+}
+
+// ── SWIPE NAVIGATION ────────────────────────────────────────────
+const MAIN_SCREENS = ['home', 'shop', 'support', 'account'];
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let isSwiping = false;
+
+const scrollArea = document.getElementById('main-scroll');
+
+scrollArea.addEventListener('touchstart', e => {
+  touchStartX    = e.touches[0].clientX;
+  touchStartY    = e.touches[0].clientY;
+  touchStartTime = Date.now();
+  isSwiping      = false;
+}, { passive: true });
+
+scrollArea.addEventListener('touchmove', e => {
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  // Only hijack if clearly more horizontal than vertical
+  if (!isSwiping && Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 8) {
+    isSwiping = true;
+  }
+}, { passive: true });
+
+scrollArea.addEventListener('touchend', e => {
+  if (!isSwiping) return;
+  const dx       = e.changedTouches[0].clientX - touchStartX;
+  const elapsed  = Date.now() - touchStartTime;
+  const velocity = Math.abs(dx) / elapsed; // px/ms
+
+  // Must be a meaningful swipe: >40px OR fast flick
+  if (Math.abs(dx) < 40 && velocity < 0.3) return;
+
+  const currentScreen = navStack[navStack.length - 1];
+
+  // Sub-screens: swipe right = go back
+  if ((currentScreen === 'category' || currentScreen === 'product') && dx > 0) {
+    goBack();
+    return;
+  }
+
+  // Main screens: swipe between tabs
+  const idx = MAIN_SCREENS.indexOf(currentScreen);
+  if (idx === -1) return;
+
+  if (dx < 0 && idx < MAIN_SCREENS.length - 1) {
+    // Swipe left → next tab
+    const next = MAIN_SCREENS[idx + 1];
+    navStack = [next];
+    showScreen(next);
+  } else if (dx > 0 && idx > 0) {
+    // Swipe right → previous tab
+    const prev = MAIN_SCREENS[idx - 1];
+    navStack = [prev];
+    showScreen(prev);
+  }
+  isSwiping = false;
+}, { passive: true });
+
+// ── TOAST ────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast-m');
+  if (!t) return;
+  t.textContent = '✓  ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
