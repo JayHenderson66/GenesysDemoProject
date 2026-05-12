@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ABC Retail — Case Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy:      #1A3A6B;
+  --navy-mid:  #1E4A8A;
+  --blue:      #4A90D9;
+  --blue-dk:   #2E74C0;
+  --blue-lt:   #E8F2FC;
+  --cream:     #F4F6F9;
+  --white:     #ffffff;
+  --gray-100:  #eef0f3;
+  --gray-200:  #d8dce3;
+  --gray-500:  #6b7a90;
+  --gray-700:  #3d4a5c;
+  --green:     #1e8c5a;
+  --green-lt:  #e3f5ed;
+  --amber:     #d97706;
+  --amber-lt:  #fef3cd;
+  --red:       #c0392b;
+  --red-lt:    #fde8e6;
+  --stage-color: #2E74C0;
+  --stage-lt:    #E8F2FC;
+  --radius: 10px;
+  --shadow: 0 3px 12px rgba(26,58,107,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(--gray-700); font-size: 14px; min-height: 100vh; }
+
+.topbar { background: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 48px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.brand { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 2px; color: #fff; text-transform: uppercase; }
+.brand span { color: #7BB8F0; }
+.divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+.stage-pill { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; background: rgba(46,116,192,0.35); color: #93C5FD; }
+
+.stage-bar { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 10px 20px; display: flex; align-items: center; gap: 0; }
+.stage-step { display: flex; align-items: center; gap: 8px; }
+.stage-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.stage-circle.active { background: var(--stage-color); color: #fff; box-shadow: 0 0 0 3px var(--stage-lt); }
+.stage-circle.done { background: var(--green); color: #fff; }
+.stage-circle.pending { background: var(--gray-200); color: var(--gray-500); }
+.stage-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.stage-label.active { color: var(--stage-color); }
+.stage-label.done { color: var(--green); }
+.stage-label.pending { color: var(--gray-500); }
+.stage-connector { flex: 1; height: 2px; background: var(--gray-200); margin: 0 10px; min-width: 32px; }
+.stage-connector.done { background: var(--green); }
+
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; height: calc(100vh - 48px - 50px); overflow: hidden; }
+.left-col { background: var(--white); border-right: 1px solid var(--gray-200); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.right-col { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--navy); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.card-accent { width: 3px; height: 14px; border-radius: 2px; background: var(--blue); }
+.card-accent.blue { background: var(--stage-color); }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-grid.full { grid-template-columns: 1fr; }
+.field-group { display: flex; flex-direction: column; gap: 3px; }
+.field-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); }
+.field-value { font-size: 0.88rem; font-weight: 500; color: var(--navy); padding: 5px 8px; background: var(--gray-100); border-radius: 6px; border: 1px solid var(--gray-200); min-height: 30px; word-break: break-word; }
+.field-value.mono { font-family: monospace; font-size: 0.82rem; }
+.field-value.summary { font-size: 0.85rem; line-height: 1.5; min-height: 60px; }
+.field-empty { color: var(--gray-500); font-style: italic; }
+
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.badge-high { background: var(--red-lt); color: var(--red); }
+.badge-medium { background: var(--amber-lt); color: var(--amber); }
+.badge-low { background: var(--gray-100); color: var(--gray-500); }
+.badge-urgent { background: #fce7f3; color: #be185d; }
+.badge-premium { background: var(--blue-lt); color: var(--blue-dk); }
+.badge-negative { background: var(--red-lt); color: var(--red); }
+
+/* POLICY CHECKS */
+.policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.policy-item { border-radius: 8px; border: 1px solid var(--gray-200); padding: 10px 12px; background: var(--gray-100); }
+.policy-item.pass { background: var(--green-lt); border-color: #a7f3d0; }
+.policy-item.fail { background: var(--red-lt); border-color: #fca5a5; }
+.policy-item.warn { background: var(--amber-lt); border-color: #fcd34d; }
+.policy-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); margin-bottom: 4px; }
+.policy-item.pass .policy-label { color: var(--green); }
+.policy-item.fail .policy-label { color: var(--red); }
+.policy-item.warn .policy-label { color: var(--amber); }
+.policy-value { font-size: 0.85rem; font-weight: 600; color: var(--navy); }
+
+/* DECISION BUTTONS */
+.decision-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.decision-btn { padding: 12px; border-radius: 8px; border: 2px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; background: var(--gray-100); color: var(--gray-500); }
+.decision-btn:hover { border-color: var(--gray-200); background: var(--white); }
+.decision-btn.approve:hover, .decision-btn.approve.selected { background: var(--green-lt); border-color: var(--green); color: var(--green); }
+.decision-btn.deny:hover, .decision-btn.deny.selected { background: var(--red-lt); border-color: var(--red); color: var(--red); }
+
+/* REVIEW CRITERIA */
+.criteria-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--gray-200); background: var(--gray-100); margin-bottom: 8px; }
+.criteria-item:last-child { margin-bottom: 0; }
+.criteria-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.criteria-body { flex: 1; }
+.criteria-label { font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+.criteria-note { font-size: 0.77rem; color: var(--gray-500); }
+.criteria-note.pass { color: var(--green); font-weight: 600; }
+.criteria-note.fail { color: var(--red); font-weight: 600; }
+
+/* COPILOT NOTICE */
+.copilot-notice { display: flex; align-items: flex-start; gap: 10px; background: linear-gradient(135deg, #EDE9FE 0%, #E8F2FC 100%); border: 1px solid #c4b5fd; border-radius: var(--radius); padding: 12px 14px; }
+.copilot-icon { font-size: 1.1rem; flex-shrink: 0; }
+.copilot-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B4FA8; margin-bottom: 3px; }
+.copilot-text { font-size: 0.82rem; color: #3d4a5c; line-height: 1.45; }
+
+.divider { height: 1px; background: var(--gray-100); }
+.loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="brand">ABC <span>Retail</span></div>
+    <div class="divider"></div>
+    <div class="page-title">Case Management</div>
+    <div class="divider"></div>
+    <div class="stage-pill">Stage 2 — Review</div>
+  </div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:rgba(255,255,255,0.4);letter-spacing:0.5px;" id="case-ref-top">—</div>
+</div>
+
+<div class="stage-bar">
+  <div class="stage-step">
+    <div class="stage-circle done">✓</div>
+    <div class="stage-label done">Intake</div>
+  </div>
+  <div class="stage-connector done"></div>
+  <div class="stage-step">
+    <div class="stage-circle active">2</div>
+    <div class="stage-label active">Review</div>
+  </div>
+  <div class="stage-connector"></div>
+  <div class="stage-step">
+    <div class="stage-circle pending">3</div>
+    <div class="stage-label pending">Resolution</div>
+  </div>
+  <div style="margin-left:auto;font-size:0.78rem;color:var(--gray-500);">
+    SLA: <span id="sla-display" style="font-weight:600;color:var(--navy);">—</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- LEFT: INTAKE SUMMARY -->
+  <div class="left-col">
+
+    <div>
+      <div class="card-title" style="margin-bottom:10px;"><div class="card-accent blue"></div>Case</div>
+      <div class="field-grid full">
+        <div class="field-group">
+          <div class="field-label">Case ID</div>
+          <div class="field-value mono" id="case-id"><span class="loading">Loading…</span></div>
+        </div>
+      </div>
+      <div class="field-grid" style="margin-top:10px;">
+        <div class="field-group">
+          <div class="field-label">Priority</div>
+          <div class="field-value" id="case-priority">—</div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Opened</div>
+          <div class="field-value" id="case-opened">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="card-title" style="margin-bottom:10px;"><div class="card-accent"></div>Customer</div>
+      <div class="field-grid">
+        <div class="field-group">
+          <div class="field-label">Name</div>
+          <div class="field-value" id="cust-name"><span class="loading">Loading…</span></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">LTV</div>
+          <div class="field-value" id="cust-ltv">—</div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Sentiment</div>
+          <div class="field-value" id="cust-sentiment">—</div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">NPS</div>
+          <div class="field-value" id="cust-nps">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="card-title" style="margin-bottom:10px;"><div class="card-accent"></div>Order</div>
+      <div class="field-grid full">
+        <div class="field-group">
+          <div class="field-label">Order Number</div>
+          <div class="field-value mono" id="txn-ref">—</div>
+        </div>
+      </div>
+      <div class="field-grid" style="margin-top:10px;">
+        <div class="field-group">
+          <div class="field-label">Amount</div>
+          <div class="field-value" id="txn-amount">—</div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Status</div>
+          <div class="field-value" id="txn-status">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="card-title" style="margin-bottom:10px;"><div class="card-accent"></div>Intake Summary</div>
+      <div class="field-value summary" id="case-summary"><span class="field-empty">No intake summary captured.</span></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: REVIEW WORK -->
+  <div class="right-col">
+
+    <!-- Policy Checks -->
+    <div class="card">
+      <div class="card-title"><div class="card-accent blue"></div>Policy Check</div>
+      <div class="policy-grid">
+        <div class="policy-item" id="policy-window">
+          <div class="policy-label">Return Window</div>
+          <div class="policy-value" id="policy-window-val">Checking…</div>
+        </div>
+        <div class="policy-item" id="policy-value">
+          <div class="policy-label">Order Value</div>
+          <div class="policy-value" id="policy-value-val">—</div>
+        </div>
+        <div class="policy-item" id="policy-priority">
+          <div class="policy-label">Customer Priority</div>
+          <div class="policy-value" id="policy-priority-val">—</div>
+        </div>
+        <div class="policy-item" id="policy-channel">
+          <div class="policy-label">Initiated Via</div>
+          <div class="policy-value" id="policy-channel-val">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Criteria -->
+    <div class="card">
+      <div class="card-title"><div class="card-accent blue"></div>Review Criteria</div>
+      <div class="criteria-item">
+        <div class="criteria-icon">📋</div>
+        <div class="criteria-body">
+          <div class="criteria-label">Standard Refund — Auto-Approve Eligible</div>
+          <div class="criteria-note">Order within 30 days · Undamaged / wrong item · Value under $500 · First claim on this order</div>
+        </div>
+      </div>
+      <div class="criteria-item">
+        <div class="criteria-icon">⚠️</div>
+        <div class="criteria-body">
+          <div class="criteria-label">Supervisor Review Required</div>
+          <div class="criteria-note">Order value over $500 · More than 30 days since purchase · Second or subsequent claim · Customer dispute flagged</div>
+        </div>
+      </div>
+      <div class="criteria-item">
+        <div class="criteria-icon">❌</div>
+        <div class="criteria-body">
+          <div class="criteria-label">Denial Criteria</div>
+          <div class="criteria-note">Outside return window with no exception · Item not eligible for return per policy · Suspected misuse or fraud pattern</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision -->
+    <div class="card">
+      <div class="card-title"><div class="card-accent blue"></div>Review Decision</div>
+      <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:12px;">Select the outcome and set the work item status in the GC Case panel. Both outcomes advance to Resolution.</p>
+      <div class="decision-row">
+        <button class="decision-btn approve" onclick="selectDecision(this, 'approve')">✓ Approve Refund</button>
+        <button class="decision-btn deny"    onclick="selectDecision(this, 'deny')">✕ Deny Refund</button>
+      </div>
+      <div id="decision-note" style="margin-top:10px;font-size:0.82rem;color:var(--gray-500);display:none;"></div>
+    </div>
+
+    <!-- Copilot Notice -->
+    <div class="copilot-notice">
+      <div class="copilot-icon">🤖</div>
+      <div>
+        <div class="copilot-label">Review Stage — No Live Checklist</div>
+        <div class="copilot-text">Stage 2 Review is typically back-office processing. Select your decision above, then set the work item status to <strong>Approved</strong> or <strong>Denied</strong> in the GC Work Item panel to advance to Stage 3 — Resolution.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w';
+const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+const p = new URLSearchParams(window.location.search);
+const caseId     = p.get('caseId')     || p.get('case_id')     || null;
+const customerId = p.get('customerId') || p.get('customer_id') || null;
+
+function sb(table, query) {
+  return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
+}
+function set(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+function badge(val, map) {
+  if (!val) return '<span class="field-empty">—</span>';
+  const cls = map[val.toLowerCase()] || '';
+  return cls ? `<span class="badge ${cls}"><span class="badge-dot"></span>${val}</span>` : val;
+}
+
+function policyClass(condition) {
+  return condition === 'pass' ? 'pass' : condition === 'fail' ? 'fail' : 'warn';
+}
+
+async function load() {
+  try {
+    let caseData = null, custData = null, txnData = null;
+
+    if (caseId) {
+      const cases = await sb('gc_demo_jh_retail_cases', `key=eq.${caseId}`);
+      caseData = cases[0];
+    }
+    if (caseData) {
+      set('case-id', caseData.key || '—');
+      set('case-ref-top', caseData.key || '—');
+      set('case-priority', badge(caseData.priority, { high:'badge-high', medium:'badge-medium', low:'badge-low', urgent:'badge-urgent' }));
+      if (caseData.opened_date) set('case-opened', new Date(caseData.opened_date).toLocaleDateString());
+      if (caseData.sla_hours) set('sla-display', `${caseData.sla_hours}h`);
+      set('case-summary', caseData.case_summary
+        ? `<span style="font-size:0.85rem;line-height:1.5;">${caseData.case_summary}</span>`
+        : '<span class="field-empty">No intake summary on file.</span>');
+      set('policy-channel-val', caseData.case_channel || '—');
+
+      // Policy: order value check
+      const custId = customerId || caseData.customer_id;
+      if (custId) {
+        const custs = await sb('gc_demo_jh_retail_customers', `key=eq.${custId}`);
+        custData = custs[0];
+      }
+      if (custData) {
+        set('cust-name', `${custData.first_name} ${custData.last_name}`);
+        set('cust-ltv', custData.lifetime_value || '—');
+        set('cust-sentiment', badge(custData.sentiment_score, { negative:'badge-negative', positive:'badge-positive' }));
+        set('cust-nps', custData.nps_score !== undefined ? custData.nps_score : '—');
+
+        // Priority policy check
+        const acctType = custData.account_type || '';
+        const pEl = document.getElementById('policy-priority');
+        if (pEl) pEl.className = 'policy-item ' + (acctType.toLowerCase() === 'premium' ? 'pass' : '');
+        set('policy-priority-val', acctType || '—');
+
+        if (custData.active_txn_id) {
+          const txns = await sb('gc_demo_jh_retail_transactions', `key=eq.${custData.active_txn_id}`);
+          txnData = txns[0];
+        }
+      }
+      if (txnData) {
+        set('txn-ref', txnData.reference_number || txnData.key || '—');
+        set('txn-amount', txnData.amount || '—');
+        set('txn-status', txnData.status_display || txnData.status || '—');
+
+        // Order value policy
+        const amt = parseFloat((txnData.amount || '').replace(/[^0-9.]/g,'')) || 0;
+        const vEl = document.getElementById('policy-value');
+        if (vEl) vEl.className = 'policy-item ' + (amt > 500 ? 'warn' : 'pass');
+        set('policy-value-val', txnData.amount || '—');
+
+        // Return window check (transaction date vs today)
+        if (txnData.transaction_date) {
+          const orderDate = new Date(txnData.transaction_date);
+          const daysSince = Math.floor((Date.now() - orderDate.getTime()) / 86400000);
+          const wEl = document.getElementById('policy-window');
+          if (wEl) wEl.className = 'policy-item ' + (daysSince <= 30 ? 'pass' : 'fail');
+          set('policy-window-val', `${daysSince} days ago`);
+        }
+      }
+    }
+  } catch(e) { console.error('Load error:', e); }
+}
+
+let selectedDecision = null;
+function selectDecision(btn, type) {
+  document.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedDecision = type;
+  const note = document.getElementById('decision-note');
+  if (note) {
+    note.style.display = 'block';
+    note.textContent = type === 'approve'
+      ? 'Set work item status to "Approved" in the GC Case panel to advance to Stage 3 — Resolution.'
+      : 'Set work item status to "Denied" in the GC Case panel. Resolution stage will handle customer communication.';
+    note.style.color = type === 'approve' ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+load();
+</script>
+</body>
+</html>
