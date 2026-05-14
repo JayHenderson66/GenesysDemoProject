@@ -327,32 +327,35 @@ function badge(val, map) {
 
 async function load() {
   try {
-    // Load case
+    let caseData = null;
+
     if (caseId) {
-      const cases = await sb('gc_demo_jh_retail_cases', `key=eq.${caseId}`);
-      const c = cases[0];
-      if (c) {
-        set('case-id', c.key || '—');
-        set('case-ref-top', c.key || '—');
-        set('case-priority', badge(c.priority, { high:'badge-high', medium:'badge-medium', low:'badge-low', urgent:'badge-urgent', critical:'badge-high' }));
-        if (c.sla_hours) set('sla-display', `${c.sla_hours}h`);
-      }
+      const cases = await sb('gc_demo_jh_retail_cases', `key=eq.${caseId}&select=*`);
+      caseData = cases[0];
     }
 
-    // Load customer
-    const custId = customerId || (caseId ? null : null);
+    if (caseData) {
+      set('case-id', caseData.key || '—');
+      set('case-ref-top', caseData.key || '—');
+      set('case-priority', badge(caseData.priority, { high:'badge-high', medium:'badge-medium', low:'badge-low', urgent:'badge-urgent', critical:'badge-high' }));
+      if (caseData.sla_hours) set('sla-display', `${caseData.sla_hours}h`);
+      set('case-channel', caseData.case_channel || p.get('channel') || '—');
+      set('ava-summary', caseData.case_summary
+        ? `<span style="font-size:0.85rem;line-height:1.5;">${caseData.case_summary}</span>`
+        : '<span class="field-empty">No AVA summary captured.</span>');
+    }
+
+    const custId = customerId || (caseData && caseData.customer_id) || null;
     if (custId) {
       const custs = await sb('gc_demo_jh_retail_customers', `key=eq.${custId}`);
       const cu = custs[0];
       if (cu) {
-        const name = `${cu.first_name} ${cu.last_name}`;
-        set('cust-name', name);
+        set('cust-name', `${cu.first_name} ${cu.last_name}`);
         set('cust-type', cu.account_type ? `<span class="badge badge-premium">${cu.account_type}</span>` : '—');
         set('cust-sentiment', badge(cu.sentiment_score, { negative:'badge-negative', positive:'badge-positive', neutral:'badge-neutral' }));
         set('cust-ltv', cu.lifetime_value || '—');
         set('tt-name', cu.first_name || 'there');
 
-        // Load transaction
         if (cu.active_txn_id) {
           const txns = await sb('gc_demo_jh_retail_transactions', `key=eq.${cu.active_txn_id}`);
           const t = txns[0];
@@ -360,23 +363,11 @@ async function load() {
             set('txn-ref', t.reference_number || t.key || '—');
             set('txn-amount', t.amount || '—');
             set('txn-status', t.status_display || t.status || '—');
-            set('txn-items', t.item_count ? `${t.item_count} item(s)` : '—');
+            const items = (t.total_items || 0);
+            set('txn-items', items ? `${items} item(s)` : '—');
             set('tt-order', t.reference_number || 'your recent order');
           }
         }
-
-        // Load case channel if not already set from case
-        if (!caseId) set('case-channel', cu.preferred_channel || '—');
-      }
-    }
-
-    // Channel from case record if available
-    if (caseId) {
-      const cases = await sb('gc_demo_jh_retail_cases', `key=eq.${caseId}&select=*`);
-      const c = cases[0];
-      if (c) {
-        set('case-channel', c.case_channel || p.get('channel') || '—');
-        set('ava-summary', c.case_summary ? `<span style="font-size:0.85rem;line-height:1.5;">${c.case_summary}</span>` : '<span class="field-empty">No AVA summary captured.</span>');
       }
     }
 
