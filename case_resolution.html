@@ -282,7 +282,7 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
     <!-- Resolution Method -->
     <div class="card">
       <div class="card-title"><div class="card-accent green"></div>Resolution Method</div>
-      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select and confirm the resolution method with the customer. Record in GC Case panel.</p>
+      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select the resolution method, then use the Close Case button in the GC panel.</p>
       <div class="method-row">
         <button class="method-btn" onclick="selectMethod(this)">Original Payment</button>
         <button class="method-btn" onclick="selectMethod(this)">Store Credit</button>
@@ -328,7 +328,6 @@ const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_
 const p = new URLSearchParams(window.location.search);
 const caseId     = p.get('caseId')     || p.get('case_id')     || null;
 const customerId = p.get('customerId') || p.get('customer_id') || null;
-// Optional: decision passed from Copilot if available
 const decision   = p.get('decision')  || null;
 
 function sb(table, query) {

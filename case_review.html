@@ -292,7 +292,7 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
         <button class="decision-btn approve" onclick="selectDecision(this, 'approve')">✓ Approve Refund</button>
         <button class="decision-btn deny"    onclick="selectDecision(this, 'deny')">✕ Deny Refund</button>
       </div>
-      <div id="decision-note" style="margin-top:10px;font-size:0.82rem;color:var(--gray-500);display:none;"></div>
+      <div id="decision-note" style="margin-top:10px;font-size:0.82rem;display:none;"></div>
     </div>
 
     <!-- Copilot Notice -->
@@ -406,8 +406,8 @@ function selectDecision(btn, type) {
   if (note) {
     note.style.display = 'block';
     note.textContent = type === 'approve'
-      ? 'Set work item status to "Approved" in the GC Case panel to advance to Stage 3 — Resolution.'
-      : 'Set work item status to "Denied" in the GC Case panel. Resolution stage will handle customer communication.';
+      ? 'Outcome: Approved. Use the Approve button in the GC panel to advance to Stage 3.'
+      : 'Outcome: Denied. Use the Deny button in the GC panel to advance to Stage 3.';
     note.style.color = type === 'approve' ? 'var(--green)' : 'var(--red)';
   }
 }

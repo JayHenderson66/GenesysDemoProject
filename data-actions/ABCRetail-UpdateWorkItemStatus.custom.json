@@ -1,0 +1,54 @@
+{
+  "name": "ABC Retail - Update Work Item Status",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/taskmanagement/workitems/${input.workitemId}",
+      "requestType": "PATCH",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "requestTemplate": "{\"statusId\": \"${input.statusId}\"}"
+    },
+    "response": {
+      "translationMap": {
+        "workitemId": "$.id",
+        "statusId": "$.statusId"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"workitemId\": ${workitemId}, \"statusId\": ${statusId}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": {
+            "type": "string"
+          },
+          "statusId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": {
+            "type": "string"
+          },
+          "statusId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
