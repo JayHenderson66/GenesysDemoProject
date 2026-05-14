@@ -131,6 +131,12 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 
 .divider { height: 1px; background: var(--gray-100); }
 .loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; }
+
+/* CLOSE BUTTON */
+.close-btn { width: 100%; padding: 13px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--green); color: #fff; transition: all 0.15s; box-shadow: 0 2px 8px rgba(30,140,90,0.25); margin-top: 10px; }
+.close-btn:hover:not(:disabled) { background: #166534; }
+.close-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.advance-success { background: var(--green-lt); border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: var(--green); font-weight: 600; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -282,12 +288,16 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
     <!-- Resolution Method -->
     <div class="card">
       <div class="card-title"><div class="card-accent green"></div>Resolution Method</div>
-      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select and confirm the resolution method with the customer. Record in GC Case panel.</p>
+      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select and confirm the resolution method with the customer.</p>
       <div class="method-row">
         <button class="method-btn" onclick="selectMethod(this)">Original Payment</button>
         <button class="method-btn" onclick="selectMethod(this)">Store Credit</button>
         <button class="method-btn" onclick="selectMethod(this)">Replacement Item</button>
       </div>
+      <button class="close-btn" id="close-btn" onclick="closeCase()" style="display:none;">
+        Close Case →
+      </button>
+      <div id="close-status" style="margin-top:8px;display:none;"></div>
     </div>
 
     <!-- Recovery Gesture -->
@@ -328,8 +338,19 @@ const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_
 const p = new URLSearchParams(window.location.search);
 const caseId     = p.get('caseId')     || p.get('case_id')     || null;
 const customerId = p.get('customerId') || p.get('customer_id') || null;
-// Optional: decision passed from Copilot if available
 const decision   = p.get('decision')  || null;
+
+const PATCH_HEADERS = { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
+
+async function patchCase(fields) {
+  if (!caseId) return false;
+  const resp = await fetch(`${SUPABASE_URL}/gc_demo_jh_retail_cases?key=eq.${caseId}`, {
+    method: 'PATCH',
+    headers: PATCH_HEADERS,
+    body: JSON.stringify({ ...fields, updated_at: new Date().toISOString() })
+  });
+  return resp.ok;
+}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
@@ -431,9 +452,36 @@ async function load() {
   } catch(e) { console.error('Load error:', e); }
 }
 
+let selectedMethod = null;
 function selectMethod(btn) {
   document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  selectedMethod = btn.textContent.trim();
+  const closeBtn = document.getElementById('close-btn');
+  if (closeBtn) closeBtn.style.display = 'block';
+}
+
+async function closeCase() {
+  if (!selectedMethod) return;
+  const btn = document.getElementById('close-btn');
+  const status = document.getElementById('close-status');
+  btn.disabled = true;
+  btn.textContent = 'Closing…';
+  const ok = await patchCase({
+    stage_3_status: 'complete',
+    status: 'resolved',
+    resolution: selectedMethod
+  });
+  if (ok) {
+    btn.style.display = 'none';
+    status.style.display = 'block';
+    status.innerHTML = `<div class="advance-success">✓ Case closed — resolution recorded as <strong>${selectedMethod}</strong>. Now set GC work item status to <strong>Resolved</strong> to complete the workflow.</div>`;
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Close Case →';
+    status.style.display = 'block';
+    status.innerHTML = '<div style="color:var(--red);font-size:0.82rem;">Update failed — check console.</div>';
+  }
 }
 
 function selectGesture(btn) {

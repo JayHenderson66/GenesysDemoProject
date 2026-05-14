@@ -110,6 +110,12 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 
 /* LOADING */
 .loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; padding: 8px 0; }
+
+/* ADVANCE BUTTON */
+.advance-btn { width: 100%; padding: 13px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--stage-color); color: #fff; transition: all 0.15s; box-shadow: 0 2px 8px rgba(217,119,6,0.25); }
+.advance-btn:hover:not(:disabled) { background: #b45309; box-shadow: 0 3px 12px rgba(217,119,6,0.4); }
+.advance-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.advance-success { background: var(--green-lt); border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: var(--green); font-weight: 600; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -294,8 +300,16 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
       <div class="copilot-icon">🤖</div>
       <div>
         <div class="copilot-label">Agent Copilot — Intake Checklist Active</div>
-        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Intake</strong> checklist in real time. When you're done, set the work item status to <strong>Intake Complete</strong> in the GC panel to advance to Stage 2 — Review.</div>
+        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Intake</strong> checklist in real time. When you're done with intake, click the button below to advance the case, then set the GC work item status to <strong>Intake Complete</strong>.</div>
       </div>
+    </div>
+
+    <!-- Advance Stage -->
+    <div>
+      <button class="advance-btn" id="advance-btn" onclick="advanceStage()" disabled>
+        Advance to Stage 2 — Review →
+      </button>
+      <div id="advance-status" style="margin-top:8px;display:none;"></div>
     </div>
 
   </div>
@@ -309,6 +323,36 @@ const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_
 const p = new URLSearchParams(window.location.search);
 const caseId      = p.get('caseId')      || p.get('case_id')      || null;
 const customerId  = p.get('customerId')  || p.get('customer_id')  || null;
+
+const PATCH_HEADERS = { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
+
+async function patchCase(fields) {
+  if (!caseId) return false;
+  const resp = await fetch(`${SUPABASE_URL}/gc_demo_jh_retail_cases?key=eq.${caseId}`, {
+    method: 'PATCH',
+    headers: PATCH_HEADERS,
+    body: JSON.stringify({ ...fields, updated_at: new Date().toISOString() })
+  });
+  return resp.ok;
+}
+
+async function advanceStage() {
+  const btn = document.getElementById('advance-btn');
+  const status = document.getElementById('advance-status');
+  btn.disabled = true;
+  btn.textContent = 'Updating…';
+  const ok = await patchCase({ current_stage: 2, stage_1_status: 'complete', status: 'in_review' });
+  if (ok) {
+    btn.style.display = 'none';
+    status.style.display = 'block';
+    status.innerHTML = '<div class="advance-success">✓ Case advanced to Stage 2 — Review. Now set GC work item status to <strong>Intake Complete</strong>.</div>';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Advance to Stage 2 — Review →';
+    status.style.display = 'block';
+    status.innerHTML = '<div style="color:var(--red);font-size:0.82rem;">Update failed — check console.</div>';
+  }
+}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
@@ -373,6 +417,11 @@ async function load() {
 
   } catch(e) {
     console.error('Load error:', e);
+  } finally {
+    if (caseId) {
+      const btn = document.getElementById('advance-btn');
+      if (btn) btn.disabled = false;
+    }
   }
 }
 
