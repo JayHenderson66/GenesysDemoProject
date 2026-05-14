@@ -1,0 +1,45 @@
+{
+  "name": "ABC Retail - Set WI Status - Resolved Refund Issued",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/taskmanagement/workitems/${input.workitemId}",
+      "requestType": "PATCH",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "requestTemplate": "{\"statusId\": \"884e37e5-61f4-463b-861c-d91e8d7cd001\"}"
+    },
+    "response": {
+      "translationMap": {
+        "workitemId": "$.id",
+        "statusId": "$.statusId"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"workitemId\": ${workitemId}, \"statusId\": ${statusId}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": { "type": "string" },
+          "statusId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}

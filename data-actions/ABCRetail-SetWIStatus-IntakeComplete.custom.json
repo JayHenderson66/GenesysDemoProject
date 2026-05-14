@@ -1,0 +1,45 @@
+{
+  "name": "ABC Retail - Set WI Status - Intake Complete",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/taskmanagement/workitems/${input.workitemId}",
+      "requestType": "PATCH",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "requestTemplate": "{\"statusId\": \"eef100ff-1390-4b7a-83a1-2611e69ee4e0\"}"
+    },
+    "response": {
+      "translationMap": {
+        "workitemId": "$.id",
+        "statusId": "$.statusId"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"workitemId\": ${workitemId}, \"statusId\": ${statusId}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": { "type": "string" },
+          "statusId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
