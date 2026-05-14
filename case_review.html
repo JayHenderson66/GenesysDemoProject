@@ -117,12 +117,6 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 
 .divider { height: 1px; background: var(--gray-100); }
 .loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; }
-
-/* ADVANCE BUTTON */
-.advance-btn { width: 100%; padding: 13px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--stage-color); color: #fff; transition: all 0.15s; box-shadow: 0 2px 8px rgba(46,116,192,0.25); margin-top: 10px; }
-.advance-btn:hover:not(:disabled) { background: var(--navy); }
-.advance-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.advance-success { background: var(--green-lt); border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: var(--green); font-weight: 600; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -299,10 +293,6 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
         <button class="decision-btn deny"    onclick="selectDecision(this, 'deny')">✕ Deny Refund</button>
       </div>
       <div id="decision-note" style="margin-top:10px;font-size:0.82rem;display:none;"></div>
-      <button class="advance-btn" id="confirm-btn" onclick="confirmDecision()" style="display:none;">
-        Confirm &amp; Advance to Stage 3 — Resolution →
-      </button>
-      <div id="advance-status" style="margin-top:8px;display:none;"></div>
     </div>
 
     <!-- Copilot Notice -->
@@ -325,18 +315,6 @@ const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_
 const p = new URLSearchParams(window.location.search);
 const caseId     = p.get('caseId')     || p.get('case_id')     || null;
 const customerId = p.get('customerId') || p.get('customer_id') || null;
-
-const PATCH_HEADERS = { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
-
-async function patchCase(fields) {
-  if (!caseId) return false;
-  const resp = await fetch(`${SUPABASE_URL}/gc_demo_jh_retail_cases?key=eq.${caseId}`, {
-    method: 'PATCH',
-    headers: PATCH_HEADERS,
-    body: JSON.stringify({ ...fields, updated_at: new Date().toISOString() })
-  });
-  return resp.ok;
-}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
@@ -425,38 +403,12 @@ function selectDecision(btn, type) {
   btn.classList.add('selected');
   selectedDecision = type;
   const note = document.getElementById('decision-note');
-  const confirmBtn = document.getElementById('confirm-btn');
   if (note) {
     note.style.display = 'block';
     note.textContent = type === 'approve'
-      ? 'Outcome: Approved. Click Confirm to record the decision and advance to Stage 3.'
-      : 'Outcome: Denied. Click Confirm to record the decision and advance to Stage 3.';
+      ? 'Outcome: Approved. Use the Approve button in the GC panel to advance to Stage 3.'
+      : 'Outcome: Denied. Use the Deny button in the GC panel to advance to Stage 3.';
     note.style.color = type === 'approve' ? 'var(--green)' : 'var(--red)';
-  }
-  if (confirmBtn) confirmBtn.style.display = 'block';
-}
-
-async function confirmDecision() {
-  if (!selectedDecision) return;
-  const btn = document.getElementById('confirm-btn');
-  const status = document.getElementById('advance-status');
-  btn.disabled = true;
-  btn.textContent = 'Updating…';
-  const ok = await patchCase({
-    current_stage: 3,
-    stage_2_status: selectedDecision === 'approve' ? 'approved' : 'denied',
-    status: 'pending_resolution'
-  });
-  if (ok) {
-    btn.style.display = 'none';
-    status.style.display = 'block';
-    const label = selectedDecision === 'approve' ? 'Approved' : 'Denied';
-    status.innerHTML = `<div class="advance-success">✓ Decision recorded (${label}) — case advanced to Stage 3 — Resolution. Now set GC work item status to <strong>${label}</strong>.</div>`;
-  } else {
-    btn.disabled = false;
-    btn.textContent = 'Confirm & Advance to Stage 3 — Resolution →';
-    status.style.display = 'block';
-    status.innerHTML = '<div style="color:var(--red);font-size:0.82rem;">Update failed — check console.</div>';
   }
 }
 
