@@ -242,6 +242,34 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 .setup-reset-btn:hover { border-color: var(--red); color: var(--red); }
 .setup-gear-btn { position: fixed; bottom: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); border: none; color: rgba(255,255,255,0.5); font-size: 1rem; cursor: pointer; z-index: 500; transition: background 0.15s, color 0.15s; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
 .setup-gear-btn:hover { background: var(--blue); color: var(--white); }
+
+/* ACTIVE CASE CARD */
+.active-case { display: none; background: linear-gradient(135deg, #FFFFFF 0%, #F4F8FD 100%); border: 1px solid var(--gray-200); border-left: 4px solid var(--blue); border-radius: var(--radius); padding: 16px 18px; margin: 12px 20px 0; box-shadow: var(--shadow); }
+.active-case.visible { display: block; }
+.ac-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ac-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); }
+.ac-case-id { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
+.ac-priority { margin-left: auto; }
+.ac-title { font-size: 0.88rem; color: var(--gray-700); margin-bottom: 12px; line-height: 1.4; }
+.ac-stages { display: flex; align-items: center; gap: 0; margin-bottom: 14px; }
+.ac-stage-step { flex: 1; display: flex; align-items: center; gap: 6px; }
+.ac-stage-step:not(:last-child)::after { content: ''; flex: 1; height: 2px; background: var(--gray-200); margin: 0 6px; }
+.ac-stage-step.done::after { background: var(--green); }
+.ac-stage-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; background: var(--gray-200); color: var(--gray-500); flex-shrink: 0; }
+.ac-stage-step.done .ac-stage-circle { background: var(--green); color: #fff; }
+.ac-stage-step.active .ac-stage-circle { background: var(--blue); color: #fff; box-shadow: 0 0 0 3px var(--blue-lt); }
+.ac-stage-name { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--gray-500); }
+.ac-stage-step.active .ac-stage-name { color: var(--blue); }
+.ac-stage-step.done .ac-stage-name { color: var(--green); }
+.ac-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ac-btn { padding: 9px 10px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; background: var(--white); color: var(--gray-500); display: flex; align-items: center; justify-content: center; gap: 5px; }
+.ac-btn:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
+.ac-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
+.ac-btn.primary:hover { background: var(--blue-dk); border-color: var(--blue-dk); color: var(--white); }
+.ac-meta { display: flex; gap: 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--gray-100); font-size: 0.78rem; color: var(--gray-500); }
+.ac-meta-item { display: flex; gap: 5px; }
+.ac-meta-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.7rem; }
+.ac-meta-val { color: var(--navy); font-weight: 500; }
 @media (max-width: 860px) {
   .main-layout { grid-template-columns: 1fr; }
   .left-panel { border-right: none; border-bottom: 1px solid var(--gray-200); }
@@ -404,6 +432,23 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
         <div class="ava-field"><div class="ava-field-label">Resolution Attempted</div><div class="ava-field-value" id="ava-resolution">&#8212;</div></div>
       </div>
       <div class="ava-summary-block" id="ava-summary" style="display:none;"></div>
+    </div>
+
+    <!-- ACTIVE CASE CARD (visible when an open case is in context) -->
+    <div class="active-case" id="activeCaseCard">
+      <div class="ac-header">
+        <span class="ac-label">Active Case</span>
+        <span class="ac-case-id" id="ac-case-id">—</span>
+        <span class="ac-priority" id="ac-priority"></span>
+      </div>
+      <div class="ac-title" id="ac-title"></div>
+      <div class="ac-stages" id="ac-stages"></div>
+      <div class="ac-actions">
+        <button class="ac-btn" id="ac-btn-intake"     onclick="openCaseStage('intake')">&#128221; Intake</button>
+        <button class="ac-btn" id="ac-btn-review"     onclick="openCaseStage('review')">&#128269; Review</button>
+        <button class="ac-btn" id="ac-btn-resolution" onclick="openCaseStage('resolution')">&#9989; Resolution</button>
+      </div>
+      <div class="ac-meta" id="ac-meta"></div>
     </div>
 
     <div class="tabs-bar">
@@ -587,6 +632,54 @@ let routingApi      = null;
 let usersApi        = null;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const gcWorkitemId = getParam('workitemId') || getParam('workitem_id') || '';
+const CASE_PAGE_BASE = 'https://jayhenderson66.github.io/GenesysDemoProject';
+
+function openCaseStage(stage) {
+  const caseId = (window.currentActiveCase && window.currentActiveCase.key) || '';
+  const customerId = (selectedCustomer && selectedCustomer.key) || getParam('customer_id') || '';
+  const params = new URLSearchParams();
+  if (customerId)    params.set('customerId', customerId);
+  if (caseId)        params.set('caseId', caseId);
+  if (gcWorkitemId)  params.set('workitemId', gcWorkitemId);
+  window.open(`${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`, '_blank');
+}
+
+function renderActiveCaseCard(c) {
+  const card = document.getElementById('activeCaseCard');
+  if (!c) { card.classList.remove('visible'); window.currentActiveCase = null; return; }
+  window.currentActiveCase = c;
+  document.getElementById('ac-case-id').textContent = c.key || '—';
+  document.getElementById('ac-title').textContent   = c.case_title || c.case_type || '';
+  document.getElementById('ac-priority').innerHTML  = c.priority ? priorityBadge(c.priority) : '';
+
+  const stages = [
+    { id: 'intake',     num: 1, name: 'Intake',     done: c.stage_1_status === 'complete' },
+    { id: 'review',     num: 2, name: 'Review',     done: c.stage_2_status === 'complete' },
+    { id: 'resolution', num: 3, name: 'Resolution', done: c.stage_3_status === 'complete' }
+  ];
+  const currentStage = parseInt(c.current_stage, 10) || 1;
+  document.getElementById('ac-stages').innerHTML = stages.map(s => {
+    const state = s.done ? 'done' : (s.num === currentStage ? 'active' : 'pending');
+    return `<div class="ac-stage-step ${state}"><div class="ac-stage-circle">${s.done ? '&#10003;' : s.num}</div><div class="ac-stage-name">${s.name}</div></div>`;
+  }).join('');
+
+  stages.forEach(s => {
+    const btn = document.getElementById('ac-btn-' + s.id);
+    btn.classList.toggle('primary', s.num === currentStage && !s.done);
+  });
+
+  const meta = [];
+  if (c.case_type)   meta.push({ label: 'Type', val: c.case_type });
+  if (c.opened_date) meta.push({ label: 'Opened', val: c.opened_date });
+  if (c.due_date)    meta.push({ label: 'Due', val: c.due_date });
+  document.getElementById('ac-meta').innerHTML = meta.map(m =>
+    `<div class="ac-meta-item"><span class="ac-meta-label">${m.label}:</span><span class="ac-meta-val">${m.val}</span></div>`
+  ).join('');
+
+  card.classList.add('visible');
+}
+
 /* ===== MODE DETECTION ===== */
 function detectMode() {
   try { isWidgetMode = window.self !== window.top; } catch(e) { isWidgetMode = true; }
@@ -693,6 +786,7 @@ function loadFromUrlParams() {
   renderOrdersDirect(transaction ? [transaction] : []);
   renderShipmentsDirect(fulfillment ? [fulfillment] : [], transaction ? [transaction] : []);
   renderCasesDirect(openCase ? [openCase] : []);
+  renderActiveCaseCard(openCase || null);
   updateCallScript(customer, transaction);
   renderAvaCard();
   document.getElementById('clearBtn').style.display = '';
@@ -779,6 +873,7 @@ function selectCustomerFromTable(key) {
   renderOrdersDirect(transactions);
   renderShipmentsDirect(fulfillment, transactions);
   renderCasesDirect(cases);
+  renderActiveCaseCard(cases.find(c => c.status !== 'closed') || cases[0] || null);
   updateCallScript(customer, transactions[0]);
   toast('Loaded: ' + (customer.company_name || customer.first_name));
 }
