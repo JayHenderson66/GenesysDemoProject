@@ -350,23 +350,10 @@ function initGcAuth() {
     const token = hashParams.get('access_token');
     if (token) { gcAccessToken = token; return; }
 
-    // Inside GC Agent UI — SDK is injected by the agent desktop.
-    // Only attempt SDK auth when running inside an iframe (i.e., embedded in GC).
-    const inIframe = window.self !== window.top;
-    const pc = window.platformClient;
-    if (inIframe && pc && pc.ApiClient) {
-      const apiClient = pc.ApiClient.instance;
-      apiClient.setEnvironment(gcEnv);
-      apiClient.loginImplicitGrant(
-        GC_CLIENT_ID,
-        window.location.href.split('?')[0].split('#')[0],
-        { state: window.location.search }
-      ).then(data => { gcAccessToken = data.accessToken; })
-       .catch(e => console.warn('GC auth skipped:', e));
-      return;
-    }
-
-    // Standalone — render without GC auth; status updates will be skipped
+    // No token present — render the page without auth. The SDK's
+    // loginImplicitGrant() always redirects when there's no session,
+    // which breaks Scripter preview and standalone testing. Status
+    // updates that require GC auth will be skipped (Supabase still works).
   } catch(e) { console.warn('GC auth skipped:', e); }
 }
 
