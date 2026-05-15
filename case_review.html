@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>ABC Retail — Case Review</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
 <style>
 :root {
   --navy:      #1A3A6B;
@@ -98,6 +99,15 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 .decision-btn:hover { border-color: var(--gray-200); background: var(--white); }
 .decision-btn.approve:hover, .decision-btn.approve.selected { background: var(--green-lt); border-color: var(--green); color: var(--green); }
 .decision-btn.deny:hover, .decision-btn.deny.selected { background: var(--red-lt); border-color: var(--red); color: var(--red); }
+
+.confirm-btn { width: 100%; padding: 13px; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; }
+.confirm-btn.visible { display: flex; }
+.confirm-btn.approve-action { background: var(--green); color: #fff; }
+.confirm-btn.deny-action { background: var(--red); color: #fff; }
+.confirm-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.confirm-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; }
+.confirm-btn.success { background: var(--navy); }
+.action-status { margin-top: 8px; font-size: 0.8rem; text-align: center; color: var(--gray-500); min-height: 18px; }
 
 /* REVIEW CRITERIA */
 .criteria-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--gray-200); background: var(--gray-100); margin-bottom: 8px; }
@@ -293,6 +303,8 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
         <button class="decision-btn deny"    onclick="selectDecision(this, 'deny')">✕ Deny Refund</button>
       </div>
       <div id="decision-note" style="margin-top:10px;font-size:0.82rem;display:none;"></div>
+      <button class="confirm-btn" id="confirmBtn" onclick="confirmDecision()"></button>
+      <div class="action-status" id="actionStatus"></div>
     </div>
 
     <!-- Copilot Notice -->
@@ -310,31 +322,119 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 <script>
 const SUPABASE_URL = 'https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w';
-const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+const SB_HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
 
-const p = new URLSearchParams(window.location.search);
-const caseId     = p.get('caseId')     || p.get('case_id')     || null;
-const customerId = p.get('customerId') || p.get('customer_id') || null;
+const GC_CLIENT_ID = '79b9998d-45f6-46c7-97e7-5019106922ee';
+const STATUS_APPROVED = '88edfdd5-eb65-4808-ae75-75d8e0163936';
+const STATUS_DENIED   = 'fcfe1783-1a4b-4bfd-8ad4-1ed3863ec736';
+
+const urlParams  = new URLSearchParams(window.location.search);
+const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+let restoredParams = new URLSearchParams();
+try {
+  const sv = urlParams.get('state') || hashParams.get('state');
+  if (sv) restoredParams = new URLSearchParams(decodeURIComponent(sv));
+} catch(e) {}
+function getParam(n) { return urlParams.get(n) || restoredParams.get(n) || hashParams.get(n) || null; }
+
+const caseId     = getParam('caseId')     || getParam('case_id')     || null;
+const customerId = getParam('customerId') || getParam('customer_id') || null;
+const workitemId = getParam('workitemId') || getParam('workitem_id') || null;
+const gcEnv      = getParam('pcEnvironment') || getParam('environment') || 'mypurecloud.com';
+
+let gcAccessToken  = null;
+let selectedDecision = null;
+
+function initGcAuth() {
+  try {
+    const pc = window.platformClient;
+    if (!pc || !pc.ApiClient) return;
+    const apiClient = pc.ApiClient.instance;
+    apiClient.setEnvironment(gcEnv);
+    apiClient.loginImplicitGrant(
+      GC_CLIENT_ID,
+      window.location.href.split('?')[0].split('#')[0],
+      { state: window.location.search }
+    ).then(data => { gcAccessToken = data.accessToken; })
+     .catch(e => console.warn('GC auth skipped:', e));
+  } catch(e) { console.warn('GC SDK unavailable:', e); }
+}
 
 function sb(table, query) {
-  return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
+  return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: SB_HEADERS }).then(r => r.json());
 }
 function set(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
-
 function badge(val, map) {
   if (!val) return '<span class="field-empty">—</span>';
   const cls = map[val.toLowerCase()] || '';
   return cls ? `<span class="badge ${cls}"><span class="badge-dot"></span>${val}</span>` : val;
 }
+function policyClass(condition) { return condition === 'pass' ? 'pass' : condition === 'fail' ? 'fail' : 'warn'; }
 
-function policyClass(condition) {
-  return condition === 'pass' ? 'pass' : condition === 'fail' ? 'fail' : 'warn';
+function selectDecision(btn, type) {
+  document.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedDecision = type;
+  const note = document.getElementById('decision-note');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const statusEl = document.getElementById('actionStatus');
+  if (note) {
+    note.style.display = 'block';
+    note.textContent = type === 'approve'
+      ? 'Outcome: Approved — click Confirm below to advance to Stage 3.'
+      : 'Outcome: Denied — click Confirm below to advance to Stage 3.';
+    note.style.color = type === 'approve' ? 'var(--green)' : 'var(--red)';
+  }
+  if (confirmBtn) {
+    confirmBtn.className = 'confirm-btn visible ' + (type === 'approve' ? 'approve-action' : 'deny-action');
+    confirmBtn.textContent = type === 'approve' ? '✓ Confirm Approved & Advance to Stage 3' : '✕ Confirm Denied & Advance to Stage 3';
+    confirmBtn.disabled = false;
+  }
+  if (statusEl) statusEl.textContent = '';
+}
+
+async function confirmDecision() {
+  if (!selectedDecision) return;
+  const btn = document.getElementById('confirmBtn');
+  const statusEl = document.getElementById('actionStatus');
+  btn.disabled = true;
+  btn.textContent = 'Confirming…';
+  statusEl.textContent = '';
+  try {
+    const statusId = selectedDecision === 'approve' ? STATUS_APPROVED : STATUS_DENIED;
+    if (workitemId && gcAccessToken) {
+      await fetch(`https://api.${gcEnv}/api/v2/taskmanagement/workitems/${workitemId}`, {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + gcAccessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statusId })
+      });
+    }
+    if (caseId) {
+      const sbPatch = selectedDecision === 'approve'
+        ? { stage_2_status: 'approved', current_stage: 3, status: 'pending_resolution' }
+        : { stage_2_status: 'denied',   current_stage: 3, status: 'pending_resolution' };
+      await fetch(`${SUPABASE_URL}/gc_demo_jh_retail_cases?key=eq.${caseId}`, {
+        method: 'PATCH',
+        headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(sbPatch)
+      });
+    }
+    btn.textContent = selectedDecision === 'approve' ? '✓ Approved — Advanced to Stage 3' : '✕ Denied — Advanced to Stage 3';
+    btn.classList.add('success');
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = workitemId && !gcAccessToken ? 'Note: open page standalone to enable GC auth.' : '';
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = selectedDecision === 'approve' ? '✓ Confirm Approved & Advance to Stage 3' : '✕ Confirm Denied & Advance to Stage 3';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Error — please try again.';
+  }
 }
 
 async function load() {
   try {
     let caseData = null, custData = null, txnData = null;
-
     if (caseId) {
       const cases = await sb('gc_demo_jh_retail_cases', `key=eq.${caseId}`);
       caseData = cases[0];
@@ -349,8 +449,6 @@ async function load() {
         ? `<span style="font-size:0.85rem;line-height:1.5;">${caseData.case_summary}</span>`
         : '<span class="field-empty">No intake summary on file.</span>');
       set('policy-channel-val', caseData.case_channel || '—');
-
-      // Policy: order value check
       const custId = customerId || caseData.customer_id;
       if (custId) {
         const custs = await sb('gc_demo_jh_retail_customers', `key=eq.${custId}`);
@@ -361,13 +459,10 @@ async function load() {
         set('cust-ltv', custData.lifetime_value || '—');
         set('cust-sentiment', badge(custData.sentiment_score, { negative:'badge-negative', positive:'badge-positive' }));
         set('cust-nps', custData.nps_score !== undefined ? custData.nps_score : '—');
-
-        // Priority policy check
         const acctType = custData.account_type || '';
         const pEl = document.getElementById('policy-priority');
         if (pEl) pEl.className = 'policy-item ' + (acctType.toLowerCase() === 'premium' ? 'pass' : '');
         set('policy-priority-val', acctType || '—');
-
         if (custData.active_txn_id) {
           const txns = await sb('gc_demo_jh_retail_transactions', `key=eq.${custData.active_txn_id}`);
           txnData = txns[0];
@@ -377,17 +472,12 @@ async function load() {
         set('txn-ref', txnData.reference_number || txnData.key || '—');
         set('txn-amount', txnData.amount || '—');
         set('txn-status', txnData.status_display || txnData.status || '—');
-
-        // Order value policy
         const amt = parseFloat((txnData.amount || '').replace(/[^0-9.]/g,'')) || 0;
         const vEl = document.getElementById('policy-value');
         if (vEl) vEl.className = 'policy-item ' + (amt > 500 ? 'warn' : 'pass');
         set('policy-value-val', txnData.amount || '—');
-
-        // Return window check (transaction date vs today)
         if (txnData.transaction_date) {
-          const orderDate = new Date(txnData.transaction_date);
-          const daysSince = Math.floor((Date.now() - orderDate.getTime()) / 86400000);
+          const daysSince = Math.floor((Date.now() - new Date(txnData.transaction_date).getTime()) / 86400000);
           const wEl = document.getElementById('policy-window');
           if (wEl) wEl.className = 'policy-item ' + (daysSince <= 30 ? 'pass' : 'fail');
           set('policy-window-val', `${daysSince} days ago`);
@@ -397,21 +487,7 @@ async function load() {
   } catch(e) { console.error('Load error:', e); }
 }
 
-let selectedDecision = null;
-function selectDecision(btn, type) {
-  document.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedDecision = type;
-  const note = document.getElementById('decision-note');
-  if (note) {
-    note.style.display = 'block';
-    note.textContent = type === 'approve'
-      ? 'Outcome: Approved. Use the Approve button in the GC panel to advance to Stage 3.'
-      : 'Outcome: Denied. Use the Deny button in the GC panel to advance to Stage 3.';
-    note.style.color = type === 'approve' ? 'var(--green)' : 'var(--red)';
-  }
-}
-
+initGcAuth();
 load();
 </script>
 </body>

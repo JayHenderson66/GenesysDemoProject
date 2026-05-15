@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>ABC Retail — Case Resolution</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
 <style>
 :root {
   --navy:      #1A3A6B;
@@ -131,6 +132,11 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 
 .divider { height: 1px; background: var(--gray-100); }
 .loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; }
+.close-btn { width: 100%; padding: 13px; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--stage-color); color: #fff; margin-top: 12px; }
+.close-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.close-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; }
+.close-btn.success { background: var(--green); }
+.action-status { margin-top: 8px; font-size: 0.8rem; text-align: center; color: var(--gray-500); min-height: 18px; }
 </style>
 </head>
 <body>
@@ -282,12 +288,14 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
     <!-- Resolution Method -->
     <div class="card">
       <div class="card-title"><div class="card-accent green"></div>Resolution Method</div>
-      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select the resolution method, then use the Close Case button in the GC panel.</p>
+      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select the resolution method, then click Close Case below.</p>
       <div class="method-row">
         <button class="method-btn" onclick="selectMethod(this)">Original Payment</button>
         <button class="method-btn" onclick="selectMethod(this)">Store Credit</button>
         <button class="method-btn" onclick="selectMethod(this)">Replacement Item</button>
       </div>
+      <button class="close-btn" id="closeBtn" onclick="closeCase()">Close Case</button>
+      <div class="action-status" id="actionStatus"></div>
     </div>
 
     <!-- Recovery Gesture -->
@@ -323,15 +331,47 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 <script>
 const SUPABASE_URL = 'https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w';
-const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+const SB_HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
 
-const p = new URLSearchParams(window.location.search);
-const caseId     = p.get('caseId')     || p.get('case_id')     || null;
-const customerId = p.get('customerId') || p.get('customer_id') || null;
-const decision   = p.get('decision')  || null;
+const GC_CLIENT_ID = '79b9998d-45f6-46c7-97e7-5019106922ee';
+const STATUS_RESOLVED_REFUND    = '884e37e5-61f4-463b-861c-d91e8d7cd001';
+const STATUS_RESOLVED_NO_REFUND = 'aa3c4c22-b91c-40f3-b36e-1dbfbfba7ab2';
+
+const urlParams  = new URLSearchParams(window.location.search);
+const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+let restoredParams = new URLSearchParams();
+try {
+  const sv = urlParams.get('state') || hashParams.get('state');
+  if (sv) restoredParams = new URLSearchParams(decodeURIComponent(sv));
+} catch(e) {}
+function getParam(n) { return urlParams.get(n) || restoredParams.get(n) || hashParams.get(n) || null; }
+
+const caseId     = getParam('caseId')     || getParam('case_id')     || null;
+const customerId = getParam('customerId') || getParam('customer_id') || null;
+const workitemId = getParam('workitemId') || getParam('workitem_id') || null;
+const gcEnv      = getParam('pcEnvironment') || getParam('environment') || 'mypurecloud.com';
+const decision   = getParam('decision') || null;
+
+let gcAccessToken  = null;
+let selectedMethod = null;
+
+function initGcAuth() {
+  try {
+    const pc = window.platformClient;
+    if (!pc || !pc.ApiClient) return;
+    const apiClient = pc.ApiClient.instance;
+    apiClient.setEnvironment(gcEnv);
+    apiClient.loginImplicitGrant(
+      GC_CLIENT_ID,
+      window.location.href.split('?')[0].split('#')[0],
+      { state: window.location.search }
+    ).then(data => { gcAccessToken = data.accessToken; })
+     .catch(e => console.warn('GC auth skipped:', e));
+  } catch(e) { console.warn('GC SDK unavailable:', e); }
+}
 
 function sb(table, query) {
-  return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
+  return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: SB_HEADERS }).then(r => r.json());
 }
 function set(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
 
@@ -424,7 +464,6 @@ async function load() {
       set('tt-amount', txnData.amount || 'the refund amount');
     }
 
-    // Apply decision from URL param or leave as unknown
     if (decision) applyDecision(decision);
 
   } catch(e) { console.error('Load error:', e); }
@@ -433,6 +472,7 @@ async function load() {
 function selectMethod(btn) {
   document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  selectedMethod = btn.textContent.trim();
 }
 
 function selectGesture(btn) {
@@ -440,6 +480,44 @@ function selectGesture(btn) {
   btn.classList.add('selected');
 }
 
+async function closeCase() {
+  const btn = document.getElementById('closeBtn');
+  const statusEl = document.getElementById('actionStatus');
+  btn.disabled = true;
+  btn.textContent = 'Closing…';
+  statusEl.textContent = '';
+  try {
+    // Pick status: refund methods → ResolvedRefund, replacement → ResolvedNoRefund
+    const isRefund = !selectedMethod || selectedMethod !== 'Replacement Item';
+    const statusId = isRefund ? STATUS_RESOLVED_REFUND : STATUS_RESOLVED_NO_REFUND;
+    if (workitemId && gcAccessToken) {
+      await fetch(`https://api.${gcEnv}/api/v2/taskmanagement/workitems/${workitemId}`, {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + gcAccessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statusId })
+      });
+    }
+    if (caseId) {
+      await fetch(`${SUPABASE_URL}/gc_demo_jh_retail_cases?key=eq.${caseId}`, {
+        method: 'PATCH',
+        headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ stage_3_status: 'complete', status: 'resolved', resolution_method: selectedMethod || '' })
+      });
+    }
+    btn.textContent = '✓ Case Closed';
+    btn.classList.add('success');
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = workitemId && !gcAccessToken ? 'Note: open page standalone to enable GC auth.' : '';
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = 'Close Case';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Error — please try again.';
+  }
+}
+
+initGcAuth();
 load();
 </script>
 </body>
