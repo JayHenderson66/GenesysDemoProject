@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>ABC Retail — Case Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
 <style>
 :root {
   --navy:      #1A3A6B;
@@ -110,6 +111,13 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 
 /* LOADING */
 .loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; padding: 8px 0; }
+
+/* ADVANCE BUTTON */
+.advance-btn { width: 100%; padding: 13px; background: var(--stage-color); color: #fff; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.advance-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.advance-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; }
+.advance-btn.success { background: var(--green); }
+.advance-status { margin-top: 8px; font-size: 0.8rem; text-align: center; color: var(--gray-500); min-height: 18px; }
 </style>
 </head>
 <body>
@@ -294,8 +302,13 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
       <div class="copilot-icon">🤖</div>
       <div>
         <div class="copilot-label">Agent Copilot — Intake Checklist Active</div>
-        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Intake</strong> checklist in real time. When you're done, use the <strong>Advance to Review</strong> button in the GC panel to advance to Stage 2.</div>
+        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Intake</strong> checklist in real time. When intake is complete, click the button below to advance to Stage 2.</div>
       </div>
+    </div>
+
+    <div>
+      <button class="advance-btn" id="advanceBtn" onclick="advanceStage()">Advance to Stage 2 — Review</button>
+      <div class="advance-status" id="advanceStatus"></div>
     </div>
 
   </div>
@@ -306,9 +319,90 @@ const SUPABASE_URL  = 'https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w';
 const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
 
+const GC_CLIENT_ID = '79b9998d-45f6-46c7-97e7-5019106922ee';
+const STATUS_INTAKE_COMPLETE = 'eef100ff-1390-4b7a-83a1-2611e69ee4e0';
+
+// Restore URL params after OAuth implicit grant redirect (token arrives in hash)
+const urlParams   = new URLSearchParams(window.location.search);
+const hashParams  = new URLSearchParams(window.location.hash.replace('#', ''));
+let restoredParams = new URLSearchParams();
+try {
+  const sv = urlParams.get('state') || hashParams.get('state');
+  if (sv) restoredParams = new URLSearchParams(decodeURIComponent(sv));
+} catch(e) {}
+function getParam(n) { return urlParams.get(n) || restoredParams.get(n) || hashParams.get(n) || null; }
+
 const p = new URLSearchParams(window.location.search);
-const caseId      = p.get('caseId')      || p.get('case_id')      || null;
-const customerId  = p.get('customerId')  || p.get('customer_id')  || null;
+const caseId      = getParam('caseId')      || getParam('case_id')      || null;
+const customerId  = getParam('customerId')  || getParam('customer_id')  || null;
+const workitemId  = getParam('workitemId')  || getParam('workitem_id')  || null;
+const gcEnv       = getParam('pcEnvironment') || getParam('environment') || 'mypurecloud.com';
+
+let gcAccessToken = null;
+
+function initGcAuth() {
+  try {
+    const pc = window.platformClient;
+    if (!pc || !pc.ApiClient) return;
+    const apiClient = pc.ApiClient.instance;
+    apiClient.setEnvironment(gcEnv);
+    apiClient.loginImplicitGrant(
+      GC_CLIENT_ID,
+      window.location.href.split('?')[0].split('#')[0],
+      { state: window.location.search }
+    ).then(data => {
+      gcAccessToken = data.accessToken;
+    }).catch(e => console.warn('GC auth skipped:', e));
+  } catch(e) { console.warn('GC SDK unavailable:', e); }
+}
+
+async function updateWIStatus(statusId) {
+  if (!workitemId || !gcAccessToken) return false;
+  const res = await fetch(
+    `https://api.${gcEnv}/api/v2/taskmanagement/workitems/${workitemId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + gcAccessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statusId })
+    }
+  );
+  return res.ok;
+}
+
+async function advanceStage() {
+  const btn = document.getElementById('advanceBtn');
+  const status = document.getElementById('advanceStatus');
+  btn.disabled = true;
+  btn.textContent = 'Advancing…';
+  status.textContent = '';
+  try {
+    let gcOk = false;
+    if (workitemId && gcAccessToken) {
+      gcOk = await updateWIStatus(STATUS_INTAKE_COMPLETE);
+    }
+    if (caseId) {
+      await fetch(`${SUPABASE_URL}/gc_demo_jh_retail_cases?key=eq.${caseId}`, {
+        method: 'PATCH',
+        headers: { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ current_stage: 2, stage_1_status: 'complete', status: 'in_review' })
+      });
+    }
+    btn.textContent = '✓ Advanced to Stage 2 — Review';
+    btn.classList.add('success');
+    if (workitemId && !gcAccessToken) {
+      status.textContent = 'GC work item not updated — auth required. Open page standalone to sign in first.';
+    } else if (workitemId && gcOk) {
+      status.textContent = 'Work item status updated in GC.';
+      status.style.color = 'var(--green)';
+    }
+  } catch(e) {
+    console.error('Advance error:', e);
+    btn.disabled = false;
+    btn.textContent = 'Advance to Stage 2 — Review';
+    status.textContent = 'Error — please try again.';
+    status.style.color = 'var(--red)';
+  }
+}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
@@ -376,6 +470,7 @@ async function load() {
   }
 }
 
+initGcAuth();
 load();
 </script>
 </body>

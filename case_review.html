@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>ABC Retail — Case Review</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
 <style>
 :root {
   --navy:      #1A3A6B;
@@ -98,6 +99,13 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 .decision-btn:hover { border-color: var(--gray-200); background: var(--white); }
 .decision-btn.approve:hover, .decision-btn.approve.selected { background: var(--green-lt); border-color: var(--green); color: var(--green); }
 .decision-btn.deny:hover, .decision-btn.deny.selected { background: var(--red-lt); border-color: var(--red); color: var(--red); }
+.confirm-btn { width: 100%; padding: 13px; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.confirm-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; }
+.confirm-btn:not(:disabled):hover { opacity: 0.88; transform: translateY(-1px); }
+.confirm-btn.approve-action { background: var(--green); color: #fff; }
+.confirm-btn.deny-action { background: var(--red); color: #fff; }
+.confirm-btn.success { background: var(--navy); }
+.action-status { margin-top: 8px; font-size: 0.8rem; text-align: center; color: var(--gray-500); min-height: 18px; }
 
 /* REVIEW CRITERIA */
 .criteria-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--gray-200); background: var(--gray-100); margin-bottom: 8px; }
