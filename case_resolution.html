@@ -374,15 +374,7 @@ function initGcAuth() {
       return;
     }
 
-    // Standalone — use native OAuth implicit grant redirect
-    const redirectUri = window.location.href.split('?')[0].split('#')[0];
-    window.location.replace(
-      `https://login.${gcEnv}/oauth/authorize` +
-      `?response_type=token` +
-      `&client_id=${encodeURIComponent(GC_CLIENT_ID)}` +
-      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&state=${encodeURIComponent(window.location.search)}`
-    );
+    // Standalone — render without GC auth; status updates will be skipped
   } catch(e) { console.warn('GC auth skipped:', e); }
 }
 
