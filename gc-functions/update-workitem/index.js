@@ -1,12 +1,14 @@
 /**
  * GC Function: Update Work Item Status
  *
- * Inputs (via Data Action requestTemplate):
+ * Inputs (event):
  *   event.workitemId  - GC work item ID to update
  *   event.statusId    - target status ID
- *   event.clientId    - OAuth client credentials ID (stored in Data Action config, not in source)
- *   event.clientSecret - OAuth client credentials secret (stored in Data Action config, not in source)
- *   event.environment - GC region, e.g. "mypurecloud.com" (optional, defaults below)
+ *   event.environment - GC region, e.g. "mypurecloud.com" (optional)
+ *
+ * Environment variables (set in GC Functions config):
+ *   GC_CLIENT_ID     - OAuth client credentials client ID
+ *   GC_CLIENT_SECRET - OAuth client credentials secret
  *
  * Returns: { success, workitemId, statusId } or { success: false, error }
  */
@@ -52,9 +54,9 @@ exports.handler = async (event) => {
     const { workitemId, statusId, clientId, clientSecret } = event;
     const env = event.environment || GC_ENV_DEFAULT;
 
-    if (!workitemId) return { success: false, error: 'Missing workitemId' };
-    if (!statusId)   return { success: false, error: 'Missing statusId' };
-    if (!clientId)   return { success: false, error: 'Missing clientId' };
+    if (!workitemId)   return { success: false, error: 'Missing workitemId' };
+    if (!statusId)     return { success: false, error: 'Missing statusId' };
+    if (!clientId)     return { success: false, error: 'Missing clientId' };
     if (!clientSecret) return { success: false, error: 'Missing clientSecret' };
 
     const token  = await getToken(clientId, clientSecret, env);
