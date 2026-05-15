@@ -1,0 +1,100 @@
+{
+  "name": "ABC Retail - Get Customer Record - SB",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1/gc_demo_jh_retail_customers?key=eq.${input.customerId}",
+      "requestType": "GET",
+      "headers": {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w"
+      },
+      "requestTemplate": "$null"
+    },
+    "response": {
+      "translationMap": {
+        "account_number": "$[0].account_number",
+        "sentiment_score": "$[0].sentiment_score",
+        "account_type": "$[0].account_type",
+        "active_txn_id": "$[0].active_txn_id",
+        "journey_stage": "$[0].journey_stage",
+        "last_name": "$[0].last_name",
+        "open_case_id": "$[0].open_case_id",
+        "nps_score": "$[0].nps_score",
+        "lifetime_value": "$[0].lifetime_value",
+        "company_name": "$[0].company_name",
+        "phone_normalized": "$[0].phone_normalized",
+        "first_name": "$[0].first_name",
+        "email": "$[0].email",
+        "gc_external_contact_id": "$[0].gc_external_contact_id"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"first_name\": ${first_name}, \"last_name\": ${last_name}, \"company_name\": ${company_name}, \"account_number\": ${account_number}, \"email\": ${email}, \"account_type\": ${account_type}, \"journey_stage\": ${journey_stage}, \"sentiment_score\": ${sentiment_score}, \"nps_score\": \"${nps_score}\", \"lifetime_value\": ${lifetime_value}, \"open_case_id\": ${open_case_id}, \"active_txn_id\": ${active_txn_id}, \"phone_normalized\": ${phone_normalized}, \"gc_external_contact_id\": ${gc_external_contact_id}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "account_number": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "account_type": {
+            "type": "string"
+          },
+          "journey_stage": {
+            "type": "string"
+          },
+          "sentiment_score": {
+            "type": "string"
+          },
+          "nps_score": {
+            "type": "string"
+          },
+          "lifetime_value": {
+            "type": "string"
+          },
+          "open_case_id": {
+            "type": "string"
+          },
+          "active_txn_id": {
+            "type": "string"
+          },
+          "phone_normalized": {
+            "type": "string"
+          },
+          "gc_external_contact_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
