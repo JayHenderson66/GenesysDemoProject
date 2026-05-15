@@ -123,6 +123,14 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 .method-btn { padding: 9px 10px; border-radius: 6px; border: 1px solid var(--gray-200); background: var(--gray-100); color: var(--gray-700); font-family: 'Barlow', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
 .method-btn:hover, .method-btn.selected { background: var(--green-lt); border-color: var(--green); color: var(--green); }
 
+/* CLOSE BUTTON */
+.close-btn { width: 100%; margin-top: 10px; padding: 11px; background: var(--green); color: #fff; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; display: none; align-items: center; justify-content: center; gap: 8px; }
+.close-btn.denied-close { background: var(--red); }
+.close-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.close-btn:active { transform: translateY(0); }
+.close-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; opacity: 1; }
+.close-sent { text-align: center; font-size: 0.8rem; color: var(--green); font-weight: 600; margin-top: 8px; display: none; }
+
 /* COPILOT NOTICE */
 .copilot-notice { display: flex; align-items: flex-start; gap: 10px; background: linear-gradient(135deg, #EDE9FE 0%, #E8F2FC 100%); border: 1px solid #c4b5fd; border-radius: var(--radius); padding: 12px 14px; }
 .copilot-icon { font-size: 1.1rem; flex-shrink: 0; }
@@ -282,12 +290,14 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
     <!-- Resolution Method -->
     <div class="card">
       <div class="card-title"><div class="card-accent green"></div>Resolution Method</div>
-      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select the resolution method, then use the Close Case button in the GC panel.</p>
+      <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;">Select the resolution method, then click Close Case to update the work item in Genesys Cloud.</p>
       <div class="method-row">
         <button class="method-btn" onclick="selectMethod(this)">Original Payment</button>
         <button class="method-btn" onclick="selectMethod(this)">Store Credit</button>
         <button class="method-btn" onclick="selectMethod(this)">Replacement Item</button>
       </div>
+      <button class="close-btn" id="closeBtn" onclick="closeCase()">&#10003; Close Case</button>
+      <div class="close-sent" id="closeSent">&#10003; Sent to Genesys Cloud</div>
     </div>
 
     <!-- Recovery Gesture -->
@@ -313,7 +323,7 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
       <div class="copilot-icon">🤖</div>
       <div>
         <div class="copilot-label">Agent Copilot — Resolution Checklist Active</div>
-        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Resolution</strong> checklist in real time. When complete, set the work item status to <strong>Resolved - Refund Issued</strong> or <strong>Resolved - No Refund</strong> in the GC Work Item panel to close the case.</div>
+        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Resolution</strong> checklist in real time. When complete, select a resolution method above and click <strong>Close Case</strong> — the work item status will be updated automatically.</div>
       </div>
     </div>
 
@@ -329,6 +339,23 @@ const p = new URLSearchParams(window.location.search);
 const caseId     = p.get('caseId')     || p.get('case_id')     || null;
 const customerId = p.get('customerId') || p.get('customer_id') || null;
 const decision   = p.get('decision')  || null;
+const workitemId = p.get('workitemId') || p.get('workitem_id') || null;
+
+function gcAction(dataAction) {
+  window.parent.postMessage(
+    { action: 'setWIStatus', dataAction: dataAction, workitemId: workitemId },
+    '*'
+  );
+}
+
+function closeCase() {
+  const isApproved = decision === 'approved' || decision === 'approve';
+  gcAction(isApproved ? 'ResolvedRefund' : 'ResolvedNoRefund');
+  const btn = document.getElementById('closeBtn');
+  const sent = document.getElementById('closeSent');
+  if (btn) { btn.disabled = true; btn.textContent = '✓ Case Closed'; }
+  if (sent) sent.style.display = 'block';
+}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
@@ -433,6 +460,12 @@ async function load() {
 function selectMethod(btn) {
   document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  const closeBtn = document.getElementById('closeBtn');
+  if (closeBtn) {
+    const isApproved = decision === 'approved' || decision === 'approve';
+    closeBtn.className = 'close-btn' + (isApproved ? '' : ' denied-close');
+    closeBtn.style.display = 'flex';
+  }
 }
 
 function selectGesture(btn) {

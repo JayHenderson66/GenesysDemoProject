@@ -110,6 +110,13 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 
 /* LOADING */
 .loading { color: var(--gray-500); font-size: 0.85rem; font-style: italic; padding: 8px 0; }
+
+/* ADVANCE BUTTON */
+.advance-btn { width: 100%; padding: 11px; background: var(--stage-color); color: #fff; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.advance-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.advance-btn:active { transform: translateY(0); }
+.advance-btn:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; transform: none; opacity: 1; }
+.advance-sent { text-align: center; font-size: 0.8rem; color: var(--green); font-weight: 600; margin-top: 8px; display: none; }
 </style>
 </head>
 <body>
@@ -294,8 +301,14 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
       <div class="copilot-icon">🤖</div>
       <div>
         <div class="copilot-label">Agent Copilot — Intake Checklist Active</div>
-        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Intake</strong> checklist in real time. When you're done, use the <strong>Advance to Review</strong> button in the GC panel to advance to Stage 2.</div>
+        <div class="copilot-text">Copilot is monitoring this interaction and auto-evaluating the <strong>ABC Retail - Refund Request - Intake</strong> checklist in real time. When intake is complete, click <strong>Advance to Review</strong> below to set the work item to Stage 2.</div>
       </div>
+    </div>
+
+    <!-- Advance Button -->
+    <div>
+      <button class="advance-btn" id="advanceBtn" onclick="advanceToReview()">&#8594; Advance to Review</button>
+      <div class="advance-sent" id="advanceSent">&#10003; Sent to Genesys Cloud</div>
     </div>
 
   </div>
@@ -309,6 +322,22 @@ const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_
 const p = new URLSearchParams(window.location.search);
 const caseId      = p.get('caseId')      || p.get('case_id')      || null;
 const customerId  = p.get('customerId')  || p.get('customer_id')  || null;
+const workitemId  = p.get('workitemId')  || p.get('workitem_id')  || null;
+
+function gcAction(dataAction) {
+  window.parent.postMessage(
+    { action: 'setWIStatus', dataAction: dataAction, workitemId: workitemId },
+    '*'
+  );
+}
+
+function advanceToReview() {
+  gcAction('IntakeComplete');
+  const btn = document.getElementById('advanceBtn');
+  const sent = document.getElementById('advanceSent');
+  if (btn) { btn.disabled = true; btn.textContent = '✓ Intake Complete'; }
+  if (sent) sent.style.display = 'block';
+}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());

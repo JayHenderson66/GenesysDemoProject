@@ -287,7 +287,7 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
     <!-- Decision -->
     <div class="card">
       <div class="card-title"><div class="card-accent blue"></div>Review Decision</div>
-      <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:12px;">Select the outcome and set the work item status in the GC Case panel. Both outcomes advance to Resolution.</p>
+      <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:12px;">Select the outcome below. The work item status will be sent to Genesys Cloud automatically.</p>
       <div class="decision-row">
         <button class="decision-btn approve" onclick="selectDecision(this, 'approve')">✓ Approve Refund</button>
         <button class="decision-btn deny"    onclick="selectDecision(this, 'deny')">✕ Deny Refund</button>
@@ -300,7 +300,7 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
       <div class="copilot-icon">🤖</div>
       <div>
         <div class="copilot-label">Review Stage — No Live Checklist</div>
-        <div class="copilot-text">Stage 2 Review is typically back-office processing. Select your decision above, then set the work item status to <strong>Approved</strong> or <strong>Denied</strong> in the GC Work Item panel to advance to Stage 3 — Resolution.</div>
+        <div class="copilot-text">Stage 2 Review is typically back-office processing. Select your decision above — the work item status will be updated to <strong>Approved</strong> or <strong>Denied</strong> in Genesys Cloud automatically to advance to Stage 3.</div>
       </div>
     </div>
 
@@ -315,6 +315,14 @@ const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_
 const p = new URLSearchParams(window.location.search);
 const caseId     = p.get('caseId')     || p.get('case_id')     || null;
 const customerId = p.get('customerId') || p.get('customer_id') || null;
+const workitemId = p.get('workitemId') || p.get('workitem_id') || null;
+
+function gcAction(dataAction) {
+  window.parent.postMessage(
+    { action: 'setWIStatus', dataAction: dataAction, workitemId: workitemId },
+    '*'
+  );
+}
 
 function sb(table, query) {
   return fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: HEADERS }).then(r => r.json());
@@ -402,14 +410,19 @@ function selectDecision(btn, type) {
   document.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   selectedDecision = type;
+
+  gcAction(type === 'approve' ? 'Approved' : 'Denied');
+
   const note = document.getElementById('decision-note');
   if (note) {
     note.style.display = 'block';
     note.textContent = type === 'approve'
-      ? 'Outcome: Approved. Use the Approve button in the GC panel to advance to Stage 3.'
-      : 'Outcome: Denied. Use the Deny button in the GC panel to advance to Stage 3.';
+      ? '✓ Approved — work item status sent to Genesys Cloud.'
+      : '✕ Denied — work item status sent to Genesys Cloud.';
     note.style.color = type === 'approve' ? 'var(--green)' : 'var(--red)';
   }
+
+  document.querySelectorAll('.decision-btn').forEach(b => b.disabled = true);
 }
 
 load();
