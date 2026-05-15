@@ -338,8 +338,25 @@ let gcAccessToken = null;
 
 function initGcAuth() {
   try {
+    // Returning from native OAuth redirect — token is in the hash
     const token = hashParams.get('access_token');
     if (token) { gcAccessToken = token; return; }
+
+    // Inside GC Agent UI — SDK is injected by the agent desktop
+    const pc = window.platformClient;
+    if (pc && pc.ApiClient) {
+      const apiClient = pc.ApiClient.instance;
+      apiClient.setEnvironment(gcEnv);
+      apiClient.loginImplicitGrant(
+        GC_CLIENT_ID,
+        window.location.href.split('?')[0].split('#')[0],
+        { state: window.location.search }
+      ).then(data => { gcAccessToken = data.accessToken; })
+       .catch(e => console.warn('GC auth skipped:', e));
+      return;
+    }
+
+    // Standalone — use native OAuth implicit grant redirect
     const redirectUri = window.location.href.split('?')[0].split('#')[0];
     window.location.replace(
       `https://login.${gcEnv}/oauth/authorize` +
