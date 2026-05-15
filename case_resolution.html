@@ -360,9 +360,11 @@ function initGcAuth() {
     const token = hashParams.get('access_token');
     if (token) { gcAccessToken = token; return; }
 
-    // Inside GC Agent UI — SDK is injected by the agent desktop
+    // Inside GC Agent UI — SDK is injected by the agent desktop.
+    // Only attempt SDK auth when running inside an iframe (i.e., embedded in GC).
+    const inIframe = window.self !== window.top;
     const pc = window.platformClient;
-    if (pc && pc.ApiClient) {
+    if (inIframe && pc && pc.ApiClient) {
       const apiClient = pc.ApiClient.instance;
       apiClient.setEnvironment(gcEnv);
       apiClient.loginImplicitGrant(
