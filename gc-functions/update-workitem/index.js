@@ -49,8 +49,11 @@ async function patchWorkitem(workitemId, statusId, token, env) {
 
 exports.handler = async (event) => {
   try {
-    const { workitemId, statusId, clientId, clientSecret } = event;
-    const env = event.environment || GC_ENV_DEFAULT;
+    const workitemId  = event.workitemId;
+    const statusId    = event.statusId;
+    const clientId    = event.clientId    || process.env.GC_CLIENT_ID;
+    const clientSecret = event.clientSecret || process.env.GC_CLIENT_SECRET;
+    const env = event.environment || process.env.GC_ENVIRONMENT || GC_ENV_DEFAULT;
 
     if (!workitemId) return { success: false, error: 'Missing workitemId' };
     if (!statusId)   return { success: false, error: 'Missing statusId' };
