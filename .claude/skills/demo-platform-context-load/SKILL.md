@@ -60,16 +60,29 @@ Then proceed with the task.
 
 ### Table Inventory
 
-| Logical Name | Full Supabase Table Name |
-|---|---|
-| Demo config | `gc_demo_jh_shared_demo_config` |
-| Customers by phone (ANI lookup) | `gc_demo_jh_shared_customers_by_phone` |
-| Work item templates | `gc_demo_jh_shared_work_item_templates` |
-| Customers | `gc_demo_jh_retail_customers` |
-| Transactions | `gc_demo_jh_retail_transactions` |
-| Fulfillment | `gc_demo_jh_retail_fulfillment` |
-| Cases | `gc_demo_jh_retail_cases` |
-| Journey events | `gc_demo_jh_retail_journey_events` |
+All tables use the prefix `gc_demo_jh_`. **At session start, query Supabase for the live table list rather than relying on this file.** Use the Supabase MCP connection to run:
+
+```sql
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public' AND table_name LIKE 'gc_demo_jh_%'
+ORDER BY table_name;
+```
+
+Current expected tables (verify live — this list may be stale):
+- `gc_demo_jh_shared_demo_config`
+- `gc_demo_jh_shared_customers_by_phone`
+- `gc_demo_jh_shared_work_item_templates`
+- `gc_demo_jh_retail_customers`
+- `gc_demo_jh_retail_transactions`
+- `gc_demo_jh_retail_fulfillment`
+- `gc_demo_jh_retail_cases`
+- `gc_demo_jh_retail_journey_events`
+
+For column-level schema, query live:
+```sql
+SELECT column_name, data_type FROM information_schema.columns
+WHERE table_name = '<table_name>' ORDER BY ordinal_position;
+```
 
 ---
 
@@ -109,7 +122,9 @@ drives the screen pop, the agent script, and the AI guide content.
 
 ## Data Actions
 
-Six Data Actions call Supabase REST (retired from Genesys Data Tables):
+Data Actions call the Supabase REST URL directly using the `apiKey` header with the Supabase anon key. Always filter by the active `demo_config_key` where relevant.
+
+**Do not rely on this file for the current Data Action list or their logic — retrieve them live from Genesys if needed.** The expected actions follow the naming convention `ABC Retail - {Action Description}`. Known actions at last update:
 
 1. ABC Retail - Get Customer ID by Phone
 2. ABC Retail - Get Customer Phone
@@ -117,8 +132,6 @@ Six Data Actions call Supabase REST (retired from Genesys Data Tables):
 4. ABC Retail - Get Transaction
 5. ABC Retail - Get Fulfillment
 6. ABC Retail - Get Case
-
-Data Actions call the Supabase REST URL directly. Use `apiKey` header with the Supabase anon key. Always filter by the active `demo_config_key` where relevant.
 
 ---
 
