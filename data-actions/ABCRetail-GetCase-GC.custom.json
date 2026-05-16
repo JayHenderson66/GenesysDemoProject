@@ -1,0 +1,49 @@
+{
+  "name": "ABC Retail - Get Case - GC",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/casemanagement/cases/${input.caseId}",
+      "requestType": "GET",
+      "headers": {},
+      "requestTemplate": "$null"
+    },
+    "response": {
+      "translationMap": {
+        "caseReference": "$.reference",
+        "caseStatus": "$.status",
+        "casePriority": "$.priority",
+        "externalContactId": "$.externalContact.id",
+        "customerIntentId": "$.customerIntent.id"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"caseReference\": ${caseReference}, \"caseStatus\": ${caseStatus}, \"casePriority\": ${casePriority}, \"externalContactId\": ${externalContactId}, \"customerIntentId\": ${customerIntentId}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "caseId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "caseReference": { "type": "string" },
+          "caseStatus": { "type": "string" },
+          "casePriority": { "type": "string" },
+          "externalContactId": { "type": "string" },
+          "customerIntentId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}

@@ -1,0 +1,75 @@
+{
+  "name": "ABC Retail - Get Work Item",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/taskmanagement/workitems/${input.workitemId}",
+      "requestType": "GET",
+      "headers": {},
+      "requestTemplate": "$null"
+    },
+    "response": {
+      "translationMap": {
+        "workitemName": "$.name",
+        "caseId": "$.case.id",
+        "typeId": "$.type.id",
+        "statusId": "$.status.id",
+        "statusCategory": "$.statusCategory",
+        "externalContactId": "$.externalContact.id",
+        "caseTypeText": "$.customFields.case_type_text",
+        "customerIdIdentifier": "$.customFields.customer_id_identifier",
+        "channelText": "$.customFields.channel_text",
+        "casePriorityText": "$.customFields.case_priority_text",
+        "intentText": "$.customFields.intent_text",
+        "orderNumberText": "$.customFields.order_number_text",
+        "caseSummaryLongtext": "$.customFields.case_summary_longtext"
+      },
+      "translationMapDefaults": {
+        "caseTypeText": "\"\"",
+        "customerIdIdentifier": "\"\"",
+        "channelText": "\"\"",
+        "casePriorityText": "\"\"",
+        "intentText": "\"\"",
+        "orderNumberText": "\"\"",
+        "caseSummaryLongtext": "\"\""
+      },
+      "successTemplate": "{\"workitemName\": ${workitemName}, \"caseId\": ${caseId}, \"typeId\": ${typeId}, \"statusId\": ${statusId}, \"statusCategory\": ${statusCategory}, \"externalContactId\": ${externalContactId}, \"caseTypeText\": ${caseTypeText}, \"customerIdIdentifier\": ${customerIdIdentifier}, \"channelText\": ${channelText}, \"casePriorityText\": ${casePriorityText}, \"intentText\": ${intentText}, \"orderNumberText\": ${orderNumberText}, \"caseSummaryLongtext\": ${caseSummaryLongtext}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "workitemId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "workitemName": { "type": "string" },
+          "caseId": { "type": "string" },
+          "typeId": { "type": "string" },
+          "statusId": { "type": "string" },
+          "statusCategory": { "type": "string" },
+          "externalContactId": { "type": "string" },
+          "caseTypeText": { "type": "string" },
+          "customerIdIdentifier": { "type": "string" },
+          "channelText": { "type": "string" },
+          "casePriorityText": { "type": "string" },
+          "intentText": { "type": "string" },
+          "orderNumberText": { "type": "string" },
+          "caseSummaryLongtext": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
