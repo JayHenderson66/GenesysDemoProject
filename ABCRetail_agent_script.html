@@ -246,10 +246,12 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 /* CASE PAGE OVERLAY */
 #caseOverlay { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:#fff; }
 #caseOverlay.open { display:flex; }
-#caseOverlayBar { background:#1A3A6B; display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:40px; flex-shrink:0; }
-#caseOverlayTitle { font-family:'Barlow Condensed',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,0.85); }
-#caseOverlayBack { font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:3px 10px; cursor:pointer; }
-#caseOverlayBack:hover { background:rgba(255,255,255,0.22); }
+#caseOverlayBar { background:#1A3A6B; display:flex; align-items:center; justify-content:space-between; padding:0 12px; height:40px; flex-shrink:0; gap:8px; }
+.onav-btn { font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:rgba(255,255,255,0.6); background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:4px; padding:4px 12px; cursor:pointer; }
+.onav-btn:hover { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); }
+.onav-btn.active { background:rgba(255,255,255,0.18); color:#fff; border-color:rgba(255,255,255,0.4); }
+#caseOverlayBack { font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:4px 10px; cursor:pointer; margin-left:auto; }
+#caseOverlayBack:hover { background:rgba(255,255,255,0.18); }
 #caseOverlayFrame { flex:1; border:none; width:100%; }
 
 /* ACTIVE CASE CARD */
@@ -651,10 +653,10 @@ function openCaseStage(stage) {
   if (customerId)   params.set('customerId', customerId);
   if (caseId)       params.set('caseId', caseId);
   if (gcWorkitemId) params.set('workitemId', gcWorkitemId);
-  const url = `${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`;
-  const labels = { intake: 'Stage 1 — Intake', review: 'Stage 2 — Review', resolution: 'Stage 3 — Resolution' };
-  document.getElementById('caseOverlayTitle').textContent = labels[stage] || 'Case Management';
-  document.getElementById('caseOverlayFrame').src = url;
+  ['intake','review','resolution'].forEach(s =>
+    document.getElementById('onav-' + s).classList.toggle('active', s === stage)
+  );
+  document.getElementById('caseOverlayFrame').src = `${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`;
   document.getElementById('caseOverlay').classList.add('open');
 }
 function closeCaseOverlay() {
@@ -1319,7 +1321,9 @@ async function executeBlindTransfer() {
 <!-- CASE PAGE OVERLAY -->
 <div id="caseOverlay">
   <div id="caseOverlayBar">
-    <span id="caseOverlayTitle">Case Management</span>
+    <button id="onav-intake"     class="onav-btn" onclick="openCaseStage('intake')">&#128221; Intake</button>
+    <button id="onav-review"     class="onav-btn" onclick="openCaseStage('review')">&#128269; Review</button>
+    <button id="onav-resolution" class="onav-btn" onclick="openCaseStage('resolution')">&#9989; Resolution</button>
     <button id="caseOverlayBack" onclick="closeCaseOverlay()">&#8592; Overview</button>
   </div>
   <iframe id="caseOverlayFrame" src="about:blank"></iframe>
