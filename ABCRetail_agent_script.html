@@ -243,6 +243,15 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 .setup-gear-btn { position: fixed; bottom: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); border: none; color: rgba(255,255,255,0.5); font-size: 1rem; cursor: pointer; z-index: 500; transition: background 0.15s, color 0.15s; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
 .setup-gear-btn:hover { background: var(--blue); color: var(--white); }
 
+/* CASE PAGE OVERLAY */
+#caseOverlay { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:#fff; }
+#caseOverlay.open { display:flex; }
+#caseOverlayBar { background:#1A3A6B; display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:40px; flex-shrink:0; }
+#caseOverlayTitle { font-family:'Barlow Condensed',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,0.85); }
+#caseOverlayBack { font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:3px 10px; cursor:pointer; }
+#caseOverlayBack:hover { background:rgba(255,255,255,0.22); }
+#caseOverlayFrame { flex:1; border:none; width:100%; }
+
 /* ACTIVE CASE CARD */
 .active-case { display: none; background: linear-gradient(135deg, #FFFFFF 0%, #F4F8FD 100%); border: 1px solid var(--gray-200); border-left: 4px solid var(--blue); border-radius: var(--radius); padding: 16px 18px; margin: 12px 20px 0; box-shadow: var(--shadow); }
 .active-case.visible { display: block; }
@@ -636,13 +645,21 @@ const gcWorkitemId = getParam('workitemId') || getParam('workitem_id') || '';
 const CASE_PAGE_BASE = 'https://jayhenderson66.github.io/GenesysDemoProject';
 
 function openCaseStage(stage) {
-  const caseId = (window.currentActiveCase && window.currentActiveCase.key) || '';
+  const caseId     = (window.currentActiveCase && window.currentActiveCase.key) || '';
   const customerId = (selectedCustomer && selectedCustomer.key) || getParam('customer_id') || '';
   const params = new URLSearchParams();
-  if (customerId)    params.set('customerId', customerId);
-  if (caseId)        params.set('caseId', caseId);
-  if (gcWorkitemId)  params.set('workitemId', gcWorkitemId);
-  window.location.href = `${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`;
+  if (customerId)   params.set('customerId', customerId);
+  if (caseId)       params.set('caseId', caseId);
+  if (gcWorkitemId) params.set('workitemId', gcWorkitemId);
+  const url = `${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`;
+  const labels = { intake: 'Stage 1 — Intake', review: 'Stage 2 — Review', resolution: 'Stage 3 — Resolution' };
+  document.getElementById('caseOverlayTitle').textContent = labels[stage] || 'Case Management';
+  document.getElementById('caseOverlayFrame').src = url;
+  document.getElementById('caseOverlay').classList.add('open');
+}
+function closeCaseOverlay() {
+  document.getElementById('caseOverlay').classList.remove('open');
+  document.getElementById('caseOverlayFrame').src = 'about:blank';
 }
 
 function renderActiveCaseCard(c) {
@@ -1298,5 +1315,14 @@ async function executeBlindTransfer() {
   }
 }
 </script>
+
+<!-- CASE PAGE OVERLAY -->
+<div id="caseOverlay">
+  <div id="caseOverlayBar">
+    <span id="caseOverlayTitle">Case Management</span>
+    <button id="caseOverlayBack" onclick="closeCaseOverlay()">&#8592; Overview</button>
+  </div>
+  <iframe id="caseOverlayFrame" src="about:blank"></iframe>
+</div>
 </body>
 </html>
