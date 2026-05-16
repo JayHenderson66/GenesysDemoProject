@@ -320,21 +320,22 @@
         "schemas": {
           "inputs": {
             "type": "object",
-            "required": ["workItemType", "subject", "description"],
             "properties": {
               "workItemType": { "type": "string" },
               "subject": { "type": "string" },
               "description": { "type": "string" },
               "orderNumber": { "type": "string" },
               "customerId": { "type": "string" }
-            }
+            },
+            "additionalProperties": true
           },
           "outputs": {
             "type": "object",
             "properties": {
               "workItemId": { "type": "string" },
               "workItemName": { "type": "string" }
-            }
+            },
+            "additionalProperties": true
           }
         }
       },
@@ -406,7 +407,6 @@
         "schemas": {
           "inputs": {
             "type": "object",
-            "required": ["caseKey", "customerId", "caseType", "caseTitle", "priority", "linkedConversationId"],
             "properties": {
               "caseKey": { "type": "string" },
               "customerId": { "type": "string" },
@@ -414,14 +414,16 @@
               "caseTitle": { "type": "string" },
               "priority": { "type": "string" },
               "linkedConversationId": { "type": "string" }
-            }
+            },
+            "additionalProperties": true
           },
           "outputs": {
             "type": "object",
             "properties": {
               "createdKey": { "type": "string" },
               "createdCustomerId": { "type": "string" }
-            }
+            },
+            "additionalProperties": true
           }
         }
       },
@@ -461,14 +463,16 @@
             "properties": {
               "customerId": { "type": "string" },
               "caseKey": { "type": "string" }
-            }
+            },
+            "additionalProperties": true
           },
           "outputs": {
             "type": "object",
             "properties": {
               "updatedCustomerId": { "type": "string" },
               "updatedCaseId": { "type": "string" }
-            }
+            },
+            "additionalProperties": true
           }
         }
       }
