@@ -350,7 +350,7 @@
         ],
         "outputInstructions": [],
         "type": "DataAction",
-        "targetId": "PLACEHOLDER_CREATE_CASE_SB_ACTION_ID",
+        "targetId": "custom_-_b54158da-7bb1-445a-acc4-5490193a6e6f",
         "targetName": "ABC Retail - Create Case - SB",
         "inputs": [
           {
