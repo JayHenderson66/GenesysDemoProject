@@ -5,89 +5,67 @@ Update this at the end of every working session. Keep it short and factual.
 ---
 
 ## Last updated
-2026-05-15
+2026-05-16
 
 ## Current focus
-AVA (Digital Bot Flow) is not yet working for work items, and inbound
-chat/voice interactions aren't routing to an agent. Routing + AVA are the
-next two things to troubleshoot.
+Inbound voice flow is generating errors. AVA (Digital Bot Flow) behavior
+also needs review. Both are next up after the case page work completed today.
 
 ## Done this session
 
-- **Active Case card** added to the Start Page (`ABCRetail_agent_script.html`):
-  stage pipeline, priority, metadata, Intake/Review/Resolution quick-open
-  buttons. Wired into both widget-mode screen pop and standalone customer
-  search. Merged to `main` in PR #11.
-- **External Contact lookup fixed.** The inbound flow's "Get External Contact"
-  block was failing because of a hardcoded UUID. Replaced with a dynamic
-  lookup driven by `Flow.getExternalContactId`, which is populated from the
-  Supabase customer record.
-- **New data action** `ABC Retail - Get Customer Record - SB` exported and
-  committed at `data-actions/ABCRetail-GetCustomerRecord-SB.custom.json` —
-  adds `gc_external_contact_id` to the response translation map, success
-  template, and output schema. **Imported and republished in GC.**
-- **Block 12 (customer lookup) re-bound** to the new data action; its new
-  output `gc_external_contact_id` is mapped to `Flow.getExternalContactId`.
-- **Block 34 (Get External Contact)** updated: `External Contact ID` =
-  `Flow.getExternalContactId`, `External Contact Result` =
-  `Flow.getExternalId` (ExternalContact type).
-- **Supabase `customers.gc_external_contact_id`** populated for Philip Rivers
-  (`C1001` → `a92d57ff-0eda-464a-9f8d-f17c68728d90`). Other 9 customers are
-  still empty — flow needs a failure branch on block 34 to avoid stalling.
+- **Inbound message flow unblocked.** Fixed the cascade of failures:
+  - Block 34 (Get External Contact): was hardcoded to a single UUID, now
+    reads `Flow.getExternalContactId` dynamically. Failure branch confirmed
+    wired to continue into transaction lookup (block 33 Set Participant Data).
+  - Philip Rivers (`C1001`) `open_case_id` corrected from nonexistent `RR-16`
+    to `CASE-2026-0042` ("Shipment Delayed 11 Days"). Case now resolves in
+    Supabase and the flow completes through to ACD transfer.
+  - Chat interaction successfully routed to agent with screen pop populating
+    the agent script. AVA handled order status inquiry and escalated to agent.
+
+- **Case page navigation fixed (PR #13, #14).** GC Scripter intercepts all
+  external navigation from its iframe. Replaced `window.open()` and
+  `window.location.href` approaches with a full-screen overlay iframe
+  embedded inside the Start Page. Clicking Intake/Review/Resolution opens
+  the case page in the overlay; "← Overview" button dismisses it and returns
+  to the Start Page. All three case pages also have "← Overview" back buttons
+  in their topbars (for standalone/direct URL access).
 
 ## In progress / pending
 
-- **Block 34 Failure branch.** Not yet confirmed wired. On failure, continue
-  into the same transaction lookup that Success leads to so a missing contact
-  doesn't stall the flow.
-- **Republish the inbound message flow** once the failure branch is added.
-- **Test a chat interaction** with Philip Rivers (`customerId=C1001`) end to
-  end — verify the screen pop populates the agent script and the Active Case
-  card appears.
+- **Voice flow** — generating errors, root cause not yet investigated.
+  Need the flow export or error trace from Performance → Interactions.
+- **AVA review** — user will share the Digital Bot Flow JSON. Behavior is
+  described as similar to the inbound message flow. Need to review and
+  confirm it works end to end.
 
 ## Blocked / known issues
 
-- **Chat + voice not routing to agent.** Tried earlier this session — neither
-  hit the agent. Root cause not yet identified. Candidates:
-  - Agent not on-queue or not a member of `ABC Retail` queue
-  - Required skills / ACD config mismatch
-  - Flow not publishing successfully (data action mapping errors stall it)
-  - Bot flow erroring before `transferToAcd`
-- **AVA not yet configured for work items.** Today AVA is called inside the
-  inbound message flow before ACD transfer, but its behavior for workitem
-  interactions hasn't been designed or implemented.
+- **Other 9 demo customers have no GC External Contact.** Block 34 will fail
+  for them (but failure branch keeps the flow running). To fully support them,
+  create GC External Contacts and populate `gc_external_contact_id` in Supabase.
 
 ## Open questions
 
-- **What should AVA do on a workitem?** Options: deflect / summarize the
-  case / coach the agent through the script / draft customer comms. Need to
-  decide before designing the bot flow.
-- **External contact handling for the other 9 demo customers.** Do we create
-  contacts for all of them in GC and populate `gc_external_contact_id`, or
-  rely on the failure branch indefinitely?
+- **AVA for workitems** — what should the bot do when a workitem interaction
+  lands? Not yet designed. User will share AVA JSON to inform the discussion.
 
 ## Next session — start here
 
 1. **Read `CLAUDE.md` and this `HANDOFF.md`** to load full context.
-2. **Verify Block 34 has a Failure branch** wired to continue into the
-   transaction lookup (same as Success).
-3. **Republish the inbound message flow**, then test a chat interaction with
-   Philip Rivers (`C1001`).
-4. **If routing still fails**, walk down this list:
-   - Is the test agent on-queue?
-   - Is the agent a member of the `ABC Retail` queue?
-   - Does the published flow validate cleanly in Architect?
-   - Does the digital bot flow publish + invoke without errors?
-   - Open the conversation in GC's Performance > Interactions view and look
-     at the flow execution to see where it stops.
-5. **Then move to AVA.** Pick a goal for the bot on workitems (start with
-   "summarize the open case and offer to advance the stage") and design the
-   bot flow around it.
+2. **Voice flow** — get the error message or Performance → Interactions trace
+   and share it. Likely similar issues to the message flow (data action
+   mapping, missing case record, hardcoded values).
+3. **AVA** — user will share the Digital Bot Flow JSON. Review it, identify
+   gaps, and align on what AVA should do end to end.
+4. **After voice + AVA are stable** — consider creating GC External Contacts
+   for the remaining 9 demo customers.
 
 ## Useful references
 
-- Inbound flow YAML export: most recent at `~/uploads/...` (re-upload if
-  needed).
+- Inbound message flow YAML: `6819fda8-ABC_Retail__Inbound_Message_Flow_v190.yaml`
+  (re-upload if needed — check `~/uploads/`).
 - Scripter export: `ec016c04-JHABC_Retail.script` (re-upload if needed).
 - GC Function Lambda: `gc-functions/update-workitem/index.js`. ZIP at
   `gc-functions/update-workitem.zip`.
+- Data action (customer lookup): `data-actions/ABCRetail-GetCustomerRecord-SB.custom.json`.

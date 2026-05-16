@@ -103,6 +103,10 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
   Tables fetches.
 - **Don't hardcode UUIDs in flow actions.** Especially external contact IDs.
   Pull dynamic values from Supabase.
+- **GC Scripter intercepts all iframe navigation.** Any `window.open()` or
+  `window.location.href` change from inside the Scripter iframe is forced into
+  a new browser tab by GC. To keep navigation self-contained, embed target
+  pages in an overlay `<iframe>` within the Start Page instead of navigating.
 
 ## Working agreements
 
