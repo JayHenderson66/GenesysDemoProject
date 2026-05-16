@@ -431,7 +431,7 @@
         "name": "update_customer_case_id",
         "description": "Updates the customer's open_case_id in Supabase to link them to the newly created case. Call this as the THIRD and final step after create_case_sb succeeds. After this, call save_ava_context with exitReasonValue set to create_work_item.",
         "inputInstructions": [
-          "caseKey is pulled automatically from the output of create_case_sb. customerId is pulled from Start Context. Do not ask the customer for either value."
+          "Set caseKey to the createdKey value returned by create_case_sb. customerId is pulled from Start Context — do not ask the customer for it."
         ],
         "outputInstructions": [],
         "type": "DataAction",
@@ -448,12 +448,11 @@
           },
           {
             "targetName": "caseKey",
-            "type": "CreatedCaseResult",
-            "source": "ToolOutput",
-            "required": false,
-            "fallbackToUser": true,
-            "fallbackToTool": false,
-            "mapping": ["CreatedCaseResult", "createdKey"]
+            "type": "CaseKey",
+            "source": "User",
+            "required": true,
+            "fallbackToUser": false,
+            "fallbackToTool": false
           }
         ],
         "output": "UpdatedCustomerResult",
@@ -629,7 +628,7 @@
       },
       {
         "name": "CreatedCaseResult",
-        "description": "The result of creating a case record in Supabase. Contains createdKey (the case reference, e.g. CASE-a3f2c891) and createdCustomerId. Use createdKey for the update_customer_case_id step and to confirm the reference number to the customer.",
+        "description": "The result of creating a case record in Supabase. Contains createdKey (the case reference, e.g. CASE-a3f2c891) and createdCustomerId. Use createdKey for the update_customer_case_id step and to confirm the case reference number to the customer.",
         "direction": "output",
         "type": "object",
         "properties": [
@@ -639,7 +638,7 @@
       },
       {
         "name": "UpdatedCustomerResult",
-        "description": "Confirmation that the customer's open_case_id was updated in Supabase. Contains updatedCustomerId and updatedCaseId.",
+        "description": "Confirmation that the customer record was updated with the new case ID.",
         "direction": "output",
         "type": "object",
         "properties": [
