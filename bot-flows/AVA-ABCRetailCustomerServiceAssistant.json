@@ -433,7 +433,7 @@
         ],
         "outputInstructions": [],
         "type": "DataAction",
-        "targetId": "PLACEHOLDER_UPDATE_CUSTOMER_CASE_ACTION_ID",
+        "targetId": "custom_-_251514e8-79ad-4ad0-b9ee-caa4a67506d5",
         "targetName": "ABC Retail - Update Customer Case ID - SB",
         "inputs": [
           {
