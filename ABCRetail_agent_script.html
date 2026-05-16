@@ -642,7 +642,7 @@ function openCaseStage(stage) {
   if (customerId)    params.set('customerId', customerId);
   if (caseId)        params.set('caseId', caseId);
   if (gcWorkitemId)  params.set('workitemId', gcWorkitemId);
-  window.open(`${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`, '_blank');
+  window.location.href = `${CASE_PAGE_BASE}/case_${stage}.html?${params.toString()}`;
 }
 
 function renderActiveCaseCard(c) {
