@@ -35,6 +35,10 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
 .topbar { background: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 48px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
 .back-btn { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: rgba(255,255,255,0.85); font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 4px 10px; cursor: pointer; text-decoration: none; }
 .back-btn:hover { background: rgba(255,255,255,0.2); }
+.stage-nav { background: var(--navy-mid); display: flex; align-items: center; gap: 4px; padding: 6px 20px; position: sticky; top: 48px; z-index: 99; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.stage-nav-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 5px 14px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.55); background: transparent; cursor: pointer; text-decoration: none; }
+.stage-nav-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+.stage-nav-btn.active { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.35); }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
 .brand { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 2px; color: #fff; text-transform: uppercase; }
 .brand span { color: #7BB8F0; }
@@ -144,6 +148,12 @@ body { background: var(--cream); font-family: 'Barlow', sans-serif; color: var(-
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:rgba(255,255,255,0.4);letter-spacing:0.5px;" id="case-ref-top">—</div>
     <a class="back-btn" href="#" onclick="goBack();return false;">&#8592; Overview</a>
   </div>
+</div>
+
+<div class="stage-nav">
+  <a class="stage-nav-btn" href="#" onclick="goStage('intake');return false;">&#128221; Intake</a>
+  <a class="stage-nav-btn active" href="#" onclick="goStage('review');return false;">&#128269; Review</a>
+  <a class="stage-nav-btn" href="#" onclick="goStage('resolution');return false;">&#9989; Resolution</a>
 </div>
 
 <div class="stage-bar">
@@ -340,11 +350,13 @@ try {
   if (sv) restoredParams = new URLSearchParams(decodeURIComponent(sv));
 } catch(e) {}
 function getParam(n) { return urlParams.get(n) || restoredParams.get(n) || hashParams.get(n) || null; }
-function goBack() {
+function buildParams() {
   const p = new URLSearchParams();
   ['customerId','caseId','workitemId','customer_id','open_case_id'].forEach(k => { const v = getParam(k); if (v) p.set(k, v); });
-  window.location.href = 'https://jayhenderson66.github.io/GenesysDemoProject/ABCRetail_agent_script.html?' + p.toString();
+  return p.toString();
 }
+function goBack()        { window.location.href = 'https://jayhenderson66.github.io/GenesysDemoProject/ABCRetail_agent_script.html?' + buildParams(); }
+function goStage(stage)  { window.location.href = 'https://jayhenderson66.github.io/GenesysDemoProject/case_' + stage + '.html?' + buildParams(); }
 
 const caseId     = getParam('caseId')     || getParam('case_id')     || null;
 const customerId = getParam('customerId') || getParam('customer_id') || null;
