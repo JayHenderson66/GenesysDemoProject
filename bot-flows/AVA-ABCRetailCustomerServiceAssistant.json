@@ -358,7 +358,7 @@
             "targetName": "caseKey",
             "type": "CaseKey",
             "source": "User",
-            "required": true,
+            "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -374,7 +374,7 @@
             "targetName": "caseType",
             "type": "WorkItemType",
             "source": "User",
-            "required": true,
+            "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -382,7 +382,7 @@
             "targetName": "caseTitle",
             "type": "WorkItemSubject",
             "source": "User",
-            "required": true,
+            "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -390,7 +390,7 @@
             "targetName": "priority",
             "type": "CasePriority",
             "source": "User",
-            "required": true,
+            "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -450,7 +450,7 @@
             "targetName": "caseKey",
             "type": "CaseKey",
             "source": "User",
-            "required": true,
+            "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
           }
