@@ -272,7 +272,7 @@
         ],
         "outputInstructions": [],
         "type": "DataAction",
-        "targetId": "PLACEHOLDER_CREATE_WORKITEM_ACTION_ID",
+        "targetId": "custom_-_1bb43a76-8e74-4114-b54c-4aa378b5c963",
         "targetName": "ABC Retail - Create Work Item",
         "inputs": [
           {
