@@ -1,0 +1,53 @@
+{
+  "name": "ABC Retail - Create Case - SB",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1/gc_demo_jh_retail_cases",
+      "requestType": "POST",
+      "headers": {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "requestTemplate": "{\"key\": \"${input.caseKey}\", \"customer_id\": \"${input.customerId}\", \"case_type\": \"${input.caseType}\", \"case_title\": \"${input.caseTitle}\", \"status\": \"stage-1\", \"current_stage\": 1, \"stage_1_status\": \"pending\", \"priority\": \"${input.priority}\", \"sla_hours\": 72, \"linked_conversation_id\": \"${input.linkedConversationId}\"}"
+    },
+    "response": {
+      "translationMap": {
+        "createdKey": "$[0].key",
+        "createdCustomerId": "$[0].customer_id"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"createdKey\": ${createdKey}, \"createdCustomerId\": ${createdCustomerId}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "caseKey": { "type": "string" },
+          "customerId": { "type": "string" },
+          "caseType": { "type": "string" },
+          "caseTitle": { "type": "string" },
+          "priority": { "type": "string" },
+          "linkedConversationId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "createdKey": { "type": "string" },
+          "createdCustomerId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}

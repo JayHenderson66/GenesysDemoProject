@@ -1,0 +1,49 @@
+{
+  "name": "ABC Retail - Update Customer Case ID - SB",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1/gc_demo_jh_retail_customers?key=eq.${input.customerId}",
+      "requestType": "PATCH",
+      "headers": {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "requestTemplate": "{\"open_case_id\": \"${input.caseKey}\"}"
+    },
+    "response": {
+      "translationMap": {
+        "updatedCustomerId": "$[0].key",
+        "updatedCaseId": "$[0].open_case_id"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"updatedCustomerId\": ${updatedCustomerId}, \"updatedCaseId\": ${updatedCaseId}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "customerId": { "type": "string" },
+          "caseKey": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "updatedCustomerId": { "type": "string" },
+          "updatedCaseId": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
