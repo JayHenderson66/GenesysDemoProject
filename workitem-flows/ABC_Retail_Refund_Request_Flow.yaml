@@ -1,10 +1,10 @@
 workitem:
-  name: ABC Retail - Shipment Exception Flow
+  name: ABC Retail - Refund Request Flow
   description: ""
   division: Home
   startUpRef: "/workitem/states/state[Initial State_10]"
   worktype:
-    name: ABC Retail - Shipment Exception
+    name: ABC Retail - Refund Request
   defaultLanguage: en-us
   supportedLanguages:
     en-us:
@@ -79,6 +79,22 @@ workitem:
         name: EventType - workitemCreated
         refId: EventType - workitemCreated_12
         actions:
+          - transferToAcd:
+              name: Transfer to ACD
+              targetQueue:
+                lit:
+                  name: ABC Retail
+              priority:
+                lit: 0
+              preferredAgents:
+                noValue: true
+              languageSkill:
+                noValue: true
+              failureOutputs:
+                errorType:
+                  noValue: true
+                errorMessage:
+                  noValue: true
           - endTask:
               name: "End Task: workitemCreated"
               outputPath:

@@ -1,0 +1,133 @@
+workitem:
+  name: ABC Retail - Delivery Delay Flow
+  description: ""
+  division: Home
+  startUpRef: "/workitem/states/state[Initial State_10]"
+  worktype:
+    name: ABC Retail - Delivery Delay
+  defaultLanguage: en-us
+  supportedLanguages:
+    en-us:
+      defaultLanguageSkill:
+        noValue: true
+  settingsErrorHandling:
+    errorHandling:
+      endFlow:
+        none: true
+  states:
+    - state:
+        name: Initial State
+        refId: Initial State_10
+        actions:
+          - decision:
+              name: Workitem Created?
+              condition:
+                exp: Workitem.EventType == "workitemCreated"
+              outputs:
+                "yes":
+                  actions:
+                    - callTask:
+                        name: Call workitemCreated Task
+                        targetTaskRef: "/workitem/tasks/task[EventType - workitemCreated_12]"
+          - decision:
+              name: Workitem Status Changed?
+              condition:
+                exp: Workitem.EventType == "workitemStatusChanged"
+              outputs:
+                "yes":
+                  actions:
+                    - switch:
+                        name: Check Workitem Status
+                        evaluate:
+                          firstMatch:
+                            string:
+                              value:
+                                exp: Workitem.Workitem.status.name
+                              cases:
+                                - case:
+                                    value:
+                                      lit: Open
+                                    actions:
+                                      - callTask:
+                                          name: Status - Open
+                                          targetTaskRef: "/workitem/tasks/task[Status - Open_16]"
+                                - case:
+                                    value:
+                                      lit: In Progress
+                                    actions:
+                                      - callTask:
+                                          name: Status - In Progress
+                                          targetTaskRef: "/workitem/tasks/task[Status - In Progress_18]"
+                                - case:
+                                    value:
+                                      lit: Waiting on Customer
+                                    actions:
+                                      - callTask:
+                                          name: Status - Waiting on Customer
+                                          targetTaskRef: "/workitem/tasks/task[Status - Waiting on Customer_20]"
+                                - case:
+                                    value:
+                                      lit: Closed
+                                    actions:
+                                      - callTask:
+                                          name: Status - Closed
+                                          targetTaskRef: "/workitem/tasks/task[Status - Closed_22]"
+          - exitWorkitemFlow:
+              name: Exit Workitem Flow
+  tasks:
+    - task:
+        name: EventType - workitemCreated
+        refId: EventType - workitemCreated_12
+        actions:
+          - transferToAcd:
+              name: Transfer to ACD
+              targetQueue:
+                lit:
+                  name: ABC Retail
+              priority:
+                lit: 0
+              preferredAgents:
+                noValue: true
+              languageSkill:
+                noValue: true
+              failureOutputs:
+                errorType:
+                  noValue: true
+                errorMessage:
+                  noValue: true
+          - endTask:
+              name: "End Task: workitemCreated"
+              outputPath:
+                name: default
+    - task:
+        name: Status - Open
+        refId: Status - Open_16
+        actions:
+          - endTask:
+              name: "End Task: Open"
+              outputPath:
+                name: default
+    - task:
+        name: Status - In Progress
+        refId: Status - In Progress_18
+        actions:
+          - endTask:
+              name: "End Task: In Progress"
+              outputPath:
+                name: default
+    - task:
+        name: Status - Waiting on Customer
+        refId: Status - Waiting on Customer_20
+        actions:
+          - endTask:
+              name: "End Task: Waiting on Customer"
+              outputPath:
+                name: default
+    - task:
+        name: Status - Closed
+        refId: Status - Closed_22
+        actions:
+          - endTask:
+              name: "End Task: Closed"
+              outputPath:
+                name: default
