@@ -119,7 +119,7 @@ published 2026-05-19. Each routes to the **ABC Retail** queue on `workitemCreate
 | ABC Retail - Credit Hold Flow | ABC Retail - Credit Hold |
 | ABC Retail - After Hours Escalation Flow | ABC Retail - After Hours Escalation |
 
-YAML exports in `workitem-flows/` (reference only — Architect does not support import).
+YAML exports in `case-management/workitem-flows/` (reference only — Architect does not support import).
 
 ### Customer Intents
 
