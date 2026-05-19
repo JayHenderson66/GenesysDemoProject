@@ -454,7 +454,7 @@
             "targetName": "caseKey",
             "type": "CaseKey",
             "source": "User",
-            "required": false,
+            "required": true,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -462,15 +462,15 @@
             "targetName": "customerId",
             "type": "CustomerId",
             "source": "External",
-            "required": false,
-            "fallbackToUser": false,
+            "required": true,
+            "fallbackToUser": true,
             "fallbackToTool": false
           },
           {
             "targetName": "caseType",
             "type": "WorkItemType",
             "source": "User",
-            "required": false,
+            "required": true,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -478,7 +478,7 @@
             "targetName": "caseTitle",
             "type": "WorkItemSubject",
             "source": "User",
-            "required": false,
+            "required": true,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -486,7 +486,7 @@
             "targetName": "priority",
             "type": "CasePriority",
             "source": "User",
-            "required": false,
+            "required": true,
             "fallbackToUser": false,
             "fallbackToTool": false
           },
@@ -494,8 +494,8 @@
             "targetName": "linkedConversationId",
             "type": "ConversationId",
             "source": "External",
-            "required": false,
-            "fallbackToUser": false,
+            "required": true,
+            "fallbackToUser": true,
             "fallbackToTool": false
           }
         ],
@@ -562,15 +562,15 @@
             "targetName": "customerId",
             "type": "CustomerId",
             "source": "External",
-            "required": false,
-            "fallbackToUser": false,
+            "required": true,
+            "fallbackToUser": true,
             "fallbackToTool": false
           },
           {
             "targetName": "caseKey",
             "type": "CaseKey",
             "source": "User",
-            "required": false,
+            "required": true,
             "fallbackToUser": false,
             "fallbackToTool": false
           }
