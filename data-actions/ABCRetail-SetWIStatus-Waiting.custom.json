@@ -1,5 +1,5 @@
 {
-  "name": "ABC Retail - Set WI Status - Intake Complete",
+  "name": "ABC Retail - Set WI Status - Waiting on Customer",
   "integrationType": "purecloud-data-actions",
   "actionType": "custom",
   "config": {
@@ -9,7 +9,7 @@
       "headers": {
         "Content-Type": "application/json"
       },
-      "requestTemplate": "{\"statusId\": \"eef100ff-1390-4b7a-83a1-2611e69ee4e0\"}"
+      "requestTemplate": "{\"statusId\": \"bdcf65fd-76a1-4616-9d75-7e03ba751686\"}"
     },
     "response": {
       "translationMap": {
