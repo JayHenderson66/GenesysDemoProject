@@ -5,11 +5,11 @@ Update this at the end of every working session. Keep it short and factual.
 ---
 
 ## Last updated
-2026-05-19
+2026-05-19 (session 2)
 
 ## Current focus
-Native GC Case Management (caseplans) build — in progress. Worktypes configured,
-Supabase updated. Next: attribute schema → customer intent → caseplan API call.
+Native GC Case Management — Shipment Exception caseplan POST in progress.
+Customer intent created. Next: POST caseplan → configure stageplans → publish.
 
 ## Done this session
 
@@ -52,33 +52,40 @@ Full status ID set in Supabase `gc_demo_jh_shared_work_item_templates`.
 ## In progress / next steps (do these in order)
 
 ### Step 1 — Custom Attribute Schema ✅ DONE
-Schema name: `ABC Retail - Case Attributes` — 20 attributes created in GC Admin.
-Full attribute reference in CLAUDE.md → "Native Case Management" section.
-**Schema ID: `14be6266-5533-466e-b79f-7a66bedf3135`**
+Schema ID: `14be6266-5533-466e-b79f-7a66bedf3135`
 
-### Step 2 — Assign Schema to Worktypes (GC Admin UI)
-Open each worktype → Schema Display tab → assign `ABC Retail - Case Attributes`.
-Do this for: Shipment Exception, Delivery Delay, Refund Request, Credit Hold.
-NOTE: schema cannot be changed after workitems exist — assign before any live use.
+### Step 2 — Assign Schema to Worktypes ✅ DONE
+All four worktypes assigned in GC Admin → Schema Display tab.
 
-### Step 3 — Customer Intent (GC Admin UI)
-Admin → Case Management → Customer Intents → Add
-- Name: `Shipment Exception`
-- Description: `Customer reporting a delayed, lost, or damaged shipment`
-Save → copy Customer Intent ID.
+### Step 3 — Customer Intents ✅ DONE
+- Refund Request: `c65ccaa9-dbd4-481f-80f5-4e4a2304d404` (pre-existing)
+- Shipment Exception: `8965dd02-a41e-4849-b80d-e43d3786bf20` (created this session)
+- API: POST/GET `/api/v2/intents/customerintents` (use flat `categoryId` field)
+- Category ID: `299bfb92-c2c7-45b3-8b1a-c00e7729a78a`
 
-### Step 4 — Caseplan (GC API Explorer)
-POST /api/v2/taskmanagement/caseplans
-Payload uses: Customer Intent ID (step 3) + Worktype IDs from the table above.
-Full payload to be written once Steps 1-3 are complete and IDs are in hand.
+### Step 4 — Shipment Exception Caseplan (GC API Explorer) ← START HERE
+POST /api/v2/casemanagement/caseplans
+```json
+{
+  "name": "ABC Retail - Shipment Exception",
+  "referencePrefix": "SE",
+  "customerIntentId": "8965dd02-a41e-4849-b80d-e43d3786bf20",
+  "divisionId": "80bc1594-6886-47ed-a2b2-d8b2fa5471cc",
+  "defaultCaseOwnerId": "b1c110a2-30df-405d-aee5-7028983843f4",
+  "defaultDueDurationInSeconds": 432000,
+  "description": "Retail shipment exception workflow — 3-stage lifecycle for triage, investigation, and resolution.",
+  "dataSchemas": [{"id": "14be6266-5533-466e-b79f-7a66bedf3135"}]
+}
+```
+After POST: save the returned ID → configure stageplans → publish.
+Existing Refund Request caseplan for reference: `be556187-8de5-45a9-a2ae-a66e242c296e`
 
 ### Step 5 — Fix Create Work Item data action
-The existing `ABC Retail - Create Work Item` action in GC needs to be verified
-in the tester. Once caseplan exists, evaluate whether to replace with a native
-Create Case call (POST /api/v2/taskmanagement/cases).
+Verify `ABC Retail - Create Work Item` in GC tester. Evaluate replacing with
+native POST /api/v2/casemanagement/cases once caseplan is published.
 
 ### Step 6 — Voice flow errors
-Still unresolved from prior session. Get error trace from Performance → Interactions.
+Still unresolved. Get error trace from Performance → Interactions.
 
 ## Blocked / known issues
 

@@ -121,9 +121,32 @@ published 2026-05-19. Each routes to the **ABC Retail** queue on `workitemCreate
 
 YAML exports in `workitem-flows/` (reference only — Architect does not support import).
 
+### Customer Intents
+
+| Intent name | ID |
+|---|---|
+| Refund Request | `c65ccaa9-dbd4-481f-80f5-4e4a2304d404` |
+| Shipment Exception | `8965dd02-a41e-4849-b80d-e43d3786bf20` |
+
+Category ID (shared): `299bfb92-c2c7-45b3-8b1a-c00e7729a78a`
+API: POST/GET `/api/v2/intents/customerintents` (use flat `categoryId` field, not nested object)
+
 ### Caseplans
-Not yet created. Requires: schema assigned to worktypes + customer intent +
-workitem flows published. Then POST /api/v2/taskmanagement/caseplans.
+
+API base: `/api/v2/casemanagement/caseplans`
+
+| Caseplan | ID | Status |
+|---|---|---|
+| ABC Retail - Refund Request | `be556187-8de5-45a9-a2ae-a66e242c296e` | published |
+| ABC Retail - Shipment Exception | TBD — POST in progress | draft |
+
+Shared fields across all caseplans:
+- `divisionId`: `80bc1594-6886-47ed-a2b2-d8b2fa5471cc`
+- `defaultCaseOwnerId`: `b1c110a2-30df-405d-aee5-7028983843f4`
+- `defaultDueDurationInSeconds`: 432000
+- `dataSchemas`: `[{"id": "14be6266-5533-466e-b79f-7a66bedf3135"}]`
+
+After POST, configure stageplans then publish via POST `.../caseplans/{id}/publish`.
 
 ## GC integration topology
 
