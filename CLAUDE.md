@@ -108,8 +108,18 @@ Full status ID set (open/in-progress/waiting/closed) lives in Supabase
 
 ### Workitem Flows (Architect)
 One flow per worktype — required for ACD routing. Without a flow, workitems
-land in the workbin but are NOT pushed to agents. Status as of 2026-05-19:
-**not yet built** — building Shipment Exception flow next.
+land in the workbin but are NOT pushed to agents. All five flows built and
+published 2026-05-19. Each routes to the **ABC Retail** queue on `workitemCreated`.
+
+| Flow name | Worktype |
+|---|---|
+| ABC Retail - Shipment Exception Flow | ABC Retail - Shipment Exception |
+| ABC Retail - Delivery Delay Flow | ABC Retail - Delivery Delay |
+| ABC Retail - Refund Request Flow | ABC Retail - Refund Request |
+| ABC Retail - Credit Hold Flow | ABC Retail - Credit Hold |
+| ABC Retail - After Hours Escalation Flow | ABC Retail - After Hours Escalation |
+
+YAML exports in `workitem-flows/` (reference only — Architect does not support import).
 
 ### Caseplans
 Not yet created. Requires: schema assigned to worktypes + customer intent +
