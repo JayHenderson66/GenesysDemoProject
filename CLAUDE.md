@@ -61,6 +61,60 @@ The customers table has a `gc_external_contact_id` column used by the inbound
 flow's `Get External Contact` block to link conversations to GC contacts.
 Only `C1001` (Philip Rivers) is currently populated.
 
+## Native Case Management — GC objects
+
+### Custom Attribute Schema — `ABC Retail - Case Attributes`
+Schema ID: **TBD — paste into HANDOFF.md when retrieved from GC Admin**
+
+All 20 attributes (attribute name → field ID → type):
+
+| Attribute name | Field ID | Type | Description |
+|---|---|---|---|
+| `case_amount_requested` | `case_amount_requested_number` | Number | Refund amount requested (USD), 0–100,000 |
+| `case_approved_amount` | `case_approved_amount_number` | Number | Amount approved for refund, 0–100,000 |
+| `case_channel` | `channel_text` | Small Text (1–20) | Contact channel: voice, web_messaging, sms |
+| `case_customer_id` | `customer_id_identifier` | Identifier (1–20) | Customer ID, e.g. C1001 |
+| `case_customer_notified` | `case_customer_notified_checkbox` | Checkbox | Whether customer has been notified |
+| `case_intent` | `intent_text` | Small Text (1–50) | AVA-detected intent: refund_request, delivery_delay, etc. |
+| `case_notification_method` | `case_notification_method_text` | Small Text (1–20) | sms, email, or phone |
+| `case_order_number` | `order_number_text` | Small Text (1–50) | Order / PO number, e.g. PO-2026-7890 |
+| `case_policy_check_passed` | `case_policy_check_passed_checkbox` | Checkbox | Refund passes policy validation |
+| `case_priority` | `case_priority_text` | Small Text (1–10) | low, medium, high, urgent |
+| `case_refund_amount_processed` | `case_refund_amount_processed_number` | Number | Final refund amount processed, 0–100,000 |
+| `case_refund_method` | `case_refund_method_text` | Small Text (1–30) | original_payment, store_credit, or check |
+| `case_refund_reference` | `case_refund_reference_text` | Small Text (1–100) | Payment system external reference number |
+| `case_resolution_notes` | `case_resolution_notes_longtext` | Large Text (1–1000) | Final resolution notes |
+| `case_review_decision` | `case_review_decision_text` | Small Text (1–20) | approve, deny, or escalate |
+| `case_review_notes` | `case_review_notes_longtext` | Large Text (1–1000) | Reviewer's justification for decision |
+| `case_review_reason` | `case_review_reason_text` | Small Text (1–50) | damaged, not_as_described, late_delivery, changed_mind, other |
+| `case_summary` | `case_summary_longtext` | Large Text (1–1000) | Customer issue summary captured by AVA |
+| `case_triage_notes` | `case_triage_notes_longtext` | Large Text (1–1000) | Intake stage notes for the Review team |
+| `case_type` | `case_type_text` | Small Text (1–50) | refund_request, shipment_exception, delivery_delay, credit_hold |
+
+**This schema must be assigned to ALL four worktypes before any workitems are created.**
+Worktypes: ABC Retail - Shipment Exception, Delivery Delay, Refund Request, Credit Hold.
+
+### Worktypes & status IDs
+
+| Worktype | gc_worktype_id | gc_status_closed_id |
+|---|---|---|
+| ABC Retail - Shipment Exception | `267bd390-039f-4bd3-a5c6-e1b1da1a93b6` | `111437de-8d2a-406a-97eb-517bbe1e7d8a` |
+| ABC Retail - Delivery Delay | `d0267631-f569-4f7b-b6d0-8a7c5dd56c4a` | `5f07caa8-efb0-469b-84f4-9de17d903fa3` |
+| ABC Retail - Refund Request | `b26019fa-26c7-4cc3-a9a9-6f2891bbf0c8` | `43201ca6-f14b-4fce-b93d-8652af75cb88` |
+| ABC Retail - Credit Hold | `946798a0-ad9a-4f66-bc2d-51e677554527` | `ecb5efb9-00ab-4145-b341-fa76d888f0c3` |
+
+Full status ID set (open/in-progress/waiting/closed) lives in Supabase
+`gc_demo_jh_shared_work_item_templates` columns `gc_status_*`.
+
+### Workitem Flows (Architect)
+One flow per worktype — required for ACD routing. Without a flow, workitems
+land in the workbin but are NOT pushed to agents. Status as of 2026-05-19:
+**not yet built** — building Shipment Exception flow next.
+
+### Caseplans
+Not yet created. Requires: schema assigned to worktypes + customer intent +
+workitem flows published. Then POST /api/v2/taskmanagement/caseplans.
+
 ## GC integration topology
 
 - **Integration:** `ABC Retail - Supabase` (Custom REST). Holds the Supabase URL

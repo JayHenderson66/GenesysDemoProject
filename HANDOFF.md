@@ -51,26 +51,10 @@ Full status ID set in Supabase `gc_demo_jh_shared_work_item_templates`.
 
 ## In progress / next steps (do these in order)
 
-### Step 1 — Custom Attribute Schema (GC Admin UI)
-Admin → Work Automation → Custom Attribute Schemas → Add
-
-Schema name: `ABC Retail - Case Attributes`
-
-Add these attributes:
-
-| Attribute name | Display label | Type |
-|---|---|---|
-| customer_id | Customer ID | Text |
-| linked_transaction_id | Transaction ID | Text |
-| case_channel | Contact Channel | Text |
-| order_number | Order Number | Text |
-| carrier | Carrier | Text |
-| exception_type | Exception Type | Text |
-| resolution_action | Resolution Action | Text |
-| case_summary | Case Summary | Text |
-| priority | Priority | Text |
-
-Save → copy the Schema ID → paste it here.
+### Step 1 — Custom Attribute Schema ✅ DONE
+Schema name: `ABC Retail - Case Attributes` — 20 attributes created in GC Admin.
+Full attribute reference in CLAUDE.md → "Native Case Management" section.
+**Schema ID: TBD — Jay needs to copy it from GC Admin and paste here.**
 
 ### Step 2 — Assign Schema to Worktypes (GC Admin UI)
 Open each worktype → Schema Display tab → assign `ABC Retail - Case Attributes`.
