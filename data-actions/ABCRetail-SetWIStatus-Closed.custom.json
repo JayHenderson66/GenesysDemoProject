@@ -1,5 +1,5 @@
 {
-  "name": "ABC Retail - Set WI Status - Resolved Refund Issued",
+  "name": "ABC Retail - Set WI Status - Closed",
   "integrationType": "purecloud-data-actions",
   "actionType": "custom",
   "config": {
@@ -9,7 +9,7 @@
       "headers": {
         "Content-Type": "application/json"
       },
-      "requestTemplate": "{\"statusId\": \"884e37e5-61f4-463b-861c-d91e8d7cd001\"}"
+      "requestTemplate": "{\"statusId\": \"111437de-8d2a-406a-97eb-517bbe1e7d8a\"}"
     },
     "response": {
       "translationMap": {

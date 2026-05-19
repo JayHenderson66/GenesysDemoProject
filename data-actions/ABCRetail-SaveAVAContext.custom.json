@@ -1,0 +1,43 @@
+{
+  "name": "ABC Retail - Save AVA Context",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/conversations/${input.conversationId}/participants/${input.participantId}/attributes",
+      "requestType": "PATCH",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "requestTemplate": "{\"attributes\": {\"ava_exit_reason\": \"${input.exitReasonValue}\", \"ava_intent\": \"${input.intentValue}\"}}"
+    },
+    "response": {
+      "translationMap": {},
+      "translationMapDefaults": {},
+      "successTemplate": "{\"status\": \"ok\"}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "required": ["conversationId", "participantId", "exitReasonValue", "intentValue"],
+        "properties": {
+          "conversationId": { "type": "string" },
+          "participantId": { "type": "string" },
+          "exitReasonValue": { "type": "string" },
+          "intentValue": { "type": "string" }
+        }
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" }
+        }
+      }
+    }
+  },
+  "secure": false
+}

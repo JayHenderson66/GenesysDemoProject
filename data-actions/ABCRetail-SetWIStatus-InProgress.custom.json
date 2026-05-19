@@ -1,5 +1,5 @@
 {
-  "name": "ABC Retail - Set WI Status - Approved",
+  "name": "ABC Retail - Set WI Status - In Progress",
   "integrationType": "purecloud-data-actions",
   "actionType": "custom",
   "config": {
@@ -9,7 +9,7 @@
       "headers": {
         "Content-Type": "application/json"
       },
-      "requestTemplate": "{\"statusId\": \"88edfdd5-eb65-4808-ae75-75d8e0163936\"}"
+      "requestTemplate": "{\"statusId\": \"9d5c8d2e-5b3a-4177-8fa2-da19fc018ab7\"}"
     },
     "response": {
       "translationMap": {

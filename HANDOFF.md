@@ -5,61 +5,89 @@ Update this at the end of every working session. Keep it short and factual.
 ---
 
 ## Last updated
-2026-05-16
+2026-05-19
 
 ## Current focus
-Inbound voice flow is generating errors. AVA (Digital Bot Flow) behavior
-also needs review. Both are next up after the case page work completed today.
+Native GC Case Management (caseplans) build — in progress. Worktypes configured,
+Supabase updated. Next: attribute schema → customer intent → caseplan API call.
 
 ## Done this session
 
-- **Inbound message flow unblocked.** Fixed the cascade of failures:
-  - Block 34 (Get External Contact): was hardcoded to a single UUID, now
-    reads `Flow.getExternalContactId` dynamically. Failure branch confirmed
-    wired to continue into transaction lookup (block 33 Set Participant Data).
-  - Philip Rivers (`C1001`) `open_case_id` corrected from nonexistent `RR-16`
-    to `CASE-2026-0042` ("Shipment Delayed 11 Days"). Case now resolves in
-    Supabase and the flow completes through to ACD transfer.
-  - Chat interaction successfully routed to agent with screen pop populating
-    the agent script. AVA handled order status inquiry and escalated to agent.
+- **Diagnosed broken case creation.** AVA's 3-step sequence
+  (create_work_item_gc → create_case_sb → update_customer_case_id) was failing
+  because: (1) status data actions had stale hardcoded statusIds, (2) three of
+  the four data actions AVA depends on were never exported to the repo.
 
-- **Case page navigation fixed (PR #13, #14).** GC Scripter intercepts all
-  external navigation from its iframe. Replaced `window.open()` and
-  `window.location.href` approaches with a full-screen overlay iframe
-  embedded inside the Start Page. Clicking Intake/Review/Resolution opens
-  the case page in the overlay; "← Overview" button dismisses it and returns
-  to the Start Page. All three case pages also have "← Overview" back buttons
-  in their topbars (for standalone/direct URL access).
+- **Rebuilt data-actions folder.** Deleted 5 stale status actions. Created:
+  - `ABCRetail-SetWIStatus-InProgress.custom.json` — Shipment Exception only
+  - `ABCRetail-SetWIStatus-Waiting.custom.json` — Shipment Exception only
+  - `ABCRetail-SetWIStatus-Closed.custom.json` — Shipment Exception only
+  - `ABCRetail-CreateCase-SB.custom.json` — POSTs to Supabase retail_cases
+  - `ABCRetail-UpdateCustomerCaseID-SB.custom.json` — PATCHes customer open_case_id
+  - `ABCRetail-SaveAVAContext.custom.json` — PATCHes conversation participant attributes
 
-## In progress / pending
+- **Worktype statuses added in GC Admin.** All four worktypes (Shipment Exception,
+  Delivery Delay, Refund Request, Credit Hold) now have: Open, In Progress,
+  Waiting on Customer, Closed.
 
-- **Voice flow** — generating errors, root cause not yet investigated.
-  Need the flow export or error trace from Performance → Interactions.
-- **AVA review** — user will share the Digital Bot Flow JSON. Behavior is
-  described as similar to the inbound message flow. Need to review and
-  confirm it works end to end.
+- **Supabase migration applied.** Added GC tracking columns to
+  `gc_demo_jh_shared_work_item_templates`:
+  `gc_ava_type`, `gc_worktype_id`, `gc_workbin_id`,
+  `gc_status_open_id`, `gc_status_in_progress_id`,
+  `gc_status_waiting_id`, `gc_status_closed_id`.
+  All four worktypes populated. WI-DELIVERY-DELAY inserted as a new row
+  (was previously merged into WI-EXCEPTION-CASE).
+
+## GC Object IDs — collected this session
+
+| Worktype | gc_ava_type | gc_worktype_id | gc_status_closed_id |
+|---|---|---|---|
+| Shipment Exception | shipment_exception | 267bd390-039f-4bd3-a5c6-e1b1da1a93b6 | 111437de-8d2a-406a-97eb-517bbe1e7d8a |
+| Delivery Delay | delivery_delay | d0267631-f569-4f7b-b6d0-8a7c5dd56c4a | 5f07caa8-efb0-469b-84f4-9de17d903fa3 |
+| Refund Request | refund_request | b26019fa-26c7-4cc3-a9a9-6f2891bbf0c8 | 43201ca6-f14b-4fce-b93d-8652af75cb88 |
+| Credit Hold | credit_hold | 946798a0-ad9a-4f66-bc2d-51e677554527 | ecb5efb9-00ab-4145-b341-fa76d888f0c3 |
+
+Full status ID set in Supabase `gc_demo_jh_shared_work_item_templates`.
+
+## In progress / next steps (do these in order)
+
+### Step 1 — Custom Attribute Schema ✅ DONE
+Schema name: `ABC Retail - Case Attributes` — 20 attributes created in GC Admin.
+Full attribute reference in CLAUDE.md → "Native Case Management" section.
+**Schema ID: `14be6266-5533-466e-b79f-7a66bedf3135`**
+
+### Step 2 — Assign Schema to Worktypes (GC Admin UI)
+Open each worktype → Schema Display tab → assign `ABC Retail - Case Attributes`.
+Do this for: Shipment Exception, Delivery Delay, Refund Request, Credit Hold.
+NOTE: schema cannot be changed after workitems exist — assign before any live use.
+
+### Step 3 — Customer Intent (GC Admin UI)
+Admin → Case Management → Customer Intents → Add
+- Name: `Shipment Exception`
+- Description: `Customer reporting a delayed, lost, or damaged shipment`
+Save → copy Customer Intent ID.
+
+### Step 4 — Caseplan (GC API Explorer)
+POST /api/v2/taskmanagement/caseplans
+Payload uses: Customer Intent ID (step 3) + Worktype IDs from the table above.
+Full payload to be written once Steps 1-3 are complete and IDs are in hand.
+
+### Step 5 — Fix Create Work Item data action
+The existing `ABC Retail - Create Work Item` action in GC needs to be verified
+in the tester. Once caseplan exists, evaluate whether to replace with a native
+Create Case call (POST /api/v2/taskmanagement/cases).
+
+### Step 6 — Voice flow errors
+Still unresolved from prior session. Get error trace from Performance → Interactions.
 
 ## Blocked / known issues
 
-- **Other 9 demo customers have no GC External Contact.** Block 34 will fail
-  for them (but failure branch keeps the flow running). To fully support them,
-  create GC External Contacts and populate `gc_external_contact_id` in Supabase.
-
-## Open questions
-
-- **AVA for workitems** — what should the bot do when a workitem interaction
-  lands? Not yet designed. User will share AVA JSON to inform the discussion.
-
-## Next session — start here
-
-1. **Read `CLAUDE.md` and this `HANDOFF.md`** to load full context.
-2. **Voice flow** — get the error message or Performance → Interactions trace
-   and share it. Likely similar issues to the message flow (data action
-   mapping, missing case record, hardcoded values).
-3. **AVA** — user will share the Digital Bot Flow JSON. Review it, identify
-   gaps, and align on what AVA should do end to end.
-4. **After voice + AVA are stable** — consider creating GC External Contacts
-   for the remaining 9 demo customers.
+- **`temp` status on Delivery Delay worktype** — cannot be deleted because a
+  workitem references it. Leave it. It doesn't affect the demo.
+- **`after_hours_escalation` missing from Create Work Item data action** — no
+  worktypeId mapped for this type. Add once the After Hours worktype is configured.
+- **Other 9 demo customers have no GC External Contact.** Block 34 fails for
+  them (failure branch keeps flow running). Fix later.
 
 ## Useful references
 
@@ -68,4 +96,5 @@ also needs review. Both are next up after the case page work completed today.
 - Scripter export: `ec016c04-JHABC_Retail.script` (re-upload if needed).
 - GC Function Lambda: `gc-functions/update-workitem/index.js`. ZIP at
   `gc-functions/update-workitem.zip`.
+- AVA export: `ava--abc-retail-customer-service-assistant-export.json` (in repo).
 - Data action (customer lookup): `data-actions/ABCRetail-GetCustomerRecord-SB.custom.json`.
