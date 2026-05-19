@@ -562,15 +562,15 @@
             "targetName": "customerId",
             "type": "CustomerId",
             "source": "External",
-            "required": true,
-            "fallbackToUser": true,
+            "required": false,
+            "fallbackToUser": false,
             "fallbackToTool": false
           },
           {
             "targetName": "caseKey",
             "type": "CaseKey",
             "source": "User",
-            "required": true,
+            "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
           }
