@@ -64,7 +64,7 @@ Only `C1001` (Philip Rivers) is currently populated.
 ## Native Case Management — GC objects
 
 ### Custom Attribute Schema — `ABC Retail - Case Attributes`
-Schema ID: **TBD — paste into HANDOFF.md when retrieved from GC Admin**
+Schema ID: **`14be6266-5533-466e-b79f-7a66bedf3135`**
 
 All 20 attributes (attribute name → field ID → type):
 
