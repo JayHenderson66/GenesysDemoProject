@@ -8,8 +8,8 @@ Update this at the end of every working session. Keep it short and factual.
 2026-05-19 (session 2)
 
 ## Current focus
-Native GC Case Management — Shipment Exception caseplan POST in progress.
-Customer intent created. Next: POST caseplan → configure stageplans → publish.
+Shipment Exception caseplan published. Next: verify/fix Create Work Item data
+action, then evaluate replacing with native POST /api/v2/casemanagement/cases.
 
 ## Done this session
 
@@ -63,24 +63,12 @@ All four worktypes assigned in GC Admin → Schema Display tab.
 - API: POST/GET `/api/v2/intents/customerintents` (use flat `categoryId` field)
 - Category ID: `299bfb92-c2c7-45b3-8b1a-c00e7729a78a`
 
-### Step 4 — Shipment Exception Caseplan (GC API Explorer) ← START HERE
-POST /api/v2/casemanagement/caseplans
-```json
-{
-  "name": "ABC Retail - Shipment Exception",
-  "referencePrefix": "SE",
-  "customerIntentId": "8965dd02-a41e-4849-b80d-e43d3786bf20",
-  "divisionId": "80bc1594-6886-47ed-a2b2-d8b2fa5471cc",
-  "defaultCaseOwnerId": "b1c110a2-30df-405d-aee5-7028983843f4",
-  "defaultDueDurationInSeconds": 432000,
-  "description": "Retail shipment exception workflow — 3-stage lifecycle for triage, investigation, and resolution.",
-  "dataSchemas": [{"id": "14be6266-5533-466e-b79f-7a66bedf3135"}]
-}
-```
-After POST: save the returned ID → configure stageplans → publish.
-Existing Refund Request caseplan for reference: `be556187-8de5-45a9-a2ae-a66e242c296e`
+### Step 4 — Shipment Exception Caseplan ✅ DONE
+ID: `4adc4d54-597e-415f-9aad-ec764684baa2` — Published 2026-05-19
+3 stages: Intake → Review → Resolution. All stepplans set to Workitem type,
+Shipment Exception worktype. Full stageplan/stepplan IDs in CLAUDE.md.
 
-### Step 5 — Fix Create Work Item data action
+### Step 5 — Fix Create Work Item data action ← START HERE
 Verify `ABC Retail - Create Work Item` in GC tester. Evaluate replacing with
 native POST /api/v2/casemanagement/cases once caseplan is published.
 

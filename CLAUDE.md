@@ -138,7 +138,7 @@ API base: `/api/v2/casemanagement/caseplans`
 | Caseplan | ID | Status |
 |---|---|---|
 | ABC Retail - Refund Request | `be556187-8de5-45a9-a2ae-a66e242c296e` | published |
-| ABC Retail - Shipment Exception | TBD — POST in progress | draft |
+| ABC Retail - Shipment Exception | `4adc4d54-597e-415f-9aad-ec764684baa2` | published |
 
 Shared fields across all caseplans:
 - `divisionId`: `80bc1594-6886-47ed-a2b2-d8b2fa5471cc`
@@ -147,6 +147,17 @@ Shared fields across all caseplans:
 - `dataSchemas`: `[{"id": "14be6266-5533-466e-b79f-7a66bedf3135"}]`
 
 After POST, configure stageplans then publish via POST `.../caseplans/{id}/publish`.
+
+GC auto-creates 3 stageplans (Stage 1/2/3) and 1 stepplan per stage on caseplan POST.
+PATCH each stageplan/stepplan to set names and `workitemSettings.worktypeId`.
+
+#### ABC Retail - Shipment Exception stageplan/stepplan IDs
+
+| Stage | Stageplan ID | Stepplan ID | Stepplan name |
+|---|---|---|---|
+| Intake | `90e52f84-97c4-425a-974e-5e76847f5f7e` | `a996860e-901f-4079-bbd8-c2b6e57eab29` | Intake and Triage |
+| Review | `31d5097b-a116-4e7c-99f2-289ecf0dd0fe` | `dc079195-e2be-48bd-aaab-ea839a1fca64` | Investigation and Review |
+| Resolution | `c1ef0432-f1a7-423a-b30a-8ac2bd0ed90e` | `6e633624-600e-4a33-8c06-ac5907184ec7` | Resolution and Closure |
 
 ## GC integration topology
 
