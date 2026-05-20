@@ -1,0 +1,72 @@
+{
+  "name": "ABC Retail - Get Transaction - SB - Exported 2026-05-20 @ 10:24",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1/gc_demo_jh_retail_transactions?key=eq.${input.transactionId}",
+      "requestType": "GET",
+      "headers": {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w"
+      },
+      "requestTemplate": "$null"
+    },
+    "response": {
+      "translationMap": {
+        "transaction_date": "$[0].transaction_date",
+        "status_display": "$[0].status_display",
+        "amount": "$[0].amount",
+        "estimated_completion": "$[0].estimated_completion",
+        "destination": "$[0].destination",
+        "description": "$[0].description",
+        "on_hold_reason": "$[0].on_hold_reason",
+        "delay_reason": "$[0].delay_reason",
+        "reference_number": "$[0].reference_number",
+        "total_items": "$[0].total_items",
+        "fulfillment_id": "$[0].fulfillment_id",
+        "completed_items": "$[0].completed_items",
+        "status": "$[0].status",
+        "assigned_to": "$[0].assigned_to"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"reference_number\": ${reference_number}, \"status\": ${status}, \"status_display\": ${status_display}, \"amount\": ${amount}, \"description\": ${description}, \"estimated_completion\": ${estimated_completion}, \"delay_reason\": ${delay_reason}, \"on_hold_reason\": ${on_hold_reason}, \"total_items\": ${total_items}, \"completed_items\": ${completed_items}, \"destination\": ${destination}, \"transaction_date\": ${transaction_date}, \"assigned_to\": ${assigned_to}, \"fulfillment_id\": ${fulfillment_id}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "reference_number": {"type": "string"},
+          "status": {"type": "string"},
+          "status_display": {"type": "string"},
+          "amount": {"type": "string"},
+          "description": {"type": "string"},
+          "estimated_completion": {"type": "string"},
+          "delay_reason": {"type": "string"},
+          "on_hold_reason": {"type": "string"},
+          "total_items": {"type": "integer"},
+          "completed_items": {"type": "integer"},
+          "destination": {"type": "string"},
+          "transaction_date": {"type": "string"},
+          "assigned_to": {"type": "string"},
+          "fulfillment_id": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
