@@ -1,0 +1,68 @@
+{
+  "name": "ABC Retail - Get Fulfillment - SB - Exported 2026-05-20 @ 10:25",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1/gc_demo_jh_retail_fulfillment?key=eq.${input.fulfillmentId}",
+      "requestType": "GET",
+      "headers": {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w"
+      },
+      "requestTemplate": "$null"
+    },
+    "response": {
+      "translationMap": {
+        "exception": "$[0].exception",
+        "actual_date": "$[0].actual_date",
+        "last_event_date": "$[0].last_event_date",
+        "signed_by": "$[0].signed_by",
+        "estimated_date": "$[0].estimated_date",
+        "tracking_reference": "$[0].tracking_reference",
+        "last_event": "$[0].last_event",
+        "destination": "$[0].destination",
+        "carrier_or_provider": "$[0].carrier_or_provider",
+        "tracking_url": "$[0].tracking_url",
+        "status": "$[0].status",
+        "start_date": "$[0].start_date"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"status\": ${status}, \"carrier_or_provider\": ${carrier_or_provider}, \"tracking_reference\": ${tracking_reference}, \"tracking_url\": ${tracking_url}, \"estimated_date\": ${estimated_date}, \"start_date\": ${start_date}, \"actual_date\": ${actual_date}, \"last_event\": ${last_event}, \"last_event_date\": ${last_event_date}, \"destination\": ${destination}, \"exception\": ${exception}, \"signed_by\": ${signed_by}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fulfillmentId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "carrier_or_provider": {"type": "string"},
+          "tracking_reference": {"type": "string"},
+          "tracking_url": {"type": "string"},
+          "estimated_date": {"type": "string"},
+          "start_date": {"type": "string"},
+          "actual_date": {"type": "string"},
+          "last_event": {"type": "string"},
+          "last_event_date": {"type": "string"},
+          "destination": {"type": "string"},
+          "exception": {"type": "string"},
+          "signed_by": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
