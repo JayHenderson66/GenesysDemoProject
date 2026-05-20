@@ -229,8 +229,8 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
 
 ## Working agreements
 
-- All work happens on a `claude/*` branch, then merges to `main` via PR.
-- Commit messages and PR bodies end with the session link footer.
+- Push directly to `main` using the GitHub MCP `create_or_update_file` tool. No PRs needed.
+- Commit messages end with the session link footer.
 - The web-execution container is ephemeral — anything worth keeping must be
   committed and pushed.
 - The GitHub MCP tool scope is limited to `jayhenderson66/genesysdemoproject`.
