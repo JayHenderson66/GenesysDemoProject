@@ -11,7 +11,7 @@
       "Ask one question at a time:\nNever ask multiple questions in a single response. If you need more information, ask for the most important piece first.",
       "Use data from Start Context (such as customer_id, first_name, or account identifiers) directly. Never ask the customer for information you already have.",
       "When calling save_ava_context, always set exitReasonValue to one of: agent_requested, create_work_item, or resolved. Set intentValue to a brief snake_case description such as: delivery_delay, shipment_exception, refund_request, credit_hold, after_hours_escalation, or agent_requested.",
-      "When creating a case, call tools in this exact sequence: (1) create_work_item_gc to create the GC work item and receive the workItemId, (2) create_case_sb using 'CASE-' followed by the first 8 characters of the conversationId as the caseKey, (3) update_customer_case_id to link the case to the customer record. Only after all three succeed, call save_ava_context with exitReasonValue set to create_work_item. Then confirm the case reference number to the customer and let them know they will be contacted within 72 hours."
+      "When creating a case, call tools in this exact sequence: (1) create_case_gc to create the GC native case and receive the caseId and caseReference (e.g. 'SE-3'), (2) create_case_sb using 'CASE-' followed by the first 8 characters of the conversationId as the caseKey, (3) update_customer_case_id to link the case to the customer record. Only after all three succeed, call save_ava_context with exitReasonValue set to create_work_item. Then confirm the caseReference to the customer (e.g. 'Your case reference is SE-3') and let them know they will be contacted within 72 hours."
     ],
     "guardrails": {
       "custom": [
@@ -341,18 +341,18 @@
         }
       },
       {
-        "name": "create_work_item_gc",
-        "description": "Creates a new work item in Genesys Cloud Task Management for back-office follow-up. Call this as the FIRST step when the customer agrees to have a case created. The work item routes automatically to the correct team based on the issue type. You must call create_case_sb and update_customer_case_id after this succeeds.",
+        "name": "create_case_gc",
+        "description": "Creates a new native case in Genesys Cloud Case Management. Call this as the FIRST step when the customer agrees to have a case created. The case is linked to the correct caseplan based on issue type and routes automatically to the back-office team. You must call create_case_sb and update_customer_case_id after this succeeds.",
         "inputInstructions": [
           "Set workItemType to exactly one of: delivery_delay, shipment_exception, refund_request, credit_hold — choose based on the customer's primary issue.",
           "Set subject to a concise 5-10 word summary of the issue. Example: 'Shipment delayed 11 days — customer escalating'.",
           "Set description to a 1-2 sentence summary including the order number and the customer's core concern.",
-          "orderNumber and customerId are pulled automatically from Start Context — do not ask the customer for these."
+          "orderNumber, customerId, and externalContactId are pulled automatically from Start Context — do not ask the customer for these."
         ],
         "outputInstructions": [],
         "type": "DataAction",
-        "targetId": "custom_-_5f8cb07b-4b38-4a17-9f66-8a3dba94b1f2",
-        "targetName": "ABC Retail - Create Work Item",
+        "targetId": "custom_-_PLACEHOLDER_RELINK_IN_UI",
+        "targetName": "ABC Retail - Create Case",
         "inputs": [
           {
             "targetName": "workItemType",
@@ -393,9 +393,17 @@
             "required": false,
             "fallbackToUser": false,
             "fallbackToTool": false
+          },
+          {
+            "targetName": "externalContactId",
+            "type": "GcExternalContactId",
+            "source": "External",
+            "required": false,
+            "fallbackToUser": false,
+            "fallbackToTool": false
           }
         ],
-        "output": "WorkItemResult",
+        "output": "CaseResult",
         "schemas": {
           "inputs": {
             "type": "object",
@@ -419,16 +427,19 @@
               },
               "customerId": {
                 "type": "string"
+              },
+              "externalContactId": {
+                "type": "string"
               }
             }
           },
           "outputs": {
             "type": "object",
             "properties": {
-              "workItemId": {
+              "caseId": {
                 "type": "string"
               },
-              "workItemName": {
+              "caseReference": {
                 "type": "string"
               }
             }
@@ -437,11 +448,11 @@
       },
       {
         "name": "create_case_sb",
-        "description": "Creates a new case record in the ABC Retail Supabase database. Call this as the SECOND step after create_work_item_gc succeeds. Links the case to the customer's conversation and sets it to stage 1 / pending.",
+        "description": "Creates a new case record in the ABC Retail Supabase database. Call this as the SECOND step after create_case_gc succeeds. Links the case to the customer's conversation and sets it to stage 1 / pending.",
         "inputInstructions": [
           "Construct caseKey as 'CASE-' followed by the first 8 characters of the conversationId from Start Context. Example: if conversationId is a3f2c891-d456-4e12-b789-0f1a2b3c4d5e, the caseKey is CASE-a3f2c891.",
-          "Set caseType to the same value used for workItemType in the previous create_work_item_gc call.",
-          "Set caseTitle to the same value used for subject in the previous create_work_item_gc call.",
+          "Set caseType to the same value used for workItemType in the previous create_case_gc call.",
+          "Set caseTitle to the same value used for subject in the previous create_case_gc call.",
           "Set priority to high, medium, or low based on customer urgency and issue severity.",
           "customerId and linkedConversationId are pulled automatically from Start Context."
         ],
@@ -913,6 +924,11 @@
             "name": "participant_id",
             "type": "ParticipantId",
             "required": false
+          },
+          {
+            "name": "gc_external_contact_id",
+            "type": "GcExternalContactId",
+            "required": false
           }
         ]
       },
@@ -935,22 +951,27 @@
         "type": "string"
       },
       {
-        "name": "WorkItemResult",
-        "description": "The result of creating a GC work item. Contains the workItemId (UUID assigned by Genesys Cloud) and workItemName (the subject line). Pass workItemId to subsequent steps if needed for reference.",
+        "name": "CaseResult",
+        "description": "The result of creating a GC native case. Contains caseId (UUID assigned by Genesys Cloud) and caseReference (the human-readable reference such as 'SE-3'). Confirm caseReference to the customer as their case reference number.",
         "direction": "output",
         "type": "object",
         "properties": [
           {
-            "name": "workItemId",
+            "name": "caseId",
             "type": "string",
             "required": false
           },
           {
-            "name": "workItemName",
+            "name": "caseReference",
             "type": "string",
             "required": false
           }
         ]
+      },
+      {
+        "name": "GcExternalContactId",
+        "description": "The Genesys Cloud External Contact ID for this customer. Passed from the inbound flow participant attributes after customer lookup in Supabase. Required to link a newly created GC case to the customer's external contact record.",
+        "type": "string"
       }
     ],
     "events": [
