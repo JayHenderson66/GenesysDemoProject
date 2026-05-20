@@ -1,0 +1,72 @@
+{
+  "name": "ABC Retail - Get Case - SB - Exported 2026-05-20 @ 10:25",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1/gc_demo_jh_retail_cases?key=eq.${input.caseId}",
+      "requestType": "GET",
+      "headers": {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w"
+      },
+      "requestTemplate": "$null"
+    },
+    "response": {
+      "translationMap": {
+        "stage_2_owner": "$[0].stage_2_owner",
+        "stage_1_owner": "$[0].stage_1_owner",
+        "case_title": "$[0].case_title",
+        "due_date": "$[0].due_date",
+        "case_type": "$[0].case_type",
+        "stage_3_owner": "$[0].stage_3_owner",
+        "opened_date": "$[0].opened_date",
+        "stage_1_status": "$[0].stage_1_status",
+        "stage_2_status": "$[0].stage_2_status",
+        "priority": "$[0].priority",
+        "stage_3_status": "$[0].stage_3_status",
+        "current_stage": "$[0].current_stage",
+        "sla_hours": "$[0].sla_hours",
+        "status": "$[0].status"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"case_title\": ${case_title}, \"case_type\": ${case_type}, \"status\": ${status}, \"current_stage\": ${current_stage}, \"priority\": ${priority}, \"sla_hours\": ${sla_hours}, \"opened_date\": ${opened_date}, \"due_date\": ${due_date}, \"stage_1_owner\": ${stage_1_owner}, \"stage_1_status\": ${stage_1_status}, \"stage_2_owner\": ${stage_2_owner}, \"stage_2_status\": ${stage_2_status}, \"stage_3_owner\": ${stage_3_owner}, \"stage_3_status\": ${stage_3_status}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "case_title": {"type": "string"},
+          "case_type": {"type": "string"},
+          "status": {"type": "string"},
+          "current_stage": {"type": "integer"},
+          "priority": {"type": "string"},
+          "sla_hours": {"type": "integer"},
+          "opened_date": {"type": "string"},
+          "due_date": {"type": "string"},
+          "stage_1_owner": {"type": "string"},
+          "stage_1_status": {"type": "string"},
+          "stage_2_owner": {"type": "string"},
+          "stage_2_status": {"type": "string"},
+          "stage_3_owner": {"type": "string"},
+          "stage_3_status": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
