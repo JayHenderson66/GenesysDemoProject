@@ -1,0 +1,64 @@
+{
+  "name": "ABC Retail - Create Work Item - Exported 2026-05-20 @ 8:03",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/taskmanagement/workitems",
+      "requestType": "POST",
+      "headers": {},
+      "requestTemplate": "#if($input.workItemType == \"delivery_delay\")\n  #set($typeId = \"d0267631-f569-4f7b-b6d0-8a7c5dd56c4a\")\n  #set($workbinId = \"1f0741f7-e67d-4c7d-9d07-a245d73f1be7\")\n#elseif($input.workItemType == \"shipment_exception\")\n  #set($typeId = \"267bd390-039f-4bd3-a5c6-e1b1da1a93b6\")\n  #set($workbinId = \"1f0741f7-e67d-4c7d-9d07-a245d73f1be7\")\n#elseif($input.workItemType == \"refund_request\")\n  #set($typeId = \"b26019fa-26c7-4cc3-a9a9-6f2891bbf0c8\")\n  #set($workbinId = \"b345afee-802d-48d4-a786-dd40efabd867\")\n#elseif($input.workItemType == \"credit_hold\")\n  #set($typeId = \"946798a0-ad9a-4f66-bc2d-51e677554527\")\n  #set($workbinId = \"4e465dbf-7239-466c-9b9f-723d0422dca0\")\n#end\n{\n  \"name\": \"${input.subject}\",\n  \"typeId\": \"$typeId\",\n  \"workbinId\": \"$workbinId\",\n  \"description\": \"${input.description}\"\n}"
+    },
+    "response": {
+      "translationMap": {
+        "workItemName": "$.name",
+        "workItemId": "$.id"
+      },
+      "translationMapDefaults": {},
+      "successTemplate": "{\"workItemId\": ${workItemId}, \"workItemName\": ${workItemName}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workItemType",
+          "subject",
+          "description"
+        ],
+        "properties": {
+          "workItemType": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "output": {
+      "successSchema": {
+        "type": "object",
+        "properties": {
+          "workItemId": {
+            "type": "string"
+          },
+          "workItemName": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "secure": false
+}
