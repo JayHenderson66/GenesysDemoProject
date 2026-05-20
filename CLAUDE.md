@@ -127,9 +127,12 @@ YAML exports in `case-management/workitem-flows/` (reference only — Architect 
 |---|---|
 | Refund Request | `c65ccaa9-dbd4-481f-80f5-4e4a2304d404` |
 | Shipment Exception | `8965dd02-a41e-4849-b80d-e43d3786bf20` |
+| Delivery Delay | `0828b8ce-0c2a-4aae-aa7f-f73de192cbd6` |
+| Credit Hold | `560709cd-7e82-47af-ac98-e0fcfb31934f` |
 
 Category ID (shared): `299bfb92-c2c7-45b3-8b1a-c00e7729a78a`
 API: POST/GET `/api/v2/intents/customerintents` (use flat `categoryId` field, not nested object)
+Required fields: `name`, `description`, `expiryTime` (integer, hours, 24–720), `categoryId`
 
 ### Caseplans
 
@@ -139,6 +142,8 @@ API base: `/api/v2/casemanagement/caseplans`
 |---|---|---|
 | ABC Retail - Refund Request | `be556187-8de5-45a9-a2ae-a66e242c296e` | published |
 | ABC Retail - Shipment Exception | `4adc4d54-597e-415f-9aad-ec764684baa2` | published |
+| ABC Retail - Delivery Delay | `26711806-9002-474d-926d-bc2d38a12196` | published |
+| ABC Retail - Credit Hold | `e1246b01-dcc6-4fb8-a97b-8dfbdf07178f` | published |
 
 Shared fields across all caseplans:
 - `divisionId`: `80bc1594-6886-47ed-a2b2-d8b2fa5471cc`
@@ -158,6 +163,22 @@ PATCH each stageplan/stepplan to set names and `workitemSettings.worktypeId`.
 | Intake | `90e52f84-97c4-425a-974e-5e76847f5f7e` | `a996860e-901f-4079-bbd8-c2b6e57eab29` | Intake and Triage |
 | Review | `31d5097b-a116-4e7c-99f2-289ecf0dd0fe` | `dc079195-e2be-48bd-aaab-ea839a1fca64` | Investigation and Review |
 | Resolution | `c1ef0432-f1a7-423a-b30a-8ac2bd0ed90e` | `6e633624-600e-4a33-8c06-ac5907184ec7` | Resolution and Closure |
+
+#### ABC Retail - Delivery Delay stageplan/stepplan IDs
+
+| Stage | Stageplan ID | Stepplan ID | Stepplan name |
+|---|---|---|---|
+| Intake | `c658bfbc-aace-4dec-933a-9986a33c6c84` | `de7771f0-f3cf-49fb-9f47-5336470c8ae0` | Intake and Triage |
+| Review | `8f9d1981-b3b8-4854-b8c1-8806e7c87512` | `d7d72fd0-0ca0-40ff-9505-bb3b4933d0d0` | Investigation and Review |
+| Resolution | `2c2b2f85-f27b-4d77-90a9-59d5517d2dab` | `379e4a3b-fd8f-4ed1-9e99-59be6d058864` | Resolution and Closure |
+
+#### ABC Retail - Credit Hold stageplan/stepplan IDs
+
+| Stage | Stageplan ID | Stepplan ID | Stepplan name |
+|---|---|---|---|
+| Intake | `f6e63804-f966-41e7-aa30-52be844e452c` | `f345f628-68e0-4110-881e-2831f05899ae` | Intake and Triage |
+| Review | `ccd19af7-1348-4800-8d38-2ff340703af1` | `d475cad8-6d4f-463b-8ae0-652e53b55a11` | Investigation and Review |
+| Resolution | `0a60ec92-2800-486c-b877-310320aece9b` | `067fed68-b68e-4677-9732-e27fd042366b` | Resolution and Closure |
 
 ## GC integration topology
 
