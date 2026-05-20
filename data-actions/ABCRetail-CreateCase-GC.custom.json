@@ -12,9 +12,11 @@
     "response": {
       "translationMap": {
         "caseId": "$.id",
-        "caseName": "$.subject"
+        "caseName": "$.name"
       },
-      "translationMapDefaults": {},
+      "translationMapDefaults": {
+        "caseName": "\"unknown\""
+      },
       "successTemplate": "{\"caseId\": ${caseId}, \"caseName\": ${caseName}}"
     }
   },
