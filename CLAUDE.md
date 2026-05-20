@@ -142,8 +142,8 @@ API base: `/api/v2/casemanagement/caseplans`
 |---|---|---|
 | ABC Retail - Refund Request | `be556187-8de5-45a9-a2ae-a66e242c296e` | published |
 | ABC Retail - Shipment Exception | `4adc4d54-597e-415f-9aad-ec764684baa2` | published |
-| ABC Retail - Delivery Delay | `26711806-9002-474d-926d-bc2d38a12196` | draft |
-| ABC Retail - Credit Hold | `e1246b01-dcc6-4fb8-a97b-8dfbdf07178f` | draft |
+| ABC Retail - Delivery Delay | `26711806-9002-474d-926d-bc2d38a12196` | published |
+| ABC Retail - Credit Hold | `e1246b01-dcc6-4fb8-a97b-8dfbdf07178f` | published |
 
 Shared fields across all caseplans:
 - `divisionId`: `80bc1594-6886-47ed-a2b2-d8b2fa5471cc`
