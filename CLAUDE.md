@@ -49,7 +49,7 @@ system of record for customer / order / case data.
 | `gc_demo_jh_retail_customers`          | Customer master (10 demo rows)           |
 | `gc_demo_jh_retail_transactions`       | Orders / transactions                    |
 | `gc_demo_jh_retail_fulfillment`        | Shipping / fulfillment records           |
-| `gc_demo_jh_retail_cases`              | Open cases + per-stage state             |
+| `gc_demo_jh_retail_cases`             | Open cases + per-stage state             |
 | `gc_demo_jh_retail_journey_events`     | Customer journey timeline                |
 | `gc_demo_jh_shared_demo_config`        | Demo-wide config                         |
 | `gc_demo_jh_shared_customers_by_phone` | Phone-keyed customer view                |
@@ -229,8 +229,8 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
 
 ## Working agreements
 
-- All work happens on a `claude/*` branch, then merges to `main` via PR.
-- Commit messages and PR bodies end with the session link footer.
+- Push directly to `main` using the GitHub MCP `create_or_update_file` tool. No PRs needed.
+- Commit messages end with the session link footer.
 - The web-execution container is ephemeral — anything worth keeping must be
   committed and pushed.
 - The GitHub MCP tool scope is limited to `jayhenderson66/genesysdemoproject`.
