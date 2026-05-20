@@ -12,12 +12,12 @@
     "response": {
       "translationMap": {
         "caseId": "$.id",
-        "caseName": "$.name"
+        "caseReference": "$.reference"
       },
       "translationMapDefaults": {
-        "caseName": "\"unknown\""
+        "caseReference": "\"unknown\""
       },
-      "successTemplate": "{\"caseId\": ${caseId}, \"caseName\": ${caseName}}"
+      "successTemplate": "{\"caseId\": ${caseId}, \"caseReference\": ${caseReference}}"
     }
   },
   "contract": {
@@ -58,7 +58,7 @@
           "caseId": {
             "type": "string"
           },
-          "caseName": {
+          "caseReference": {
             "type": "string"
           }
         }
