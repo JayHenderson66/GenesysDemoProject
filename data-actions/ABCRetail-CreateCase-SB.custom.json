@@ -33,8 +33,7 @@
           "caseType": { "type": "string" },
           "caseTitle": { "type": "string" },
           "priority": { "type": "string" },
-          "linkedConversationId": { "type": "string" },
-          "openedDate": { "type": "string" }
+          "linkedConversationId": { "type": "string" }
         },
         "additionalProperties": true
       }
