@@ -49,7 +49,7 @@ system of record for customer / order / case data.
 | `gc_demo_jh_retail_customers`          | Customer master (10 demo rows)           |
 | `gc_demo_jh_retail_transactions`       | Orders / transactions                    |
 | `gc_demo_jh_retail_fulfillment`        | Shipping / fulfillment records           |
-| `gc_demo_jh_retail_cases`             | Open cases + per-stage state             |
+| `gc_demo_jh_retail_cases`              | Open cases + per-stage state             |
 | `gc_demo_jh_retail_journey_events`     | Customer journey timeline                |
 | `gc_demo_jh_shared_demo_config`        | Demo-wide config                         |
 | `gc_demo_jh_shared_customers_by_phone` | Phone-keyed customer view                |
@@ -226,6 +226,21 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
   `window.location.href` change from inside the Scripter iframe is forced into
   a new browser tab by GC. To keep navigation self-contained, embed target
   pages in an overlay `<iframe>` within the Start Page instead of navigating.
+- **External Contact ID in Architect = `Message.ExternalContactId`** (String,
+  read-only built-in). NOT `Session.ExternalContactId` (doesn't exist). Available
+  on message-type flows (Inbound/In-queue Message, chat, bot, digital bot). Note:
+  Architect does not support multiple external contact IDs — it selects the first
+  contact on the conversation by `startDate`. To pass it to a bot, store it in a
+  `Flow.*` var in an Update Data block upstream of `callDigitalBotFlow`, then map
+  that var as a bot input (bot inputs come from flow vars, NOT setParticipantData).
+  Other useful message built-ins: `Message.ConversationID`, `Message.ContactID`,
+  `Message.IsAuthenticated`. System min/max constants: `System.MinDateTime` etc.
+  **Voice/call flows use the `Call.*` namespace instead**: `Call.ExternalContactId`
+  (same first-contact-by-startDate behavior), `Call.Ani` (caller's number),
+  `Call.CalledAddress` / `Call.CalledAddressOriginal`, `Call.ConversationID`,
+  `Call.Language`, `Call.UUIData` (note: UUIData does NOT follow across flow
+  transfers/disconnects). So when wiring the inbound voice flow, use
+  `Call.ExternalContactId`, not `Message.ExternalContactId`.
 
 ## Working agreements
 
