@@ -11,7 +11,7 @@
       "Ask one question at a time:\nNever ask multiple questions in a single response. If you need more information, ask for the most important piece first.",
       "Use data from Start Context (such as customer_id, first_name, or account identifiers) directly. Never ask the customer for information you already have.",
       "When calling save_ava_context, always set exitReasonValue to one of: agent_requested, create_work_item, or resolved. Set intentValue to a brief snake_case description such as: delivery_delay, shipment_exception, refund_request, credit_hold, after_hours_escalation, or agent_requested.",
-      "When creating a case, call tools in this exact sequence: (1) create_case_gc to create the GC native case and receive the caseId and caseReference (e.g. 'SE-3'), (2) create_case_sb using 'CASE-' followed by the first 8 characters of the conversationId as the caseKey, (3) update_customer_case_id to link the case to the customer record. Only after all three succeed, call save_ava_context with exitReasonValue set to create_work_item. Then confirm the caseReference to the customer (e.g. 'Your case reference is SE-3') and let them know they will be contacted within 72 hours."
+      "When creating a case, call tools in this exact sequence: (1) create_case_gc to create the GC native case and receive the caseId and caseReference (e.g. 'SE-3'), (2) create_case_sb using the caseReference from create_case_gc as the caseKey (e.g. SE-4, RR-2) — do not construct from conversationId, (3) update_customer_case_id to link the case to the customer record. Only after all three succeed, call save_ava_context with exitReasonValue set to create_work_item. Then confirm the caseReference to the customer (e.g. 'Your case reference is SE-3') and let them know they will be contacted within 72 hours."
     ],
     "guardrails": {
       "custom": [
@@ -450,7 +450,7 @@
         "name": "create_case_sb",
         "description": "Creates a new case record in the ABC Retail Supabase database. Call this as the SECOND step after create_case_gc succeeds. Links the case to the customer's conversation and sets it to stage 1 / pending.",
         "inputInstructions": [
-          "Construct caseKey as 'CASE-' followed by the first 8 characters of the conversationId from Start Context. Example: if conversationId is a3f2c891-d456-4e12-b789-0f1a2b3c4d5e, the caseKey is CASE-a3f2c891.",
+          "Set caseKey to the caseReference returned by the previous create_case_gc call. Examples: SE-4, RR-2, DD-1, CH-3. Do not construct from conversationId.",
           "Set caseType to the same value used for workItemType in the previous create_case_gc call.",
           "Set caseTitle to the same value used for subject in the previous create_case_gc call.",
           "Set priority to high, medium, or low based on customer urgency and issue severity.",
@@ -635,7 +635,7 @@
       },
       {
         "name": "OpenCaseId",
-        "description": "The case ID for the customer's open service case. Passed from the \nArchitect inbound voice flow after ANI and customer lookup. \nFormat: CASE-2026-0042.",
+        "description": "The case ID for the customer's open service case. Passed from the \nArchitect inbound flow after ANI and customer lookup. \nFormat: SE-4, RR-2, DD-1, CH-3.",
         "type": "string"
       },
       {
@@ -677,7 +677,7 @@
       },
       {
         "name": "CaseKey",
-        "description": "Unique case reference key. Construct as 'CASE-' followed by the first 8 characters of the conversationId. Example: CASE-a3f2c891.",
+        "description": "The GC-generated case reference returned by create_case_gc. Examples: SE-4, RR-2, DD-1, CH-3. Do not construct from conversationId.",
         "direction": "input",
         "type": "string"
       },
@@ -851,7 +851,7 @@
       },
       {
         "name": "CreatedCaseResult",
-        "description": "The result of creating a case record in Supabase. Contains createdKey (the case reference, e.g. CASE-a3f2c891) and createdCustomerId. Use createdKey for the update_customer_case_id step and to confirm the case reference number to the customer.",
+        "description": "The result of creating a case record in Supabase. Contains createdKey (the GC case reference, e.g. SE-4) and createdCustomerId. Use createdKey for the update_customer_case_id step and to confirm the case reference number to the customer.",
         "direction": "output",
         "type": "object",
         "properties": [
