@@ -5,6 +5,12 @@ Showcases voice + web messaging routing, a custom agent script (Scripter), a
 work-item-based case management workflow, a bot flow (AVA), and Supabase as the
 system of record for customer / order / case data.
 
+## Terminology
+- **AVA** = **Agentic Virtual Agent**. Always use this full name (or AVA for short).
+  Never refer to it as "bot", "chatbot", or "digital bot" — those are the Architect
+  flow types that sit in front of AVA, not AVA itself.
+- **Web Messaging** — never "web chat".
+
 ## Architecture at a glance
 
 ```
@@ -193,12 +199,20 @@ PATCH each stageplan/stepplan to set names and `workitemSettings.worktypeId`.
   - `ABC Retail - Get Transaction - SB`
   - `ABC Retail - Get Fulfillment - SB`
   - `ABC Retail - Get Case - SB`
+  - `ABC Retail - Create Case - SB`
+  - `ABC Retail - Update Customer Case ID - SB`
+  - `ABC Retail - Save AVA Context`
+- **Data action** (GC native / purecloud-data-actions integration):
+  - `ABC Retail - Create Case` (POSTs to `/api/v2/casemanagement/cases`)
 - **Integration:** GC Function for `update-workitem` (separate, with its own
   OAuth client-credentials integration providing `${credentials.clientId}` and
   `${credentials.clientSecret}` to the request body template).
 - **Architect flows:**
   - `ABC Retail - Inbound Message Flow` (web messaging)
-  - `ABC Retail Digital Bot Flow` (AVA)
+  - `ABC Retail Digital Bot Flow` (intermediary in front of AVA — messaging)
+  - `ABC Retail - Inbound Voice Flow` (voice)
+  - Voice Bot Flow (intermediary in front of AVA — voice)
+- **Agentic Virtual Agent (AVA):** `ABC Retail Customer Service Assistant`
 - **Script:** `JH-ABC Retail` (Scripter) — loads `ABCRetail_agent_script.html`.
 
 ## Inbound flow contract
@@ -245,6 +259,10 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
   `Call.Language`, `Call.UUIData` (note: UUIData does NOT follow across flow
   transfers/disconnects). So when wiring the inbound voice flow, use
   `Call.ExternalContactId`, not `Message.ExternalContactId`.
+- **AVA `caseKey` inputs must use source ToolInput, not User.** GC validation
+  blocks saving if a value comes from another tool's output but is marked as
+  `source: User`. In Bot Designer, you cannot change source type in-place —
+  delete the input and recreate it with the correct source.
 
 ## Working agreements
 
