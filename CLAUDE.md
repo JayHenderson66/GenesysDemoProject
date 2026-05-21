@@ -138,12 +138,16 @@ Required fields: `name`, `description`, `expiryTime` (integer, hours, 24–720),
 
 API base: `/api/v2/casemanagement/caseplans`
 
-| Caseplan | ID | Status |
-|---|---|---|
-| ABC Retail - Refund Request | `be556187-8de5-45a9-a2ae-a66e242c296e` | published |
-| ABC Retail - Shipment Exception | `4adc4d54-597e-415f-9aad-ec764684baa2` | published |
-| ABC Retail - Delivery Delay | `26711806-9002-474d-926d-bc2d38a12196` | published |
-| ABC Retail - Credit Hold | `e1246b01-dcc6-4fb8-a97b-8dfbdf07178f` | published |
+| Caseplan | ID | Reference Prefix | Status |
+|---|---|---|---|
+| ABC Retail - Refund Request | `be556187-8de5-45a9-a2ae-a66e242c296e` | `RR` | published |
+| ABC Retail - Shipment Exception | `4adc4d54-597e-415f-9aad-ec764684baa2` | `SE` | published |
+| ABC Retail - Delivery Delay | `26711806-9002-474d-926d-bc2d38a12196` | `DD` | published |
+| ABC Retail - Credit Hold | `e1246b01-dcc6-4fb8-a97b-8dfbdf07178f` | `CH` | published |
+
+The GC-generated case reference (e.g. `SE-4`, `RR-2`) is the canonical case identifier used
+across GC, Supabase, and AVA. It is stored as the `key` in `gc_demo_jh_retail_cases` and
+as `open_case_id` in `gc_demo_jh_retail_customers`.
 
 Shared fields across all caseplans:
 - `divisionId`: `80bc1594-6886-47ed-a2b2-d8b2fa5471cc`
