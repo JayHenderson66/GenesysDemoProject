@@ -5,19 +5,61 @@ Update this at the end of every working session. Keep it short and factual.
 ---
 
 ## Last updated
-2026-05-21 (session 4)
+2026-05-21 (session 5)
+
+## Terminology
+The bot is the **Agentic Virtual Agent (AVA)**. Always use this name going forward.
 
 ## Current focus
-Native Case Management migration is essentially done. `ABC Retail - Create Case`
-data action (native POST /api/v2/casemanagement/cases) built, tested (returns
-caseReference e.g. "SE-3"), and exported. AVA updated to call `create_case`.
-External-contact wiring is COMPLETE end-to-end on the MESSAGING side (all three
-flows verified). Next: run the messaging end-to-end test, then wire the VOICE
-side, then delete the old `ABC Retail - Create Work Item` action.
+AVA is one task away from being publishable. The `create_case_sb` tool has a
+validation error: `caseKey` is set to `source: User` but GC requires it to be
+`source: ToolInput` since the value comes from `create_case_gc`'s output.
+Jay needs to delete and recreate the `caseKey` input in Bot Designer (GC won't
+let you change source type in-place — must delete and add fresh). Once fixed,
+publish AVA and run the messaging E2E test.
+
+## What was done in session 5
+
+- **`opened_date` Supabase default fixed** — changed from a hardcoded timestamp
+  to `NOW()`. Done directly in Supabase via SQL.
+- **`ABCRetail-CreateCase-SB.custom.json` updated** — removed `openedDate` from
+  the request template and input schema. GitHub reference updated. **Still need
+  to apply this change in GC Admin** (open the live data action, remove
+  `opened_date: ${input.openedDate}` from the request template, remove
+  `openedDate` from input contract, save and republish).
+- **AVA export updated on GitHub** — all three stale `CASE-{conversationId}`
+  references replaced with GC reference format (SE-4, RR-2, etc.) in:
+  sequencing instruction, `create_case_sb` inputInstructions, `CaseKey` type
+  description, `CreatedCaseResult` type description, `OpenCaseId` type description.
+- **`create_case_sb` tool in Bot Designer** — all 6 inputs confirmed present.
+  `caseKey` instruction correctly says to use `caseReference` from `create_case_gc`.
+  BUT: source is still `User` — GC validation blocked save. Must fix (see below).
+
+## Immediate next step (start here tomorrow)
+
+### Fix `caseKey` source on `create_case_sb` in AVA Bot Designer
+
+GC validation error:
+> "Tool input 'caseKey' for tool 'create_case_sb' has a source of 'User' which
+> is defined by another tool. Check if this tool input should have a source of
+> 'ToolInput'."
+
+**Fix:** In Bot Designer → `create_case_sb` tool → delete the `caseKey` input
+entirely → add it back fresh with:
+- Source: **Tool Input**
+- Tool: `create_case_gc`
+- Output field: `caseReference`
+
+You cannot change source type in-place — GC requires delete + recreate.
+
+After saving, also apply the GC Admin data action update (remove `openedDate`
+from `ABC Retail - Create Case - SB` request template + input contract).
+
+Then publish AVA and run the messaging E2E test.
 
 ## Flow topology (clarified session 4 — important)
-AVA is ONE agentic bot serving both channels. Each channel has its own pair of
-Architect flows in front of AVA:
+AVA is ONE Agentic Virtual Agent serving both channels. Each channel has its own
+pair of Architect flows in front of AVA:
 - Messaging: Inbound Message Flow → Digital Bot Flow → AVA
 - Voice:     Inbound Call Flow    → Bot Flow         → AVA
 The middle "bot flow" is a separate intermediary, NOT AVA. Any value passed to
@@ -33,7 +75,12 @@ var + pass-through mapping in the Call Agentic Virtual Agent block) → AVA.
   Delay, Credit Hold). 3 stages each: Intake → Review → Resolution. IDs in CLAUDE.md.
 - **Customer intents** created for all four worktypes. IDs in CLAUDE.md.
 - **Create Case data action built** and AVA migrated from create_work_item to
-  create_case (see Step 5).
+  create_case_gc.
+- **External contact wiring COMPLETE** on the messaging side (all three flows
+  verified). `Message.ExternalContactId` → Inbound Msg Flow
+  `Flow.gcExternalContactId` → callDigitalBotFlow input → Digital Bot Flow input
+  var → Call Agentic VA → AVA InputData `gc_external_contact_id` →
+  `create_case_gc` externalContactId.
 
 ## GC Object IDs
 
@@ -52,49 +99,28 @@ Full status ID set in Supabase `gc_demo_jh_shared_work_item_templates`.
 Schema, schema-to-worktype assignment, customer intents, and all four caseplans
 built and published.
 
-### Step 5 — Replace Create Work Item with native Create Case ✅ MOSTLY DONE
-- Built `ABC Retail - Create Case` (`data-actions/ABCRetail-CreateCase-GC.custom.json`)
-  using native `POST /api/v2/casemanagement/cases`. Velocity template selects
-  caseplanId from `$input.workItemType`. Returns `caseId` ($.id) +
-  `caseReference` ($.reference, e.g. "SE-3"). Includes `externalContactId` input.
-- AVA updated: tool `create_case` (manually rebuilt in Bot Designer), `create_case_sb`
-  recreated, sequencing instruction updated, AVA published. NOTE: GitHub export
-  still labels the tool `create_case_gc` — reconcile when convenient. AVA tool's
-  `targetId` was a placeholder needing relink in UI (done in UI).
-- Capitalized input names (`WorkItemType`/`Subject`/`Description`) in AVA — verify
-  during E2E test that Velocity `${input.workItemType}` substitution still resolves.
-- **External contact wiring COMPLETE.** The GC External Contact for the live
-  conversation is `Message.ExternalContactId` (Architect built-in — NOT
-  `Session.ExternalContactId`, which doesn't exist). Wired in the inbound message
-  flow as: Block 37 "Store External Contact ID" Update Data sets
-  `Flow.gcExternalContactId = Message.ExternalContactId`, placed after Set
-  Participant Data (Block 29) / Update Data (Block 31) and before Set Screen Pop /
-  Call Digital Bot Flow. `callDigitalBotFlow` passes input
-  `gc_external_contact_id = Flow.gcExternalContactId`.
-  This supersedes the old `Flow.getExternalContactId` (Supabase column from
-  Block 14 customer lookup, only populated for C1001) — that output is now
-  dead/unused but harmless. Block 14 itself is still required (primary customer
-  lookup feeding Set Participant Data + screen pop).
+### Step 5 — Replace Create Work Item with native Create Case — ALMOST DONE
 
-  **Digital Bot Flow VERIFIED wired** (v90 YAML, session 4): has Input var
-  `Flow.gcExternalContactId` (isInput true) and the Call Agentic Virtual Agent
-  block maps `gc_external_contact_id: exp Flow.gcExternalContactId` into AVA.
-  So the full messaging chain is complete:
-  `Message.ExternalContactId` → Inbound Msg Flow `Flow.gcExternalContactId`
-  → callDigitalBotFlow input → Digital Bot Flow input var → Call Agentic VA
-  → AVA InputData `gc_external_contact_id` → create_case `externalContactId`.
+**AVA tool chain (all configured in Bot Designer):**
+1. `create_case_gc` — creates GC native case, returns `caseId` + `caseReference`
+2. `create_case_sb` — inserts Supabase row. **`caseKey` input needs to be
+   recreated as source ToolInput from `create_case_gc → caseReference`** (see
+   Immediate next step above). All other 5 inputs correct.
+3. `update_customer_case_id` — links `createdKey` to customer `open_case_id`. No changes needed.
+4. `save_ava_context` — exits with `create_work_item`. No changes needed.
 
-  Remaining for Step 5 (messaging):
-  - Confirm all three messaging flows published (Inbound Message, Digital Bot, AVA).
-  - End-to-end test: web message as Philip Rivers (C1001) → ask AVA to create a
-    case → verify native GC case created + linked to external contact + Supabase
-    row created + customer open_case_id updated + caseReference returned.
-  - Watch the capitalized-AVA-input/Velocity risk: if case_type is empty or the
-    wrong caseplan is chosen, `${input.workItemType}` isn't matching AVA's field
-    name (WorkItemType) — fix the data action template to match.
-  - Delete `ABC Retail - Create Work Item` from GC Admin once E2E passes.
+**After caseKey fix + AVA published, run E2E test:**
+- Web message as Philip Rivers (C1001) → ask AVA to create a case
+- Verify: GC native case created + linked to external contact + Supabase row
+  inserted with GC reference as key (e.g. SE-4) + customer `open_case_id`
+  updated + caseReference confirmed to customer
+- Delete `ABC Retail - Create Work Item` from GC Admin once E2E passes
 
-### Step 6 — Voice side external-contact wiring (do after messaging passes)
+**Also still needed:**
+- Apply `openedDate` removal to the live `ABC Retail - Create Case - SB` data
+  action in GC Admin (GitHub reference already updated this session)
+
+### Step 6 — Voice side external-contact wiring (do after messaging E2E passes)
 Mirror the messaging wiring on voice, using the `Call.*` namespace:
 - Inbound Call Flow: Update Data block `Flow.gcExternalContactId = Call.ExternalContactId`
   (NOT Message.* — voice uses Call.*), placed before the call-bot-flow block,
@@ -111,11 +137,9 @@ Performance → Interactions.
   workitem references it. Leave it. It doesn't affect the demo.
 - **`after_hours_escalation` missing from Create Case data action** — no
   caseplanId mapped. Add once the After Hours worktype is configured.
-- **Other 9 demo customers have no GC External Contact.** Block 34 (Get External
-  Contact) fails for them (failure branch keeps flow running). For case creation
-  this no longer relies on the Supabase column — `Message.ExternalContactId` is
-  empty when GC hasn't matched a contact, so cases for those customers will be
-  created without an external-contact link until contacts are populated.
+- **Other 9 demo customers have no GC External Contact.** Cases for those
+  customers will be created without an external-contact link until contacts
+  are populated. Philip Rivers (C1001) is the only one wired.
 
 ## Useful references
 
@@ -124,6 +148,6 @@ Performance → Interactions.
 - Inbound voice flow YAML: `9c761662-ABC_Retail__Inbound_Voice_v330.yaml` (in uploads).
 - Digital Bot Flow YAML: `aa5b0058-ABC_Retail_Digital_Bot_Flow_v90.yaml` (in uploads).
 - AVA export: `ava--abc-retail-customer-service-assistant-export.json` (on GitHub main).
-- Create Case data action: `data-actions/ABCRetail-CreateCase-GC.custom.json`.
-- Customer lookup data action: `data-actions/ABCRetail-GetCustomerRecord-SB.custom.json`.
+- Create Case (GC) data action: `data-actions/ABCRetail-CreateCase-GC.custom.json`.
+- Create Case (SB) data action: `data-actions/ABCRetail-CreateCase-SB.custom.json`.
 - GC Function Lambda: `gc-functions/update-workitem/index.js`.
