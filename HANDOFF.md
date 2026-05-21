@@ -11,8 +11,18 @@ Update this at the end of every working session. Keep it short and factual.
 Native Case Management migration is essentially done. `ABC Retail - Create Case`
 data action (native POST /api/v2/casemanagement/cases) built, tested (returns
 caseReference e.g. "SE-3"), and exported. AVA updated to call `create_case`.
-External-contact wiring into the inbound flow is complete. Next: end-to-end test,
-then delete the old `ABC Retail - Create Work Item` action.
+External-contact wiring is COMPLETE end-to-end on the MESSAGING side (all three
+flows verified). Next: run the messaging end-to-end test, then wire the VOICE
+side, then delete the old `ABC Retail - Create Work Item` action.
+
+## Flow topology (clarified session 4 — important)
+AVA is ONE agentic bot serving both channels. Each channel has its own pair of
+Architect flows in front of AVA:
+- Messaging: Inbound Message Flow → Digital Bot Flow → AVA
+- Voice:     Inbound Call Flow    → Bot Flow         → AVA
+The middle "bot flow" is a separate intermediary, NOT AVA. Any value passed to
+AVA must traverse EVERY hop: inbound flow → bot flow (needs an Input-direction
+var + pass-through mapping in the Call Agentic Virtual Agent block) → AVA.
 
 ## Done in earlier sessions
 
@@ -66,15 +76,34 @@ built and published.
   dead/unused but harmless. Block 14 itself is still required (primary customer
   lookup feeding Set Participant Data + screen pop).
 
-  Remaining for Step 5:
-  - Publish inbound message flow (if not already).
+  **Digital Bot Flow VERIFIED wired** (v90 YAML, session 4): has Input var
+  `Flow.gcExternalContactId` (isInput true) and the Call Agentic Virtual Agent
+  block maps `gc_external_contact_id: exp Flow.gcExternalContactId` into AVA.
+  So the full messaging chain is complete:
+  `Message.ExternalContactId` → Inbound Msg Flow `Flow.gcExternalContactId`
+  → callDigitalBotFlow input → Digital Bot Flow input var → Call Agentic VA
+  → AVA InputData `gc_external_contact_id` → create_case `externalContactId`.
+
+  Remaining for Step 5 (messaging):
+  - Confirm all three messaging flows published (Inbound Message, Digital Bot, AVA).
   - End-to-end test: web message as Philip Rivers (C1001) → ask AVA to create a
     case → verify native GC case created + linked to external contact + Supabase
     row created + customer open_case_id updated + caseReference returned.
+  - Watch the capitalized-AVA-input/Velocity risk: if case_type is empty or the
+    wrong caseplan is chosen, `${input.workItemType}` isn't matching AVA's field
+    name (WorkItemType) — fix the data action template to match.
   - Delete `ABC Retail - Create Work Item` from GC Admin once E2E passes.
 
-### Step 6 — Voice flow errors
-Still unresolved. Get error trace from Performance → Interactions.
+### Step 6 — Voice side external-contact wiring (do after messaging passes)
+Mirror the messaging wiring on voice, using the `Call.*` namespace:
+- Inbound Call Flow: Update Data block `Flow.gcExternalContactId = Call.ExternalContactId`
+  (NOT Message.* — voice uses Call.*), placed before the call-bot-flow block,
+  then map it as an input on that block.
+- Bot Flow (voice): add Input-direction var `Flow.gcExternalContactId` and pass it
+  into AVA in the Call Agentic Virtual Agent block (same as Digital Bot Flow).
+- AVA is shared — already done.
+Also: original voice flow errors still unresolved — get error trace from
+Performance → Interactions.
 
 ## Blocked / known issues
 
