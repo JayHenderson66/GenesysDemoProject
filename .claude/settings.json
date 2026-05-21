@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/user/GenesysDemoProject && git fetch origin main 2>/dev/null && git checkout origin/main -- CLAUDE.md HANDOFF.md 2>/dev/null || true",
+            "statusMessage": "Syncing CLAUDE.md and HANDOFF.md from main..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REPO=/home/user/GenesysDemoProject && cd \"$REPO\" && git fetch origin main 2>/dev/null && mkdir -p \"$REPO/.worktrees\" && git worktree add \"$REPO/.worktrees/main\" origin/main 2>/dev/null && cp \"$REPO/CLAUDE.md\" \"$REPO/HANDOFF.md\" \"$REPO/.worktrees/main/\" && cd \"$REPO/.worktrees/main\" && git add CLAUDE.md HANDOFF.md && (git diff --cached --quiet || (git commit -m \"Session end: sync docs to main\" && git push origin HEAD:main 2>/dev/null)) ; git worktree remove \"$REPO/.worktrees/main\" --force 2>/dev/null ; rmdir \"$REPO/.worktrees\" 2>/dev/null || true",
+            "statusMessage": "Syncing CLAUDE.md and HANDOFF.md to main..."
+          }
+        ]
+      }
+    ]
+  }
+}
