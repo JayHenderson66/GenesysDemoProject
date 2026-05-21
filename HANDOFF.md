@@ -5,40 +5,27 @@ Update this at the end of every working session. Keep it short and factual.
 ---
 
 ## Last updated
-2026-05-19 (session 2)
+2026-05-21 (session 4)
 
 ## Current focus
-Shipment Exception caseplan published. Next: verify/fix Create Work Item data
-action, then evaluate replacing with native POST /api/v2/casemanagement/cases.
+Native Case Management migration is essentially done. `ABC Retail - Create Case`
+data action (native POST /api/v2/casemanagement/cases) built, tested (returns
+caseReference e.g. "SE-3"), and exported. AVA updated to call `create_case`.
+External-contact wiring into the inbound flow is complete. Next: end-to-end test,
+then delete the old `ABC Retail - Create Work Item` action.
 
-## Done this session
+## Done in earlier sessions
 
-- **Diagnosed broken case creation.** AVA's 3-step sequence
-  (create_work_item_gc → create_case_sb → update_customer_case_id) was failing
-  because: (1) status data actions had stale hardcoded statusIds, (2) three of
-  the four data actions AVA depends on were never exported to the repo.
+- **Diagnosed and rebuilt broken case creation** (status data actions, Supabase
+  data actions exported to repo).
+- **Worktype statuses + Supabase tracking columns** added for all four worktypes.
+- **All four caseplans published** (Refund Request, Shipment Exception, Delivery
+  Delay, Credit Hold). 3 stages each: Intake → Review → Resolution. IDs in CLAUDE.md.
+- **Customer intents** created for all four worktypes. IDs in CLAUDE.md.
+- **Create Case data action built** and AVA migrated from create_work_item to
+  create_case (see Step 5).
 
-- **Rebuilt data-actions folder.** Deleted 5 stale status actions. Created:
-  - `ABCRetail-SetWIStatus-InProgress.custom.json` — Shipment Exception only
-  - `ABCRetail-SetWIStatus-Waiting.custom.json` — Shipment Exception only
-  - `ABCRetail-SetWIStatus-Closed.custom.json` — Shipment Exception only
-  - `ABCRetail-CreateCase-SB.custom.json` — POSTs to Supabase retail_cases
-  - `ABCRetail-UpdateCustomerCaseID-SB.custom.json` — PATCHes customer open_case_id
-  - `ABCRetail-SaveAVAContext.custom.json` — PATCHes conversation participant attributes
-
-- **Worktype statuses added in GC Admin.** All four worktypes (Shipment Exception,
-  Delivery Delay, Refund Request, Credit Hold) now have: Open, In Progress,
-  Waiting on Customer, Closed.
-
-- **Supabase migration applied.** Added GC tracking columns to
-  `gc_demo_jh_shared_work_item_templates`:
-  `gc_ava_type`, `gc_worktype_id`, `gc_workbin_id`,
-  `gc_status_open_id`, `gc_status_in_progress_id`,
-  `gc_status_waiting_id`, `gc_status_closed_id`.
-  All four worktypes populated. WI-DELIVERY-DELAY inserted as a new row
-  (was previously merged into WI-EXCEPTION-CASE).
-
-## GC Object IDs — collected this session
+## GC Object IDs
 
 | Worktype | gc_ava_type | gc_worktype_id | gc_status_closed_id |
 |---|---|---|---|
@@ -51,26 +38,40 @@ Full status ID set in Supabase `gc_demo_jh_shared_work_item_templates`.
 
 ## In progress / next steps (do these in order)
 
-### Step 1 — Custom Attribute Schema ✅ DONE
-Schema ID: `14be6266-5533-466e-b79f-7a66bedf3135`
+### Step 1–4 ✅ DONE (see CLAUDE.md for all IDs)
+Schema, schema-to-worktype assignment, customer intents, and all four caseplans
+built and published.
 
-### Step 2 — Assign Schema to Worktypes ✅ DONE
-All four worktypes assigned in GC Admin → Schema Display tab.
+### Step 5 — Replace Create Work Item with native Create Case ✅ MOSTLY DONE
+- Built `ABC Retail - Create Case` (`data-actions/ABCRetail-CreateCase-GC.custom.json`)
+  using native `POST /api/v2/casemanagement/cases`. Velocity template selects
+  caseplanId from `$input.workItemType`. Returns `caseId` ($.id) +
+  `caseReference` ($.reference, e.g. "SE-3"). Includes `externalContactId` input.
+- AVA updated: tool `create_case` (manually rebuilt in Bot Designer), `create_case_sb`
+  recreated, sequencing instruction updated, AVA published. NOTE: GitHub export
+  still labels the tool `create_case_gc` — reconcile when convenient. AVA tool's
+  `targetId` was a placeholder needing relink in UI (done in UI).
+- Capitalized input names (`WorkItemType`/`Subject`/`Description`) in AVA — verify
+  during E2E test that Velocity `${input.workItemType}` substitution still resolves.
+- **External contact wiring COMPLETE.** The GC External Contact for the live
+  conversation is `Message.ExternalContactId` (Architect built-in — NOT
+  `Session.ExternalContactId`, which doesn't exist). Wired in the inbound message
+  flow as: Block 37 "Store External Contact ID" Update Data sets
+  `Flow.gcExternalContactId = Message.ExternalContactId`, placed after Set
+  Participant Data (Block 29) / Update Data (Block 31) and before Set Screen Pop /
+  Call Digital Bot Flow. `callDigitalBotFlow` passes input
+  `gc_external_contact_id = Flow.gcExternalContactId`.
+  This supersedes the old `Flow.getExternalContactId` (Supabase column from
+  Block 14 customer lookup, only populated for C1001) — that output is now
+  dead/unused but harmless. Block 14 itself is still required (primary customer
+  lookup feeding Set Participant Data + screen pop).
 
-### Step 3 — Customer Intents ✅ DONE
-- Refund Request: `c65ccaa9-dbd4-481f-80f5-4e4a2304d404` (pre-existing)
-- Shipment Exception: `8965dd02-a41e-4849-b80d-e43d3786bf20` (created this session)
-- API: POST/GET `/api/v2/intents/customerintents` (use flat `categoryId` field)
-- Category ID: `299bfb92-c2c7-45b3-8b1a-c00e7729a78a`
-
-### Step 4 — Shipment Exception Caseplan ✅ DONE
-ID: `4adc4d54-597e-415f-9aad-ec764684baa2` — Published 2026-05-19
-3 stages: Intake → Review → Resolution. All stepplans set to Workitem type,
-Shipment Exception worktype. Full stageplan/stepplan IDs in CLAUDE.md.
-
-### Step 5 — Fix Create Work Item data action ← START HERE
-Verify `ABC Retail - Create Work Item` in GC tester. Evaluate replacing with
-native POST /api/v2/casemanagement/cases once caseplan is published.
+  Remaining for Step 5:
+  - Publish inbound message flow (if not already).
+  - End-to-end test: web message as Philip Rivers (C1001) → ask AVA to create a
+    case → verify native GC case created + linked to external contact + Supabase
+    row created + customer open_case_id updated + caseReference returned.
+  - Delete `ABC Retail - Create Work Item` from GC Admin once E2E passes.
 
 ### Step 6 — Voice flow errors
 Still unresolved. Get error trace from Performance → Interactions.
@@ -79,17 +80,20 @@ Still unresolved. Get error trace from Performance → Interactions.
 
 - **`temp` status on Delivery Delay worktype** — cannot be deleted because a
   workitem references it. Leave it. It doesn't affect the demo.
-- **`after_hours_escalation` missing from Create Work Item data action** — no
-  worktypeId mapped for this type. Add once the After Hours worktype is configured.
-- **Other 9 demo customers have no GC External Contact.** Block 34 fails for
-  them (failure branch keeps flow running). Fix later.
+- **`after_hours_escalation` missing from Create Case data action** — no
+  caseplanId mapped. Add once the After Hours worktype is configured.
+- **Other 9 demo customers have no GC External Contact.** Block 34 (Get External
+  Contact) fails for them (failure branch keeps flow running). For case creation
+  this no longer relies on the Supabase column — `Message.ExternalContactId` is
+  empty when GC hasn't matched a contact, so cases for those customers will be
+  created without an external-contact link until contacts are populated.
 
 ## Useful references
 
-- Inbound message flow YAML: `6819fda8-ABC_Retail__Inbound_Message_Flow_v190.yaml`
-  (re-upload if needed — check `~/uploads/`).
-- Scripter export: `ec016c04-JHABC_Retail.script` (re-upload if needed).
-- GC Function Lambda: `gc-functions/update-workitem/index.js`. ZIP at
-  `gc-functions/update-workitem.zip`.
-- AVA export: `ava--abc-retail-customer-service-assistant-export.json` (in repo).
-- Data action (customer lookup): `data-actions/ABCRetail-GetCustomerRecord-SB.custom.json`.
+- Inbound message flow YAML: `8afc0719-ABC_Retail__Inbound_Message_Flow_v220.yaml`
+  (in uploads). callDigitalBotFlow block at line 1116; Block 37 stores ext contact.
+- Inbound voice flow YAML: `9c761662-ABC_Retail__Inbound_Voice_v330.yaml` (in uploads).
+- AVA export: `ava--abc-retail-customer-service-assistant-export.json` (on GitHub main).
+- Create Case data action: `data-actions/ABCRetail-CreateCase-GC.custom.json`.
+- Customer lookup data action: `data-actions/ABCRetail-GetCustomerRecord-SB.custom.json`.
+- GC Function Lambda: `gc-functions/update-workitem/index.js`.
