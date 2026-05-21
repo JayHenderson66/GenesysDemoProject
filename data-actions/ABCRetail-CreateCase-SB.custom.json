@@ -12,7 +12,7 @@
         "Content-Type": "application/json",
         "Prefer": "return=representation"
       },
-      "requestTemplate": "{\"key\": \"${input.caseKey}\", \"customer_id\": \"${input.customerId}\", \"case_type\": \"${input.caseType}\", \"case_title\": \"${input.caseTitle}\", \"status\": \"stage-1\", \"current_stage\": 1, \"stage_1_status\": \"in-progress\", \"stage_2_status\": \"pending\", \"stage_3_status\": \"pending\", \"priority\": \"${input.priority}\", \"linked_conversation_id\": \"${input.linkedConversationId}\", \"demo_config_key\": \"abc-retail-v1\", \"opened_date\": \"${input.openedDate}\"}"
+      "requestTemplate": "{\"key\": \"${input.caseKey}\", \"customer_id\": \"${input.customerId}\", \"case_type\": \"${input.caseType}\", \"case_title\": \"${input.caseTitle}\", \"status\": \"stage-1\", \"current_stage\": 1, \"stage_1_status\": \"in-progress\", \"stage_2_status\": \"pending\", \"stage_3_status\": \"pending\", \"priority\": \"${input.priority}\", \"linked_conversation_id\": \"${input.linkedConversationId}\", \"demo_config_key\": \"abc-retail-v1\"}"
     },
     "response": {
       "translationMap": {
@@ -33,8 +33,7 @@
           "caseType": { "type": "string" },
           "caseTitle": { "type": "string" },
           "priority": { "type": "string" },
-          "linkedConversationId": { "type": "string" },
-          "openedDate": { "type": "string" }
+          "linkedConversationId": { "type": "string" }
         },
         "additionalProperties": true
       }
