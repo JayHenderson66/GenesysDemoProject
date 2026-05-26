@@ -5,40 +5,41 @@ Update at natural checkpoints during a session, not just at the end.
 ---
 
 ## Last updated
-2026-05-21 (session 5) — AVA case creation, caseKey source fix pending
+2026-05-26 (session 6) — AVA case creation E2E working in internal test tool
 
-## Immediate next step
+## Immediate next steps
 
-### Fix `caseKey` source on `create_case_sb` in AVA Bot Designer
-GC validation error: source is `User` but value comes from `create_case_gc` output.
+### Fix Inbound Message Flow in Architect (manual)
+Two changes needed:
 
-**Fix:** Bot Designer → `create_case_sb` → delete `caseKey` input → add fresh:
-- Source: **Tool Input**
-- Tool: `create_case_gc`
-- Output field: `caseReference`
+**Fix 1 — Get Case failure path:**
+In the `Get Case - SB` data action block, change the failure and timeout paths from `Transfer to ACD` to proceed to `callDigitalBotFlow` (with empty case variables). When `open_case_id` is null, the query returns empty and the flow currently bypasses AVA entirely.
 
-Then apply the `openedDate` removal to the live `ABC Retail - Create Case - SB` data action in GC Admin (remove `opened_date: ${input.openedDate}` from request template + remove `openedDate` from input contract, save and republish).
+**Fix 2 — Get Customer Record output mapping:**
+In `Call Data Action 1` (Get Customer Record), `gc_external_contact_id` is currently mapped to `noValue: true`. Change it to map to `Flow.gcExternalContactId`. This ensures Philip's External Contact ID flows from Supabase, not only from `Message.ExternalContactId`.
 
-Then publish AVA and run the messaging E2E test:
-- Web message as Philip Rivers (C1001) → ask AVA to create a case
-- Verify: GC case created + linked to external contact + Supabase row with GC reference as key (e.g. SE-4) + customer `open_case_id` updated + caseReference confirmed to customer
-
-Once E2E passes: delete `ABC Retail - Create Work Item` from GC Admin.
+### After inbound flow fix — Live E2E web messaging test
+- Reset Philip's `open_case_id` to null in Supabase before testing
+- Web message as Philip Rivers → AVA creates case → verify GC case + Supabase row + `open_case_id` updated + work item routed to ABC Retail queue
 
 ### After messaging E2E — Step 6: Voice external-contact wiring
 Mirror messaging wiring using `Call.*` namespace:
-- Inbound Call Flow: `Flow.gcExternalContactId = Call.ExternalContactId` (Update Data block before call-bot-flow block)
-- Bot Flow (voice): add Input-direction var `Flow.gcExternalContactId`, pass into AVA via Call Agentic Virtual Agent block
-- Also: pull error trace from Performance → Interactions for original voice flow errors
+- Inbound Call Flow: store `Call.ExternalContactId` → `Flow.gcExternalContactId` (Update Data block before callBotFlow)
+- Voice Bot Flow: pass `Flow.gcExternalContactId` as input to AVA via Call Agentic Virtual Agent block
 
-## This session (session 5)
-- `opened_date` Supabase default changed from hardcoded timestamp to `NOW()`
-- `ABCRetail-CreateCase-SB.custom.json` updated — `openedDate` removed from request template + input schema (GitHub updated; live GC data action still needs this applied)
-- AVA export updated — stale `CASE-{conversationId}` references replaced with GC reference format throughout
-- `create_case_sb` tool: all 6 inputs confirmed present; caseKey instruction correct but source still `User` (GC blocked save)
+## This session (session 6)
+- `ABC Retail - Create Case` data action: added Velocity `#if` guard for `externalContactId` — omits field if not a real UUID (length ≤ 30). Tested successfully (RR-20, RR-21 created during tests).
+- AVA export updated from Jay's latest GC export as base:
+  - `linkedConversationId` in `create_case_sb`: source `User` → `External`, type `ConversationId`
+  - Confirmation loop fixed: instruction [1] now says confirm once then proceed immediately; instruction [9] explicitly says don't ask for refund details or re-confirm order number
+- AVA internal test: all three tool calls (`create_case` → `create_case_sb` → `update_customer_case_id_sb`) verified working. RR-22 created in GC + Supabase, Philip's `open_case_id` updated correctly.
+- Philip's `open_case_id` reset to null in Supabase (ready for E2E test)
+- Inbound Message Flow analyzed — two bugs found (see above)
 
 ## Blocked / known issues
-- **`caseKey` source** — must delete + recreate in Bot Designer (see above)
+- **Inbound flow Get Case failure path** — bypasses AVA when `open_case_id` is null (manual Architect fix needed)
+- **Inbound flow gc_external_contact_id mapping** — discarded instead of stored in `Flow.gcExternalContactId` (manual Architect fix needed)
 - **`temp` status on Delivery Delay worktype** — can't delete (workitem references it). Leave it, doesn't affect demo.
 - **`after_hours_escalation`** — no caseplanId mapped in Create Case data action. Add once After Hours worktype is configured.
-- **9 demo customers have no GC External Contact** — only Philip Rivers (C1001) is wired. Cases for others created without external-contact link until contacts are populated.
+- **9 demo customers have no GC External Contact** — only Philip Rivers (C1001) is wired.
+- **Test cases RR-20, RR-21, RR-22** — created during testing, should be cleaned up in GC Case Management.
