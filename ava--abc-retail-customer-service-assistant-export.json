@@ -11,7 +11,7 @@
       "Ask one question at a time:\nNever ask multiple questions in a single response. If you need more information, ask for the most important piece first.",
       "Use data from Start Context (such as customer_id, first_name, or account identifiers) directly. Never ask the customer for information you already have.",
       "When calling save_ava_context, always set exitReasonValue to one of: agent_requested, create_work_item, or resolved. Set intentValue to a brief snake_case description such as: delivery_delay, shipment_exception, refund_request, credit_hold, after_hours_escalation, or agent_requested.",
-      "When creating a case, call tools in this exact sequence: (1) create_case_gc to create the GC native case and receive the caseId and caseReference (e.g. 'SE-3'), (2) create_case_sb using the caseReference from create_case_gc as the caseKey (e.g. SE-4, RR-2) \u2014 do not construct from conversationId, (3) update_customer_case_id to link the case to the customer record. Only after all three succeed, call save_ava_context with exitReasonValue set to create_work_item. Then confirm the caseReference to the customer (e.g. 'Your case reference is SE-3') and let them know they will be contacted within 72 hours."
+      "When creating a case, call tools in this exact sequence: (1) create_case to create the GC native case and receive the caseReference (e.g., SE-4), (2) create_case_sb using that caseReference as the caseKey, and (3) update_customer_case_id_sb to link the case to the customer record. Only after all three succeed, call save_ava_context to finalize the interaction tracker."
     ],
     "guardrails": {
       "custom": [
@@ -38,32 +38,28 @@
             "type": "ConversationId",
             "source": "External",
             "required": true,
-            "fallbackToUser": true,
-            "fallbackToTool": false
+            "fallbackToUser": true
           },
           {
             "targetName": "participantId",
             "type": "ParticipantId",
             "source": "External",
             "required": true,
-            "fallbackToUser": true,
-            "fallbackToTool": false
+            "fallbackToUser": true
           },
           {
             "targetName": "exitReasonValue",
             "type": "ExitReasonValue",
             "source": "User",
             "required": true,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "intentValue",
             "type": "IntentValue",
             "source": "User",
             "required": true,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           }
         ],
         "output": "status",
@@ -117,8 +113,7 @@
             "type": "OpenCaseId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           }
         ],
         "output": "Case_details",
@@ -196,8 +191,7 @@
             "type": "ActiveTxnId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           }
         ],
         "output": "Active_txn_id",
@@ -278,7 +272,6 @@
             "source": "ToolOutput",
             "required": false,
             "fallbackToUser": false,
-            "fallbackToTool": false,
             "mapping": [
               "Active_txn_id",
               "fulfillment_id"
@@ -341,66 +334,85 @@
         }
       },
       {
-        "name": "create_case_gc",
-        "description": "Creates a new native case in Genesys Cloud Case Management. Call this as the FIRST step when the customer agrees to have a case created. The case is linked to the correct caseplan based on issue type and routes automatically to the back-office team. You must call create_case_sb and update_customer_case_id after this succeeds.",
+        "name": "abc_retail_knowledge_base",
+        "description": "ABC Retail customer service knowledge base covering order tracking, shipment and delivery, returns and refunds, billing and payments, account management, and escalation procedures. Used by AVA for self-service resolution and by Agent Copilot for live interaction support.",
         "inputInstructions": [
-          "Set workItemType to exactly one of: delivery_delay, shipment_exception, refund_request, credit_hold \u2014 choose based on the customer's primary issue.",
-          "Set subject to a concise 5-10 word summary of the issue. Example: 'Shipment delayed 11 days \u2014 customer escalating'.",
-          "Set description to a 1-2 sentence summary including the order number and the customer's core concern.",
-          "orderNumber, customerId, and externalContactId are pulled automatically from Start Context \u2014 do not ask the customer for these."
+          "Search this knowledge base when the customer asks a question that can be answered by policy or procedure \u2014 such as return windows, shipping timelines, refund processes, billing questions, or account management steps. Prefer a knowledge article answer over a hardcoded response whenever one is available. Present the answer conversationally in your own words \u2014 do not read the article verbatim. If the article does not fully resolve the customer's question, offer to transfer to a live agent."
         ],
-        "outputInstructions": [],
+        "outputInstructions": [
+          {
+            "when": "lambda result: len(result) == 0",
+            "then": "Sorry I didn't find anything, is there anything else I can help with?"
+          },
+          {
+            "when": "lambda result: len(result) > 0",
+            "then": "Did that answer your question?"
+          }
+        ],
+        "targetId": "ee0257d8-09c9-4647-b205-86e8bfa80f6a",
+        "targetName": "ABC Retail KB",
+        "type": "KnowledgeBase"
+      },
+      {
+        "name": "create_case",
+        "description": "Creates a new native case in Genesys Cloud Case Management. Call this as the FIRST step when the customer agrees to have a case created. The case is linked to the correct caseplan based on issue type and routes automatically to the back-office team. You must call create_case_sb and update_customer_case_id after this succeeds.",
+        "inputInstructions": [],
+        "outputInstructions": [
+          {
+            "when": "True",
+            "then": "None needed \u2014 AVA will use the caseReference value from this output when confirming the case to the customer in the next step."
+          }
+        ],
         "type": "DataAction",
-        "targetId": "custom_-_PLACEHOLDER_RELINK_IN_UI",
+        "targetId": "custom_-_b4b80e3b-4720-410a-94cd-b855beddb2af",
         "targetName": "ABC Retail - Create Case",
+        "errors": [
+          {
+            "type": "create_case_error"
+          }
+        ],
         "inputs": [
           {
             "targetName": "workItemType",
             "type": "WorkItemType",
             "source": "User",
             "required": true,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "subject",
-            "type": "WorkItemSubject",
+            "type": "Subject",
             "source": "User",
             "required": true,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "description",
-            "type": "WorkItemDescription",
+            "type": "Description",
             "source": "User",
             "required": true,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "orderNumber",
             "type": "ActiveTxnId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "customerId",
             "type": "CustomerId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "externalContactId",
             "type": "GcExternalContactId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           }
         ],
         "output": "CaseResult",
@@ -448,28 +460,28 @@
       },
       {
         "name": "create_case_sb",
-        "description": "Creates a new case record in the ABC Retail Supabase database. Call this as the SECOND step after create_case_gc succeeds. Links the case to the customer's conversation and sets it to stage 1 / pending.",
+        "description": "Inserts a new case record into the Supabase database. Call this as the second step in the case creation sequence, after create_case.",
         "inputInstructions": [
-          "Set caseKey to the caseReference returned by the previous create_case_gc call. Examples: SE-4, RR-2, DD-1, CH-3. Do not construct from conversationId.",
-          "Set caseType to the same value used for workItemType in the previous create_case_gc call.",
-          "Set caseTitle to the same value used for subject in the previous create_case_gc call.",
-          "Set priority to high, medium, or low based on customer urgency and issue severity.",
-          "customerId and linkedConversationId are pulled automatically from Start Context."
+          "This tool is the second step in the mandatory case-creation sequence. You must only call this tool after create_case has successfully executed and returned a caseReference\n. You must have the customerId and linkedConversationId from the Start Context ready to pass into this tool\n. Do not attempt to insert the record into Supabase if the initial native case creation failed"
         ],
-        "outputInstructions": [],
+        "outputInstructions": [
+          {
+            "when": "True",
+            "then": "Successfully created the case record in the Supabase database. Now proceed immediately to the update_customer_case_id tool to link this new case to the customer\u2019s profile. Do not confirm completion to the customer until the entire tool chain, including the customer record update, is finished."
+          }
+        ],
         "type": "DataAction",
-        "targetId": "custom_-_b54158da-7bb1-445a-acc4-5490193a6e6f",
+        "targetId": "custom_-_5c83ad1a-868f-453c-a01b-34e42ad8e10b",
         "targetName": "ABC Retail - Create Case - SB",
         "inputs": [
           {
             "targetName": "caseKey",
-            "type": "CaseKey",
+            "type": "CaseResult",
             "source": "ToolOutput",
             "required": false,
             "fallbackToUser": false,
-            "fallbackToTool": false,
             "mapping": [
-              "CaseKey",
+              "CaseResult",
               "caseReference"
             ]
           },
@@ -478,43 +490,38 @@
             "type": "CustomerId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "caseType",
-            "type": "WorkItemType",
+            "type": "CaseType",
             "source": "User",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "caseTitle",
-            "type": "WorkItemSubject",
+            "type": "CaseTitle",
             "source": "User",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "priority",
-            "type": "CasePriority",
+            "type": "Priority",
             "source": "User",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "linkedConversationId",
             "type": "ConversationId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           }
         ],
-        "output": "CreatedCaseResult",
+        "output": "case_result",
         "schemas": {
           "inputs": {
             "type": "object",
@@ -555,12 +562,17 @@
         }
       },
       {
-        "name": "update_customer_case_id",
-        "description": "Updates the customer's open_case_id in Supabase to link them to the newly created case. Call this as the THIRD and final step after create_case_sb succeeds. After this, call save_ava_context with exitReasonValue set to create_work_item.",
+        "name": "update_customer_case_id_sb",
+        "description": "The human-readable unique identifier for the case (e.g., SE-4). This value is the result of the previous database insertion and is used here to link the case to Philip Rivers' customer record in Supabase.\" [323, 326, conversation history]",
         "inputInstructions": [
-          "Set caseKey to the createdKey value returned by create_case_sb. customerId is pulled from Start Context \u2014 do not ask the customer for it."
+          "This is the final step in the case-creation sequence. You must pull the caseKey from the createdKey output of the create_case_sb tool. The customerId is provided in the Start Context. Do not prompt the customer for either value.\" [325, conversation history]"
         ],
-        "outputInstructions": [],
+        "outputInstructions": [
+          {
+            "when": "True",
+            "then": "The result object from the Supabase update, confirming that the customer's profile has been linked to the new case record.\" [124, conversation history]"
+          }
+        ],
         "type": "DataAction",
         "targetId": "custom_-_251514e8-79ad-4ad0-b9ee-caa4a67506d5",
         "targetName": "ABC Retail - Update Customer Case ID - SB",
@@ -570,23 +582,21 @@
             "type": "CustomerId",
             "source": "External",
             "required": false,
-            "fallbackToUser": false,
-            "fallbackToTool": false
+            "fallbackToUser": false
           },
           {
             "targetName": "caseKey",
-            "type": "CaseKey",
+            "type": "case_result",
             "source": "ToolOutput",
             "required": false,
             "fallbackToUser": false,
-            "fallbackToTool": false,
             "mapping": [
-              "CaseKey",
+              "case_result",
               "createdKey"
             ]
           }
         ],
-        "output": "UpdatedCustomerResult",
+        "output": "update_result",
         "schemas": {
           "inputs": {
             "type": "object",
@@ -613,87 +623,70 @@
             "additionalProperties": true
           }
         }
-      },
-      {
-        "name": "abc_retail_knowledge_base",
-        "description": "ABC Retail customer service knowledge base covering order tracking, shipment and delivery, returns and refunds, billing and payments, account management, and escalation procedures. Used by AVA for self-service resolution and by Agent Copilot for live interaction support.",
-        "inputInstructions": [
-          "Search this knowledge base when the customer asks a question that can be answered by policy or procedure \u2014 such as return windows, shipping timelines, refund processes, billing questions, or account management steps. Prefer a knowledge article answer over a hardcoded response whenever one is available. Present the answer conversationally in your own words \u2014 do not read the article verbatim. If the article does not fully resolve the customer's question, offer to transfer to a live agent."
-        ],
-        "outputInstructions": [
-          {
-            "when": "lambda result: len(result) == 0",
-            "then": "Sorry I didn't find anything, is there anything else I can help with?"
-          },
-          {
-            "when": "lambda result: len(result) > 0",
-            "then": "Did that answer your question?"
-          }
-        ],
-        "targetId": "ee0257d8-09c9-4647-b205-86e8bfa80f6a",
-        "targetName": "ABC Retail KB",
-        "type": "KnowledgeBase"
       }
     ],
     "types": [
       {
         "name": "ActiveTxnId",
         "description": "The transaction ID for the customer's most recent active order. \nUsed by get_abc_retail_order_status and get_abc_retail_shipment_status \nto retrieve order and fulfillment details. Passed from the Architect \ninbound voice flow after ANI lookup. Format: TXN001.",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "OpenCaseId",
-        "description": "The case ID for the customer's open service case. Passed from the \nArchitect inbound flow after ANI and customer lookup. \nFormat: SE-4, RR-2, DD-1, CH-3.",
-        "type": "string"
+        "description": "The case ID for the customer's open service case. Passed from the \nArchitect inbound voice flow after ANI and customer lookup. \nFormat: CASE-2026-0042.",
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "CustomerId",
         "description": "Unique identifier for the customer. Format: C1001.",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "FirstName",
         "description": "Customer's first name used by AVA for personalized greeting and identity confirmation.",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "AniNumber",
         "description": "Customer's normalized 10-digit phone number used for ANI-based identification. Format: 9492955945.",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "ConversationId",
         "description": "The Genesys Cloud conversation ID for the current interaction.",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "ParticipantId",
         "description": "The participant ID for the current interaction.",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
+      },
+      {
+        "name": "GcExternalContactId",
+        "description": "The Genesys Cloud External Contact ID for this customer. Passed from the inbound flow participant attributes after customer lookup in Supabase. Required to link a newly created GC case to the customer's external contact record.",
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "ExitReasonValue",
         "description": "Determine the correct exit reason based on the conversation outcome. Use agent_requested if the customer asked to speak with an agent or the issue requires human assistance. Use create_work_item if the customer agreed to have a case or follow-up task created without needing live agent assistance. Use resolved if the issue was fully resolved without any follow-up needed.",
         "direction": "input",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "IntentValue",
         "description": "Summarize what the customer was calling about in a brief snake_case phrase. Examples: shipment_delay, order_status, billing_inquiry, return_request, case_status. Use the most specific term that describes the customer's primary reason for calling.",
         "direction": "input",
-        "type": "string"
-      },
-      {
-        "name": "CaseKey",
-        "description": "The GC-generated case reference returned by create_case_gc. Examples: SE-4, RR-2, DD-1, CH-3. Do not construct from conversationId.",
-        "direction": "input",
-        "type": "string"
-      },
-      {
-        "name": "CasePriority",
-        "description": "Case priority level. Use high for urgent issues where the customer is escalating or has been waiting more than 7 days, medium for standard follow-up needed within SLA, low for informational or non-urgent requests.",
-        "direction": "input",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "status",
@@ -858,42 +851,6 @@
         ]
       },
       {
-        "name": "CreatedCaseResult",
-        "description": "The result of creating a case record in Supabase. Contains createdKey (the GC case reference, e.g. SE-4) and createdCustomerId. Use createdKey for the update_customer_case_id step and to confirm the case reference number to the customer.",
-        "direction": "output",
-        "type": "object",
-        "properties": [
-          {
-            "name": "createdKey",
-            "type": "string",
-            "required": false
-          },
-          {
-            "name": "createdCustomerId",
-            "type": "string",
-            "required": false
-          }
-        ]
-      },
-      {
-        "name": "UpdatedCustomerResult",
-        "description": "Confirmation that the customer record was updated with the new case ID.",
-        "direction": "output",
-        "type": "object",
-        "properties": [
-          {
-            "name": "updatedCustomerId",
-            "type": "string",
-            "required": false
-          },
-          {
-            "name": "updatedCaseId",
-            "type": "string",
-            "required": false
-          }
-        ]
-      },
-      {
         "name": "InputData",
         "direction": "agentInput",
         "type": "object",
@@ -941,26 +898,236 @@
         ]
       },
       {
+        "name": "create_case_error",
+        "description": "The GC case creation API call failed. This may be due to a missing external contact, an invalid caseplan ID, or a temporary service error.",
+        "type": "DataActionHttpError",
+        "statusCodes": [
+          400,
+          401,
+          402,
+          403,
+          404,
+          405,
+          406,
+          407,
+          408,
+          409,
+          410,
+          411,
+          412,
+          413,
+          414,
+          415,
+          416,
+          417,
+          418,
+          419,
+          420,
+          421,
+          422,
+          423,
+          424,
+          425,
+          426,
+          427,
+          428,
+          429,
+          430,
+          431,
+          432,
+          433,
+          434,
+          435,
+          436,
+          437,
+          438,
+          439,
+          440,
+          441,
+          442,
+          443,
+          444,
+          445,
+          446,
+          447,
+          448,
+          449,
+          450,
+          451,
+          452,
+          453,
+          454,
+          455,
+          456,
+          457,
+          458,
+          459,
+          460,
+          461,
+          462,
+          463,
+          464,
+          465,
+          466,
+          467,
+          468,
+          469,
+          470,
+          471,
+          472,
+          473,
+          474,
+          475,
+          476,
+          477,
+          478,
+          479,
+          480,
+          481,
+          482,
+          483,
+          484,
+          485,
+          486,
+          487,
+          488,
+          489,
+          490,
+          491,
+          492,
+          493,
+          494,
+          495,
+          496,
+          497,
+          498,
+          499,
+          500,
+          501,
+          502,
+          503,
+          504,
+          505,
+          506,
+          507,
+          508,
+          509,
+          510,
+          511,
+          512,
+          513,
+          514,
+          515,
+          516,
+          517,
+          518,
+          519,
+          520,
+          521,
+          522,
+          523,
+          524,
+          525,
+          526,
+          527,
+          528,
+          529,
+          530,
+          531,
+          532,
+          533,
+          534,
+          535,
+          536,
+          537,
+          538,
+          539,
+          540,
+          541,
+          542,
+          543,
+          544,
+          545,
+          546,
+          547,
+          548,
+          549,
+          550,
+          551,
+          552,
+          553,
+          554,
+          555,
+          556,
+          557,
+          558,
+          559,
+          560,
+          561,
+          562,
+          563,
+          564,
+          565,
+          566,
+          567,
+          568,
+          569,
+          570,
+          571,
+          572,
+          573,
+          574,
+          575,
+          576,
+          577,
+          578,
+          579,
+          580,
+          581,
+          582,
+          583,
+          584,
+          585,
+          586,
+          587,
+          588,
+          589,
+          590,
+          591,
+          592,
+          593,
+          594,
+          595,
+          596,
+          597,
+          598,
+          599
+        ],
+        "defaultInstruction": "Apologize to the customer and let them know you were unable to open a case at this time. Do not retry. Offer to transfer them to a live agent so the issue can be handled manually. When ending the conversation, call save_ava_context with exitReasonValue set to agent_requested."
+      },
+      {
         "name": "WorkItemType",
-        "description": "The category of work item to create. Must be exactly one of: delivery_delay (order or shipment arrived late or not at all), shipment_exception (carrier exception, lost package, damage), refund_request (customer requesting money back for a return or error), credit_hold (account flagged or payment issue requiring review).",
         "direction": "input",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
-        "name": "WorkItemSubject",
-        "description": "A concise 5-10 word summary of the customer's issue. Used as the work item subject line and case title. Example: 'Shipment delayed 11 days \u2014 customer escalating'.",
+        "name": "Subject",
+        "description": "A concise 5-10 word summary of the customer's issue. Used as the case subject line. Example: 'Shipment delayed 11 days \u2014 customer escalating'.",
         "direction": "input",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
-        "name": "WorkItemDescription",
-        "description": "A 1-2 sentence description of the issue including the order number and the customer's core concern. Used as the work item description for back-office agents.",
+        "name": "Description",
+        "description": "A 1-2 sentence description of the issue including the order number and the customer's core concern. Used as the case description for back-office agents.",
         "direction": "input",
-        "type": "string"
+        "type": "string",
+        "userUtteranceSubstring": false
       },
       {
         "name": "CaseResult",
-        "description": "The result of creating a GC native case. Contains caseId (UUID assigned by Genesys Cloud) and caseReference (the human-readable reference such as 'SE-3'). Confirm caseReference to the customer as their case reference number.",
+        "description": "The result of creating a GC native case. Contains caseId (the UUID assigned by Genesys Cloud) and caseReference (the human-readable reference such as 'SE-3'). Confirm caseReference to the customer as their case reference number.",
         "direction": "output",
         "type": "object",
         "properties": [
@@ -977,9 +1144,68 @@
         ]
       },
       {
-        "name": "GcExternalContactId",
-        "description": "The Genesys Cloud External Contact ID for this customer. Passed from the inbound flow participant attributes after customer lookup in Supabase. Required to link a newly created GC case to the customer's external contact record.",
-        "type": "string"
+        "name": "update_result",
+        "description": "The result object from the Supabase update, confirming that the customer's profile has been linked to the new case record.\" [124, conversation history]",
+        "direction": "output",
+        "type": "object",
+        "properties": [
+          {
+            "name": "updatedCustomerId",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "updatedCaseId",
+            "type": "string",
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CaseType",
+        "description": "A string indicating the category of the issue, such as refund_request, shipment_exception, or delivery_delay\n. This is determined by the AI model based on the customer's stated intent",
+        "direction": "input",
+        "type": "string",
+        "userUtteranceSubstring": false
+      },
+      {
+        "name": "CaseTitle",
+        "description": "A concise, 5-10 word summary of the customer's issue that serves as the record's title (e.g., \"Shipment delayed 11 days \u2014 customer escalating\")\n. This is generated dynamically by the AI model based on the conversation context",
+        "direction": "input",
+        "type": "string",
+        "userUtteranceSubstring": false
+      },
+      {
+        "name": "Priority",
+        "description": "The urgency level assigned to the case, such as high, medium, or low\n. The AI model assigns this value, which can later be used to drive ACD routing logic or SLA management",
+        "direction": "input",
+        "type": "string",
+        "userUtteranceSubstring": false
+      },
+      {
+        "name": "LinkedConversationId",
+        "description": "The unique Genesys Cloud GUID for the specific interaction where the case was created\n. This is linked to the conversation_id variable in the AVA Start Context to provide a direct audit trail between the database record and the original interaction",
+        "direction": "input",
+        "type": "string",
+        "userUtteranceSubstring": false
+      },
+      {
+        "name": "case_result",
+        "description": "The result object from the Supabase database insertion, containing the unique record key and the associated customer ID.",
+        "direction": "output",
+        "type": "object",
+        "properties": [
+          {
+            "name": "createdKey",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "createdCustomerId",
+            "type": "string",
+            "required": false
+          }
+        ]
       }
     ],
     "events": [
