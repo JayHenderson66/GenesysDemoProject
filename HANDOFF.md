@@ -5,16 +5,31 @@ Update at natural checkpoints during a session, not just at the end.
 ---
 
 ## Last updated
-2026-05-27 (session 7) — Live E2E web messaging test passed; three follow-up items identified
+2026-05-28 (session 8) — Root cause of AVA exit-reason error found; fix identified but not yet applied
 
 ## Immediate next steps
 
-### 1. Disconnect messaging conversation after case creation (manual Architect)
-In the **Inbound Message Flow**, the happy path after `callDigitalBotFlow` currently routes to `Transfer to ACD`. Change it to a **Disconnect** action.
-- The demo story is: customer contacts → AVA creates case → "we'll be in touch" → conversation ends → back-office works the case as a workitem.
-- The AVA failure/timeout paths inside the Digital Bot Flow already `Transfer to ACD` for live-agent escalation — leave those alone.
+### 1. Fix `save_ava_context` data action URL (GC Admin — 2 min)
+The live data action has `/conversations/calls/` hardcoded in the URL, which fails for messaging conversations.
 
-### 2. Screen pop on workitem delivery (manual Architect — all four workitem flows)
+**Fix:** Admin → Integrations → Actions → `ABC Retail - Save AVA Context` → Setup → change Request URL to:
+```
+/api/v2/conversations/${input.conversationId}/participants/${input.participantId}/attributes
+```
+(Remove `/calls/` — the generic endpoint works for both voice and messaging.)
+
+After saving, re-test the action with a live conversation's IDs to confirm 200.
+
+### 2. Reset Philip's `open_case_id` before next test
+RR-33 was created during today's test. Reset `open_case_id` to null in Supabase `gc_demo_jh_retail_customers` for `key = 'C1001'` before the next E2E run.
+
+### 3. Fix Inbound Message Flow happy path (manual Architect)
+After `callDigitalBotFlow` succeeds, the flow currently routes to `Transfer to ACD`. Change to **Disconnect**.
+- The demo story: customer contacts → AVA creates case → "we'll be in touch" → conversation ends.
+- AVA handles agent escalation internally (Digital Bot Flow routes `agent_requested` to Transfer to ACD before exiting).
+- The AVA failure/timeout paths inside the Digital Bot Flow already `Transfer to ACD` — leave those alone.
+
+### 4. Screen pop on workitem delivery (manual Architect — all four workitem flows)
 The `workitemCreated` task in each workitem flow currently does:
 ```
 transferToAcd → ABC Retail
@@ -29,7 +44,7 @@ endTask
 ```
 Apply to all four flows: Shipment Exception, Delivery Delay, Refund Request, Credit Hold.
 
-### 3. "No orders found" in agent script (debug)
+### 5. "No orders found" in agent script (debug)
 TXN001 isn't rendering in the agent script after screen pop. Root cause unknown — chase down the data action response / URL param mapping.
 
 ## Known issues (lower priority)
@@ -37,7 +52,13 @@ TXN001 isn't rendering in the agent script after screen pop. Root cause unknown 
 - **`temp` status on Delivery Delay worktype** — can't delete (workitem references it). Leave it, doesn't affect demo.
 - **`after_hours_escalation`** — no caseplanId mapped in Create Case data action. Add once After Hours worktype is configured.
 - **9 demo customers have no GC External Contact** — only Philip Rivers (C1001) is wired.
-- **Test cases RR-20, RR-21, RR-22** — created during testing; clean up in GC Case Management when convenient.
+- **Test cases RR-20, RR-21, RR-22, RR-33** — created during testing; clean up in GC Case Management when convenient.
+
+## Session 8 (2026-05-28)
+- Root cause of AVA exit-reason "error" identified: `ABC Retail - Save AVA Context` data action had `/conversations/calls/` in the URL template (voice-specific endpoint), which fails for messaging. Correct URL uses generic `/conversations/{id}/participants/{id}/attributes`.
+- Confirmed: one data action covers both voice and messaging — no separate actions needed per channel.
+- Fix not yet applied — Jay was mid-test when session ended. Start next session with step 1 above.
+- Philip's `open_case_id` not yet reset — RR-33 created during today's test.
 
 ## Session 7 (2026-05-27)
 - Confirmed Architect Fix 1 (Get Case failure path) and Fix 2 (gc_external_contact_id mapping) done by Jay manually.
