@@ -55,7 +55,7 @@ system of record for customer / order / case data.
 | `gc_demo_jh_retail_customers`          | Customer master (10 demo rows)           |
 | `gc_demo_jh_retail_transactions`       | Orders / transactions                    |
 | `gc_demo_jh_retail_fulfillment`        | Shipping / fulfillment records           |
-| `gc_demo_jh_retail_cases`              | Open cases + per-stage state             |
+| `gc_demo_jh_retail_cases`             | Open cases + per-stage state             |
 | `gc_demo_jh_retail_journey_events`     | Customer journey timeline                |
 | `gc_demo_jh_shared_demo_config`        | Demo-wide config                         |
 | `gc_demo_jh_shared_customers_by_phone` | Phone-keyed customer view                |
@@ -201,9 +201,9 @@ PATCH each stageplan/stepplan to set names and `workitemSettings.worktypeId`.
   - `ABC Retail - Get Case - SB`
   - `ABC Retail - Create Case - SB`
   - `ABC Retail - Update Customer Case ID - SB`
-  - `ABC Retail - Save AVA Context`
-- **Data action** (GC native / purecloud-data-actions integration):
+- **Data actions** (GC native / purecloud-data-actions integration):
   - `ABC Retail - Create Case` (POSTs to `/api/v2/casemanagement/cases`)
+  - `ABC Retail - Save AVA Context` (PATCHes `/api/v2/conversations/{conversationId}/participants/{participantId}/attributes` — sets `ava_exit_reason` and `ava_intent`; works for both voice and messaging)
 - **Integration:** GC Function for `update-workitem` (separate, with its own
   OAuth client-credentials integration providing `${credentials.clientId}` and
   `${credentials.clientSecret}` to the request body template).
@@ -263,6 +263,12 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
   blocks saving if a value comes from another tool's output but is marked as
   `source: User`. In Bot Designer, you cannot change source type in-place —
   delete the input and recreate it with the correct source.
+- **`Save AVA Context` URL must use the generic conversations path.** The correct
+  request URL is `/api/v2/conversations/{id}/participants/{id}/attributes` — no
+  `/calls/` or `/messages/` segment. The type-specific variants (e.g. `/calls/`)
+  reject messaging conversations with a 400. To find a participant ID for testing,
+  call `GET /api/v2/conversations/{conversationId}` in API Explorer and look in
+  the `participants` array for the entry with `"purpose": "customer"`.
 
 ## Working agreements
 
