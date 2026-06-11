@@ -25,11 +25,22 @@ const TABLE_IDS = {
 const urlParams  = new URLSearchParams(window.location.search);
 const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
 let restoredParams = new URLSearchParams();
+let runtimeContext = {};
 try {
   const sv = urlParams.get('state') || hashParams.get('state');
   if (sv) restoredParams = new URLSearchParams(decodeURIComponent(sv));
 } catch(e) {}
-function getParam(n) { return urlParams.get(n) || restoredParams.get(n) || hashParams.get(n) || null; }
+function setRuntimeContext(obj) {
+  runtimeContext = (obj && typeof obj === 'object') ? Object.assign({}, runtimeContext, obj) : runtimeContext;
+}
+function getContextValue(obj, key) {
+  if (!obj || typeof obj !== 'object') return null;
+  const value = obj[key];
+  return value === undefined || value === null || value === '' ? null : String(value);
+}
+function getParam(n) {
+  return getContextValue(runtimeContext, n) || urlParams.get(n) || restoredParams.get(n) || hashParams.get(n) || null;
+}
 const gcConvId = getParam('conversationId') || getParam('pcConversationId') || null;
 </script>
 <style>
@@ -643,7 +654,9 @@ let routingApi      = null;
 let usersApi        = null;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const gcWorkitemId = getParam('workitemId') || getParam('workitem_id') || '';
+function getCurrentWorkitemId() {
+  return getParam('workitemId') || getParam('workitem_id') || '';
+}
 const CASE_PAGE_BASE = 'https://jayhenderson66.github.io/GenesysDemoProject';
 const SUPABASE_URL = 'https://jwnmiakpxzbvjoxeqjde.supabase.co/rest/v1';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3bm1pYWtweHpidmpveGVxamRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzMzQsImV4cCI6MjA5MzI2MDMzNH0.9Q96paekV2nceP-ySLqdYt1-Z_VHH3j8z3PB034l1-w';
@@ -653,6 +666,21 @@ async function sb(table, query) {
   const res = await fetch(`${SUPABASE_URL}/${table}?${query}`, { headers: SB_HEADERS });
   if (!res.ok) throw new Error(`Supabase ${table} request failed: ${res.status}`);
   return res.json();
+}
+function firstNonEmpty(...vals) {
+  for (const val of vals) {
+    if (val !== undefined && val !== null && String(val).trim() !== '') return String(val);
+  }
+  return '';
+}
+function readWorkitemCustomField(custom, ...keys) {
+  if (!custom || typeof custom !== 'object') return '';
+  for (const key of keys) {
+    if (custom[key] !== undefined && custom[key] !== null && String(custom[key]).trim() !== '') {
+      return String(custom[key]);
+    }
+  }
+  return '';
 }
 function normalizeCaseRecord(c) {
   if (!c) return null;
@@ -667,10 +695,11 @@ function normalizeCaseRecord(c) {
 function openCaseStage(stage) {
   const caseId     = (window.currentActiveCase && window.currentActiveCase.key) || '';
   const customerId = (selectedCustomer && selectedCustomer.key) || getParam('customer_id') || '';
+  const currentWorkitemId = getCurrentWorkitemId();
   const params = new URLSearchParams();
-  if (customerId)   params.set('customerId', customerId);
-  if (caseId)       params.set('caseId', caseId);
-  if (gcWorkitemId) params.set('workitemId', gcWorkitemId);
+  if (customerId)       params.set('customerId', customerId);
+  if (caseId)           params.set('caseId', caseId);
+  if (currentWorkitemId) params.set('workitemId', currentWorkitemId);
   ['intake','review','resolution'].forEach(s =>
     document.getElementById('onav-' + s).classList.toggle('active', s === stage)
   );
@@ -897,6 +926,236 @@ async function loadFromCaseContext() {
     return true;
   } catch(e) {
     console.error('Case fallback load failed:', e);
+    return false;
+  }
+}
+
+function getApiBase() {
+  const env = getParam('pcEnvironment') || getParam('environment') || gcEnvironment || GC_CONFIG.environment || 'mypurecloud.com';
+  gcEnvironment = env;
+  return `https://api.${env}`;
+}
+
+function getRedirectUri() {
+  return window.location.href.split('?')[0].split('#')[0];
+}
+
+function ensurePlatformSdk() {
+  if (platformClient && apiClient) return true;
+  try {
+    if (window.require) {
+      platformClient = window.require('platformClient');
+      apiClient = platformClient.ApiClient.instance;
+    }
+  } catch (e) {}
+  if (!apiClient) {
+    try {
+      const pc = window.platformClient;
+      if (pc && pc.ApiClient) {
+        platformClient = pc;
+        apiClient = pc.ApiClient.instance;
+      }
+    } catch (e) {}
+  }
+  return !!apiClient;
+}
+
+async function ensureWidgetApiAuth() {
+  if (gcAccessToken) return gcAccessToken;
+  if (!ensurePlatformSdk()) throw new Error('Genesys Platform SDK unavailable in widget');
+  const env = getParam('pcEnvironment') || getParam('environment') || GC_CONFIG.environment || 'mypurecloud.com';
+  gcEnvironment = env;
+  apiClient.setEnvironment(env);
+  apiClient.setPersistSettings(true, 'abcretail_widget_runtime');
+
+  try {
+    const data = await apiClient.loginImplicitGrant(
+      GC_CONFIG.clientId,
+      getRedirectUri(),
+      { state: window.location.search }
+    );
+    gcAccessToken = data && data.accessToken ? data.accessToken : apiClient.authData?.accessToken || null;
+    return gcAccessToken;
+  } catch (e) {
+    console.error('Widget auth failed:', e);
+    throw e;
+  }
+}
+
+async function gcApiJson(path) {
+  const token = await ensureWidgetApiAuth();
+  if (!token) throw new Error('No Genesys Cloud access token available');
+  const res = await fetch(`${getApiBase()}${path}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`Genesys API ${path} failed: ${res.status} ${body}`);
+  }
+  return res.json();
+}
+
+async function loadFromWorkitemContext() {
+  const workitemId = getCurrentWorkitemId();
+  if (!workitemId) return false;
+
+  try {
+    const wi = await gcApiJson(`/api/v2/taskmanagement/workitems/${encodeURIComponent(workitemId)}`);
+
+    const custom = wi.customFields || {};
+    let customerId = firstNonEmpty(
+      readWorkitemCustomField(custom, 'customer_id_identifier', 'customerIdIdentifier', 'customer_id', 'customerId', 'external_customer_id'),
+      wi.customerId
+    );
+    const orderNumber = firstNonEmpty(
+      readWorkitemCustomField(custom, 'order_number_text', 'orderNumberText', 'order_number', 'orderNumber', 'transaction_reference', 'txn_ref')
+    );
+    const workitemCaseType = firstNonEmpty(
+      readWorkitemCustomField(custom, 'case_type_text', 'caseTypeText', 'case_type', 'caseType')
+    );
+    const externalContactId = firstNonEmpty(
+      wi.externalContact && wi.externalContact.id ? wi.externalContact.id : '',
+      wi.externalContactId,
+      readWorkitemCustomField(custom, 'external_contact_id', 'externalContactId')
+    );
+    const nativeCaseId = firstNonEmpty(
+      wi.case && wi.case.id ? wi.case.id : '',
+      wi.caseId,
+      readWorkitemCustomField(custom, 'case_id', 'caseId', 'open_case_id', 'openCaseId')
+    );
+
+    console.debug('ABCRetail workitem payload', {
+      workitemId,
+      customerId,
+      orderNumber,
+      workitemCaseType,
+      externalContactId,
+      nativeCaseId,
+      customFields: custom,
+      rawWorkitem: wi
+    });
+
+    let customer = null;
+    if (customerId) {
+      const customerRows = await sb('gc_demo_jh_retail_customers', `key=eq.${encodeURIComponent(customerId)}&select=*`);
+      customer = customerRows && customerRows[0] ? customerRows[0] : null;
+    }
+
+    if (!customer && externalContactId) {
+      const customerRows = await sb('gc_demo_jh_retail_customers', `gc_external_contact_id=eq.${encodeURIComponent(externalContactId)}&select=*`);
+      customer = customerRows && customerRows[0] ? customerRows[0] : null;
+      customerId = customer && customer.key ? customer.key : customerId;
+    }
+
+    let openCase = null;
+    const candidateCaseKeys = [];
+    if (customer && customer.open_case_id) candidateCaseKeys.push(customer.open_case_id);
+
+    for (const caseKey of candidateCaseKeys) {
+      const caseRows = await sb('gc_demo_jh_retail_cases', `key=eq.${encodeURIComponent(caseKey)}&select=*`);
+      if (caseRows && caseRows[0]) {
+        openCase = normalizeCaseRecord(caseRows[0]);
+        break;
+      }
+    }
+
+    if (!openCase && customerId) {
+      const caseRows = await sb('gc_demo_jh_retail_cases', `customer_id=eq.${encodeURIComponent(customerId)}&select=*`);
+      const matching = (caseRows || []).find(c => String(c.status || '').toLowerCase() !== 'closed') || (caseRows || [])[0];
+      if (matching) openCase = normalizeCaseRecord(matching);
+    }
+
+    if (!openCase && nativeCaseId) {
+      try {
+        const gcCase = await gcApiJson(`/api/v2/casemanagement/cases/${encodeURIComponent(nativeCaseId)}`);
+        const caseReference = gcCase && gcCase.reference ? gcCase.reference : '';
+        if (!customer && gcCase && gcCase.externalContact && gcCase.externalContact.id) {
+          const customerRows = await sb('gc_demo_jh_retail_customers', `gc_external_contact_id=eq.${encodeURIComponent(gcCase.externalContact.id)}&select=*`);
+          customer = customerRows && customerRows[0] ? customerRows[0] : customer;
+          customerId = customer && customer.key ? customer.key : customerId;
+        }
+        if (caseReference) {
+          const caseRows = await sb('gc_demo_jh_retail_cases', `key=eq.${encodeURIComponent(caseReference)}&select=*`);
+          if (caseRows && caseRows[0]) openCase = normalizeCaseRecord(caseRows[0]);
+        }
+      } catch (e) {
+        console.warn('Native case lookup failed:', e);
+      }
+    }
+
+    let transaction = null;
+    const txnKeys = [];
+    if (customer && customer.active_txn_id) txnKeys.push({ field: 'key', value: customer.active_txn_id });
+    if (openCase && openCase.linked_transaction_id) txnKeys.push({ field: 'key', value: openCase.linked_transaction_id });
+    if (orderNumber) txnKeys.push({ field: 'reference_number', value: orderNumber });
+
+    for (const candidate of txnKeys) {
+      const txnRows = await sb('gc_demo_jh_retail_transactions', `${candidate.field}=eq.${encodeURIComponent(candidate.value)}&select=*`);
+      if (txnRows && txnRows[0]) {
+        transaction = txnRows[0];
+        break;
+      }
+    }
+
+    let fulfillment = null;
+    const fulfillmentId = transaction && transaction.fulfillment_id ? transaction.fulfillment_id : '';
+    if (fulfillmentId) {
+      const fulfillmentRows = await sb('gc_demo_jh_retail_fulfillment', `key=eq.${encodeURIComponent(fulfillmentId)}&select=*`);
+      fulfillment = fulfillmentRows && fulfillmentRows[0] ? fulfillmentRows[0] : null;
+    }
+
+    if (!customer) {
+      customer = {
+        key: customerId || '',
+        first_name: getParam('first_name') || '',
+        last_name: getParam('last_name') || '',
+        company_name: getParam('company_name') || '',
+        account_number: getParam('account_number') || '',
+        phone: getParam('phone') || '',
+        phone_normalized: getParam('phone') || '',
+        email: getParam('email') || '',
+        account_type: getParam('account_type') || '',
+        journey_stage: getParam('journey_stage') || '',
+        sentiment_score: getParam('sentiment') || '',
+        nps_score: getParam('nps') || '',
+        lifetime_value: getParam('ltv') || '',
+        open_case_id: openCase && openCase.key ? openCase.key : ''
+      };
+    } else if (openCase && openCase.key) {
+      customer.open_case_id = customer.open_case_id || openCase.key;
+    }
+
+    if (!openCase && customer && customer.open_case_id) {
+      openCase = normalizeCaseRecord({
+        key: customer.open_case_id,
+        customer_id: customer.key || customerId || '',
+        case_type: workitemCaseType || '',
+        status: 'open',
+        current_stage: '1'
+      });
+    }
+
+    selectedCustomer = customer;
+    renderLeftPanelDirect(customer);
+    renderOrdersDirect(transaction ? [transaction] : []);
+    renderShipmentsDirect(fulfillment ? [fulfillment] : [], transaction ? [transaction] : []);
+    renderCasesDirect(openCase ? [openCase] : []);
+    renderActiveCaseCard(openCase || null);
+    updateCallScript(customer, transaction);
+    renderAvaCard();
+    document.getElementById('clearBtn').style.display = '';
+
+    const toastName =
+      (customer && (customer.company_name || [customer.first_name, customer.last_name].filter(Boolean).join(' '))) ||
+      orderNumber ||
+      workitemId;
+    toast('Workitem hydration: ' + toastName);
+    return true;
+  } catch (e) {
+    console.error('Workitem fallback load failed:', e);
     return false;
   }
 }
@@ -1267,6 +1526,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (isWidgetMode || hasUrlParams) {
     setStatus('widget');
     let loaded = loadFromUrlParams();
+    if (!loaded) loaded = await loadFromWorkitemContext();
     if (!loaded) loaded = await loadFromCaseContext();
     if (!loaded) renderAvaCard();
 
@@ -1277,8 +1537,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.data.case_id || event.data.open_case_id || event.data.workitemId || event.data.workitem_id;
       if (!hasMessageContext) return;
 
-      const reloaded = loadFromUrlParams();
-      if (!reloaded) await loadFromCaseContext();
+      setRuntimeContext(event.data);
+      console.debug('ABCRetail widget message context', event.data);
+
+      const reloadedFromUrl = loadFromUrlParams();
+      if (reloadedFromUrl) return;
+      const reloadedFromWorkitem = await loadFromWorkitemContext();
+      if (!reloadedFromWorkitem) await loadFromCaseContext();
     });
   } else {
     if (GC_CONFIG.clientId && UUID_RE.test(GC_CONFIG.clientId)) {
