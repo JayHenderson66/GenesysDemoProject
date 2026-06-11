@@ -9,7 +9,7 @@
 <script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
 <script>
 const STORAGE_KEY = 'gc_widget_config_abcretail';
-const ORG_DEFAULTS = { clientId: '79b9998d-45f6-46c7-97e7-5019106922ee', environment: 'mypurecloud.com' };
+const ORG_DEFAULTS = { clientId: '', environment: 'mypurecloud.com' };
 function loadConfig() {
   try { const s = localStorage.getItem(STORAGE_KEY); if (s) return Object.assign({}, ORG_DEFAULTS, JSON.parse(s)); } catch(e) {}
   return Object.assign({}, ORG_DEFAULTS);
@@ -1621,10 +1621,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!reloadedFromWorkitem) await loadFromCaseContext();
     });
   } else {
-    if (GC_CONFIG.clientId && UUID_RE.test(GC_CONFIG.clientId)) {
+    const autoLoginRequested = getParam('autologin') === '1';
+    if (autoLoginRequested && GC_CONFIG.clientId && UUID_RE.test(GC_CONFIG.clientId)) {
       setStatus('authenticating');
       initStandaloneAuth();
     } else {
+      setStatus('connected');
       openSetup(false);
     }
   }
