@@ -962,6 +962,12 @@ function ensurePlatformSdk() {
 
 async function ensureWidgetApiAuth() {
   if (gcAccessToken) return gcAccessToken;
+
+  if (isWidgetMode) {
+    console.warn('ABCRetail widget auth disabled in v4; skipping loginImplicitGrant inside the script widget. Pass customer/case/contact hints in the URL or postMessage context, or use a framework token integration.');
+    return null;
+  }
+
   if (!ensurePlatformSdk()) throw new Error('Genesys Platform SDK unavailable in widget');
   const env = getParam('pcEnvironment') || getParam('environment') || GC_CONFIG.environment || 'mypurecloud.com';
   gcEnvironment = env;
@@ -1002,41 +1008,110 @@ async function loadFromWorkitemContext() {
   const workitemId = getCurrentWorkitemId();
   if (!workitemId) return false;
 
+  const hinted = {
+    customerId: firstNonEmpty(
+      getParam('customer_id_identifier'),
+      getParam('customerIdIdentifier'),
+      getParam('customer_id'),
+      getParam('customerId'),
+      getParam('AccountNumber'),
+      getParam('account_number'),
+      getParam('external_customer_id')
+    ),
+    orderNumber: firstNonEmpty(
+      getParam('order_number_text'),
+      getParam('orderNumberText'),
+      getParam('order_number'),
+      getParam('orderNumber'),
+      getParam('transaction_reference'),
+      getParam('txn_ref'),
+      getParam('order_ref')
+    ),
+    workitemCaseType: firstNonEmpty(
+      getParam('case_type_text'),
+      getParam('caseTypeText'),
+      getParam('case_type'),
+      getParam('caseType')
+    ),
+    externalContactId: firstNonEmpty(
+      getParam('external_contact_id'),
+      getParam('externalContactId')
+    ),
+    nativeCaseId: firstNonEmpty(
+      getParam('native_case_id'),
+      getParam('nativeCaseId')
+    )
+  };
+
+  let wi = null;
+  let customerId = hinted.customerId;
+  let orderNumber = hinted.orderNumber;
+  let workitemCaseType = hinted.workitemCaseType;
+  let externalContactId = hinted.externalContactId;
+  let nativeCaseId = hinted.nativeCaseId;
+
+  const hasDirectHints = !!(customerId || orderNumber || externalContactId || nativeCaseId || workitemCaseType);
+
+  if (!isWidgetMode) {
+    try {
+      wi = await gcApiJson(`/api/v2/taskmanagement/workitems/${encodeURIComponent(workitemId)}`);
+    } catch (e) {
+      console.warn('ABCRetail standalone workitem fetch failed:', e);
+    }
+  } else if (!hasDirectHints) {
+    console.warn('ABCRetail widget workitem lookup skipped in v4 because no direct screen-pop hints were provided and the script no longer launches implicit grant auth inside the widget.', { workitemId });
+    return false;
+  }
+
   try {
-    const wi = await gcApiJson(`/api/v2/taskmanagement/workitems/${encodeURIComponent(workitemId)}`);
+    if (wi) {
+      const custom = wi.customFields || {};
+      customerId = firstNonEmpty(
+        readWorkitemCustomField(custom, 'customer_id_identifier', 'customerIdIdentifier', 'customer_id', 'customerId', 'external_customer_id'),
+        wi.customerId,
+        customerId
+      );
+      orderNumber = firstNonEmpty(
+        readWorkitemCustomField(custom, 'order_number_text', 'orderNumberText', 'order_number', 'orderNumber', 'transaction_reference', 'txn_ref'),
+        orderNumber
+      );
+      workitemCaseType = firstNonEmpty(
+        readWorkitemCustomField(custom, 'case_type_text', 'caseTypeText', 'case_type', 'caseType'),
+        workitemCaseType
+      );
+      externalContactId = firstNonEmpty(
+        wi.externalContact && wi.externalContact.id ? wi.externalContact.id : '',
+        wi.externalContactId,
+        readWorkitemCustomField(custom, 'external_contact_id', 'externalContactId'),
+        externalContactId
+      );
+      nativeCaseId = firstNonEmpty(
+        wi.case && wi.case.id ? wi.case.id : '',
+        wi.caseId,
+        readWorkitemCustomField(custom, 'case_id', 'caseId', 'open_case_id', 'openCaseId'),
+        nativeCaseId
+      );
 
-    const custom = wi.customFields || {};
-    let customerId = firstNonEmpty(
-      readWorkitemCustomField(custom, 'customer_id_identifier', 'customerIdIdentifier', 'customer_id', 'customerId', 'external_customer_id'),
-      wi.customerId
-    );
-    const orderNumber = firstNonEmpty(
-      readWorkitemCustomField(custom, 'order_number_text', 'orderNumberText', 'order_number', 'orderNumber', 'transaction_reference', 'txn_ref')
-    );
-    const workitemCaseType = firstNonEmpty(
-      readWorkitemCustomField(custom, 'case_type_text', 'caseTypeText', 'case_type', 'caseType')
-    );
-    const externalContactId = firstNonEmpty(
-      wi.externalContact && wi.externalContact.id ? wi.externalContact.id : '',
-      wi.externalContactId,
-      readWorkitemCustomField(custom, 'external_contact_id', 'externalContactId')
-    );
-    const nativeCaseId = firstNonEmpty(
-      wi.case && wi.case.id ? wi.case.id : '',
-      wi.caseId,
-      readWorkitemCustomField(custom, 'case_id', 'caseId', 'open_case_id', 'openCaseId')
-    );
-
-    console.debug('ABCRetail workitem payload', {
-      workitemId,
-      customerId,
-      orderNumber,
-      workitemCaseType,
-      externalContactId,
-      nativeCaseId,
-      customFields: custom,
-      rawWorkitem: wi
-    });
+      console.debug('ABCRetail workitem payload', {
+        workitemId,
+        customerId,
+        orderNumber,
+        workitemCaseType,
+        externalContactId,
+        nativeCaseId,
+        customFields: custom,
+        rawWorkitem: wi
+      });
+    } else {
+      console.debug('ABCRetail workitem hints only', {
+        workitemId,
+        customerId,
+        orderNumber,
+        workitemCaseType,
+        externalContactId,
+        nativeCaseId
+      });
+    }
 
     let customer = null;
     if (customerId) {
