@@ -174,6 +174,13 @@ PATCH each stageplan/stepplan to set names and `workitemSettings.worktypeId`.
 | Review | `31d5097b-a116-4e7c-99f2-289ecf0dd0fe` | `dc079195-e2be-48bd-aaab-ea839a1fca64` | Investigation and Review |
 | Resolution | `c1ef0432-f1a7-423a-b30a-8ac2bd0ed90e` | `6e633624-600e-4a33-8c06-ac5907184ec7` | Resolution and Closure |
 
+**All three SE stages point at the SAME worktype** (`ABC Retail - Shipment Exception`).
+One worktype → one workitem flow → its OnCreate / OnAttributeChange rules fire at *every*
+stage (Intake, Review, Resolution). Detect the stage from the work item **name** or from
+`current_stage` (Supabase) — `Workitem.eventType` only tells you created vs statusChanged,
+not which stage. The native work item status stays a flat `Open`; the stage shows only in
+the agent script (read from Supabase).
+
 #### ABC Retail - Delivery Delay stageplan/stepplan IDs
 
 | Stage | Stageplan ID | Stepplan ID | Stepplan name |
@@ -270,6 +277,64 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
   call `GET /api/v2/conversations/{conversationId}` in API Explorer and look in
   the `participants` array for the entry with `"purpose": "customer"`.
 
+## Status & stage model (decision — 2026-06-25)
+
+Keep three concepts **orthogonal** — never let one encode another. The old per-stage
+status names (`Intake Complete`, `Approved`/`Denied`, `Resolved-Refund Issued`) conflated
+all three, which is why nothing was reusable.
+
+- **Stage** = caseplan stage (Intake / Review / Resolution). Lives in `current_stage`.
+- **Status** = the work item's lifecycle *within* a stage.
+- **Outcome** = what was decided → a **data attribute**, never a status.
+
+**Universal status set** — identical on every stage worktype, every case type (one config
+for all verticals, by design):
+
+| Status | Category | Role |
+|---|---|---|
+| Open | Open | initial (auto on create) |
+| In Progress | In Progress | agent working the stage |
+| Waiting on Customer | On Hold | blocked, pending customer |
+| Complete | Closed | stage done → caseplan advances (terminal) |
+
+- One terminal (`Complete`); advance-vs-close is **positional/automatic** in the published
+  caseplan, not wired per stage.
+- **Auto-advance is native.** Ending the active stage's work item at a terminal (Closed)
+  status advances the case; the final stage's terminal closes the case. Nothing to build.
+  Every SE case stuck at stage 1 = never exercised, not missing.
+- **Outcome → `case_outcome`** (Option 1, chosen): new Small Text attribute, per-type
+  constrained values. Add a matching `case_outcome` column to `gc_demo_jh_retail_cases`
+  and to the Trigger-2 PATCH. Keep `case_resolution_notes` for human detail.
+- **Caseplans stay linear — never branch on outcome.** A denied case still walks to
+  Resolution and records the no-action outcome as data. Branching is what forces per-type
+  statuses and breaks the single config.
+
+## Proactive SMS notifications (design — 2026-06-25)
+
+Two agentless SMS notifications, both built **inside the worktype's workitem flow** (not a
+standalone Trigger). Workitem flows expose `Workitem.Workitem.customFields.*` natively,
+which sidesteps the parked `JsonSchema` vs `TopLevelPrimitives` trigger conflict and needs
+no Get-Work-Item lookup.
+
+- **Notification 1 — tracking** ("we've opened case SE-xx, we're tracking it"), on case
+  open. Replaces the old ACW confirmation SMS (which sent `conversationId` instead of the
+  case ref — disable that ACW trigger).
+- **Notification 2 — resolved** ("shipped / case closed"), when the Resolution stage's work
+  item reaches terminal `Complete`. Launch via an **OnAttributeChange** rule (statusId
+  start→end transition; only `statusId` is supported for these rules).
+
+Reused data actions (both exist):
+- `ABC Retail - Get Customer Phone` — input `customerId` → outputs `customerPhone`, `firstName`.
+- `ABC Retail - Send SMS Confirmation` — inputs `customerPhone`, `messageBody` → `confirmationId`;
+  agentless outbound, from-number `+19495414956`.
+
+**Best-effort:** wire both data actions' Failure + Timeout outputs onward to Transfer to ACD.
+A phone/SMS hiccup must never block case creation or routing.
+
+**Stage-detection caveat:** the single SE worktype/flow fires its rules at every stage, so
+both notifications must gate on the stage (work item name or `current_stage`) — see the SE
+caseplan note above. PENDING: confirm the actual SE work item name.
+
 ## Working agreements
 
 - Push directly to `main` using the GitHub MCP `create_or_update_file` tool. No PRs needed.
@@ -277,6 +342,9 @@ field the flow sets — see `loadFromUrlParams` in `ABCRetail_agent_script.html`
 - The web-execution container is ephemeral — anything worth keeping must be
   committed and pushed.
 - The GitHub MCP tool scope is limited to `jayhenderson66/genesysdemoproject`.
+- **Web-app (claude.ai) sessions have NO GitHub MCP** — they can read the public repo but
+  cannot push. Doc/file updates from a web session are produced for manual commit (GitHub
+  UI) or for Claude Code to commit. Pushing works only from Claude Code.
 
 ## Where state of the work lives
 
