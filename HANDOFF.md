@@ -10,6 +10,11 @@ NOTE: this session ran in the Claude **web app** (no GitHub MCP) — these doc u
 for **manual commit**, not pushed. Work-item custom attributes now populate the native panel; the
 agent-script load-order bug is fixed (delivered as a file; commit status unconfirmed).
 
+**Two facts worth not relearning:**
+
+Auto-advance works natively; Supabase never hears about it (SE-69 is Stage 2 in GC, still current_stage = 1 in Supabase). That sync gap is the real open defect.
+Gating's solved without Supabase: auto-spawned stages are named SE-XX {stepplan} ("Investigation and Review," "Resolution and Closure"); Intake is the generic "ABC Retail" item. So Notification 2 gates on "Resolution and Closure" in the name, Notification 1 by the absence of stepplan markers.
+
 ## Immediate next steps
 
 ### 1. Get the SE work item Name (Task List) — BLOCKS Notification 2
